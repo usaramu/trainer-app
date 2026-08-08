@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>うさトレ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <div class="header-top-row">
+            <div class="header-spacer"></div>
+            <div>
+                <h1>Workout Tracker</h1>
+                <div class="subtitle">うさトレ</div>
+            </div>
+            <button class="btn-settings-gear" id="btn-open-rotation-settings" title="ローテーション設定">⚙️</button>
+        </div>
+    </header>
+
+    <!-- メイン：今日の推奨表示バナー -->
+    <div class="recommendation-card">
+        <div class="recommendation-header">TODAY'S WORKOUT</div>
+        <div class="recommendation-main">
+            <div>
+                <span class="target-menu" id="rec-id">メニュー -</span>
+                <span class="target-title" id="rec-title">読み込み中...</span>
+            </div>
+        </div>
+        <div class="last-completed" id="last-completed-info">
+            前回完了: なし
+        </div>
+        <div class="banner-actions">
+            <button class="btn-complete" id="btn-start-today">記録・完了</button>
+            <button class="btn-offday" onclick="recordOffDay()">オフ</button>
+        </div>
+    </div>
+
+    <!-- カレンダーセクション -->
+    <section class="log-section">
+        <h2>実施ログ & カレンダー</h2>
+        <div class="calendar-card">
+            <div class="calendar-header">
+                <button onclick="changeMonth(-1)">&lt;</button>
+                <span id="calendar-month-year"></span>
+                <button onclick="changeMonth(1)">&gt;</button>
+            </div>
+            <div class="calendar-grid" id="calendar-grid">
+                <!-- JSで生成 -->
+            </div>
+        </div>
+    </section>
+
+    <!-- 全メニュー比較表セクション（最下部） -->
+    <section class="table-section">
+        <h2>全メニュー詳細一覧表</h2>
+        <div class="table-wrapper">
+            <table class="menu-table">
+                <thead>
+                    <tr>
+                        <th style="width: 12%;">メニュー</th>
+                        <th style="width: 25%;">対象部位</th>
+                        <th style="width: 38%;">種目と設定</th>
+                        <th style="width: 15%;">メモ / 注意点</th>
+                        <th style="width: 10%;">編集</th>
+                    </tr>
+                </thead>
+                <tbody id="menu-table-body">
+                    <!-- JSでテーブル行を生成 -->
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- メニュー編集用モーダルウィンドウ -->
+    <div class="modal-overlay" id="edit-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>メニュー編集 (<span id="edit-menu-id"></span>)</h2>
+                <button class="btn-close" onclick="closeEditModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <label class="form-label">メニュータイトル / 対象部位</label>
+                <input type="text" id="edit-menu-title" class="form-input">
+
+                <label class="form-label">メモ・フォームの注意点</label>
+                <textarea id="edit-menu-memo" class="form-input form-textarea" placeholder="例: シートの高さは3、グリップは広め"></textarea>
+
+                <label class="form-label">種目リスト</label>
+                <div id="exercise-inputs-container">
+                    <!-- Dynamic exercise inputs -->
+                </div>
+                <button class="btn-add-exercise" onclick="addExerciseInput()">+ 種目を追加</button>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeEditModal()">キャンセル</button>
+                <button class="btn-save" onclick="saveMenuEdit()">保存する</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ワークアウト結果記録用モーダル -->
+    <div class="modal-overlay" id="workout-log-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>ワークアウト記録</h2>
+                <button class="btn-close" onclick="closeWorkoutLogModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <label class="form-label">実施するメニューを選択</label>
+                <select id="select-log-menu" class="form-input" onchange="onLogMenuSelectChange(this.value)">
+                    <!-- JSで選択肢を自動生成 -->
+                </select>
+
+                <div id="workout-log-inputs">
+                    <!-- 基本メニューの数値入力欄 -->
+                </div>
+
+                <div class="extra-exercise-section">
+                    <label class="form-label">追加でやった種目（任意）</label>
+                    <div id="extra-exercise-container">
+                        <!-- 動的に追加種目行が生成されます -->
+                    </div>
+                    <button type="button" class="btn-add-extra" onclick="addExtraExerciseInput()">+ 追加の種目を足す</button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeWorkoutLogModal()">キャンセル</button>
+                <button class="btn-save" onclick="submitWorkoutLog()">記録して完了</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- カレンダー記録の詳細確認・削除モーダル -->
+    <div class="modal-overlay" id="detail-log-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>記録の詳細 (<span id="detail-log-date"></span>)</h2>
+                <button class="btn-close" onclick="closeDetailLogModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="font-size: 1.1rem; font-weight: bold; margin-bottom: 12px; color: var(--primary-color);" id="detail-log-title"></div>
+                <div id="detail-log-body">
+                    <!-- JSで詳細内容を表示 -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-reset" style="margin-top:0; color:#ef4444;" id="btn-delete-detail-log">この記録を削除する</button>
+                <button class="btn-cancel" onclick="closeDetailLogModal()">閉じる</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ローテーション設定モーダル -->
+    <div class="modal-overlay" id="rotation-settings-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>ローテーション設定</h2>
+                <button class="btn-close" onclick="closeRotationSettingsModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <label class="form-label">おすすめメニューの決め方</label>
+                <div class="rotation-mode-options">
+                    <label class="rotation-mode-option">
+                        <input type="radio" name="rotation-mode" id="rotation-mode-sequence" onchange="toggleWeekdaySection()">
+                        <span>順番通り（A→B→C→D→E→F）</span>
+                    </label>
+                    <label class="rotation-mode-option">
+                        <input type="radio" name="rotation-mode" id="rotation-mode-weekday" onchange="toggleWeekdaySection()">
+                        <span>曜日で固定する</span>
+                    </label>
+                </div>
+
+                <div id="sequence-order-section">
+                    <label class="form-label" style="margin-top: 6px;">実施する順番（↑↓で並び替え）</label>
+                    <div id="sequence-order-container">
+                        <!-- JSで並び替え行を生成 -->
+                    </div>
+                </div>
+
+                <div id="weekday-assignment-section">
+                    <label class="form-label" style="margin-top: 6px;">曜日ごとのメニュー</label>
+                    <div id="weekday-assignment-container">
+                        <!-- JSで曜日行を生成 -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeRotationSettingsModal()">キャンセル</button>
+                <button class="btn-save" onclick="saveRotationSettings()">保存する</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <button class="btn-reset" onclick="resetData()">履歴・メニュー設定を初期化</button>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        // 過去にService Workerが登録されていた場合に備え、念のため解除してキャッシュも削除する
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(regs => {
+                regs.forEach(reg => reg.unregister());
+            });
+        }
+        if (window.caches) {
+            caches.keys().then(keys => keys.forEach(key => caches.delete(key)));
+        }
+    </script>
+</body>
+</html>
