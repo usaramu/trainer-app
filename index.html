@@ -90,10 +90,10 @@
                 </div>
                 <button class="btn-add-exercise" onclick="addExerciseInput()">+ 種目を追加</button>
             </div>
-            <div class="modal-footer">
+                <div class="modal-footer">
                 <button class="btn-cancel" onclick="closeEditModal()">キャンセル</button>
                 <button class="btn-save" onclick="saveMenuEdit()">保存する</button>
-            </div>
+                </div>
         </div>
     </div>
 
@@ -162,6 +162,8 @@
                 </div>
             </div>
             <div class="modal-footer">
+                <!-- ▼ ここに「編集する」ボタンを追加！ -->
+                <button class="btn-save" id="btn-edit-detail-log" style="margin-right: auto;">編集する</button>
                 <button class="btn-reset" style="margin-top:0; color:#ef4444;" id="btn-delete-detail-log">この記録を削除する</button>
                 <button class="btn-cancel" onclick="closeDetailLogModal()">閉じる</button>
             </div>

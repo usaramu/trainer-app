@@ -242,6 +242,16 @@ function getLastExerciseLogObj(exerciseName) {
 function formatLogObj(logObj) {
     if (!logObj) return '';
     if (typeof logObj === 'string') return logObj;
+    
+    // 有酸素運動の記録（minutes や calories がある場合）
+    if (logObj.isCardio || logObj.minutes !== undefined || logObj.calories !== undefined) {
+        const parts = [];
+        if (logObj.minutes) parts.push(`${logObj.minutes}分`);
+        if (logObj.calories) parts.push(`${logObj.calories}kcal`);
+        return parts.join(' / ');
+    }
+
+    // 通常の筋トレの記録
     const parts = [];
     if (logObj.weight !== null && logObj.weight !== undefined && logObj.weight !== '') {
         parts.push(`${logObj.weight}kg`);
@@ -299,49 +309,129 @@ function recordOffDay() {
     saveState();
     renderCalendar();
 
-    alert(`本日 (${todayStr}) をオフ日として記録しました！`);
 }
 
 function openWorkoutLogModal(defaultMenuId, presetDateISO) {
+    const targetDate = presetDateISO || getTodayISO();
+    const existingLog = state.logs.find(l => l.date === targetDate);
+
     const selectEl = document.getElementById('select-log-menu');
     selectEl.innerHTML = '';
 
     const offOption = document.createElement('option');
     offOption.value = 'OFF';
-    offOption.textContent = 'オフ';
-    if (defaultMenuId === 'OFF') {
-        offOption.selected = true;
-    }
+    offOption.textContent = 'オフ（休養日）';
     selectEl.appendChild(offOption);
 
     state.menus.forEach(menu => {
         const option = document.createElement('option');
         option.value = menu.id;
         option.textContent = ` ${menu.id} : ${menu.title}`;
-        if (menu.id === defaultMenuId) {
-            option.selected = true;
-        }
         selectEl.appendChild(option);
     });
 
-    // 日付欄の設定
     const dateEl = document.getElementById('select-log-date');
     if (dateEl) {
-        dateEl.value = presetDateISO || getTodayISO();
+        dateEl.value = targetDate;
         dateEl.max = getTodayISO();
     }
 
-    // ラジオボタンの切り替え
-    if (defaultMenuId === 'OFF') {
-        document.getElementById('record-type-off').checked = true;
+    // 既存の記録がある場合はそのモード・メニューを再現
+    let currentMenuId = defaultMenuId;
+    if (existingLog) {
+        if (existingLog.menuId === 'OFF') {
+            document.getElementById('record-type-off').checked = true;
+        } else if (existingLog.recordType === 'free') {
+            document.getElementById('record-type-free').checked = true;
+            currentMenuId = existingLog.menuId;
+        } else {
+            document.getElementById('record-type-menu').checked = true;
+            currentMenuId = existingLog.menuId;
+        }
     } else {
-        document.getElementById('record-type-menu').checked = true;
+        if (defaultMenuId === 'OFF') {
+            document.getElementById('record-type-off').checked = true;
+        } else {
+            document.getElementById('record-type-menu').checked = true;
+        }
+    }
+
+    if (currentMenuId && currentMenuId !== 'OFF') {
+        selectEl.value = currentMenuId;
     }
 
     toggleRecordType();
 
-    renderWorkoutLogInputs(defaultMenuId === 'OFF' ? 'A' : defaultMenuId);
-    document.getElementById('extra-exercise-container').innerHTML = '';
+    const activeMenuId = (selectEl.value === 'OFF' || !selectEl.value) ? 'A' : selectEl.value;
+    renderWorkoutLogInputs(activeMenuId);
+
+    // 既存記録の数値をフォームに反映
+    if (existingLog && existingLog.exerciseLogs && existingLog.menuId !== 'OFF') {
+        const menu = state.menus.find(m => m.id === existingLog.menuId);
+        
+        // メニュー通りの種目の反映
+        if (menu && existingLog.recordType !== 'free') {
+            menu.exercises.forEach((e, idx) => {
+                const logObj = existingLog.exerciseLogs[e.name];
+                if (logObj) {
+                    if (logObj.isCardio) {
+                        const minEl = document.getElementById(`minutes-${idx}`);
+                        const calEl = document.getElementById(`calories-${idx}`);
+                        if (minEl) minEl.value = logObj.minutes !== undefined ? logObj.minutes : '';
+                        if (calEl) calEl.value = logObj.calories !== undefined ? logObj.calories : '';
+                    } else {
+                        const wEl = document.getElementById(`weight-${idx}`);
+                        const rEl = document.getElementById(`reps-${idx}`);
+                        const sEl = document.getElementById(`sets-${idx}`);
+                        if (wEl) wEl.value = logObj.weight !== undefined ? logObj.weight : '';
+                        if (rEl) rEl.value = logObj.reps !== undefined ? logObj.reps : '';
+                        if (sEl) sEl.value = logObj.sets !== undefined ? logObj.sets : '';
+                    }
+                }
+            });
+        }
+
+        // 追加種目・自由入力種目の復元
+        document.getElementById('extra-exercise-container').innerHTML = '';
+        for (const [exName, logObj] of Object.entries(existingLog.exerciseLogs)) {
+            const isNormalEx = menu && menu.exercises.some(e => e.name === exName);
+            if (!isNormalEx || existingLog.recordType === 'free') {
+                const cleanName = exName.replace('【追加】', '');
+                addExtraExerciseInput();
+                const container = document.getElementById('extra-exercise-container');
+                const lastBlock = container.lastElementChild;
+                if (lastBlock) {
+                    const nameInput = lastBlock.querySelector('.extra-name-input');
+                    if (nameInput) nameInput.value = cleanName;
+
+                    if (logObj.label) {
+                        const labelSelect = lastBlock.querySelector('.extra-label-select');
+                        if (labelSelect) {
+                            labelSelect.value = logObj.label;
+                            renderExerciseChipsForBlock(lastBlock);
+                        }
+                    }
+
+                    if (logObj.isCardio) {
+                        const minInput = lastBlock.querySelector('.extra-minutes');
+                        const calInput = lastBlock.querySelector('.extra-calories');
+                        if (minInput) minInput.value = logObj.minutes !== undefined ? logObj.minutes : '';
+                        if (calInput) calInput.value = logObj.calories !== undefined ? logObj.calories : '';
+                    } else {
+                        const wInput = lastBlock.querySelector('.extra-weight');
+                        const rInput = lastBlock.querySelector('.extra-reps');
+                        const sInput = lastBlock.querySelector('.extra-sets');
+                        if (wInput) wInput.value = logObj.weight !== undefined ? logObj.weight : '';
+                        if (rInput) rInput.value = logObj.reps !== undefined ? logObj.reps : '';
+                        if (sInput) sInput.value = logObj.sets !== undefined ? logObj.sets : '';
+                    }
+                }
+            }
+        }
+    } else {
+        document.getElementById('extra-exercise-container').innerHTML = '';
+    }
+
     document.getElementById('workout-log-modal').classList.add('active');
 }
 
@@ -390,27 +480,48 @@ function renderWorkoutLogInputs(menuId) {
     container.innerHTML = '';
 
     menu.exercises.forEach((e, idx) => {
-        const lastObj = getLastExerciseLogObj(e.name) || { weight: '', reps: 10, sets: 3 };
+        const lastObj = getLastExerciseLogObj(e.name) || {};
+        // 種目名やメニューIDから有酸素かどうか判定
+        const isCardio = menuId === 'F' || e.name.includes('ウォーキング') || e.name.includes('有酸素') || e.name.includes('トレッドミル') || e.name.includes('ランニング');
 
         const block = document.createElement('div');
         block.className = 'log-exercise-block';
-        block.innerHTML = `
-            <div class="log-exercise-title">${e.name} <span style="font-size:0.8rem; font-weight:normal; color:var(--text-sub);">(${e.detail})</span></div>
-            <div class="direct-input-group">
-                <div class="direct-field">
-                    <label>重量 (kg)</label>
-                    <input type="number" id="weight-${idx}" step="0.5" inputmode="decimal" value="${lastObj.weight !== undefined ? lastObj.weight : ''}" placeholder="0">
+
+        if (isCardio) {
+            // 有酸素用の入力欄（時間・カロリー）
+            block.innerHTML = `
+                <div class="log-exercise-title">${e.name} <span style="font-size:0.8rem; font-weight:normal; color:var(--text-sub);">(${e.detail})</span></div>
+                <div class="direct-input-group" data-cardio="true">
+                    <div class="direct-field">
+                        <label>時間 (分)</label>
+                        <input type="number" id="minutes-${idx}" inputmode="numeric" value="${lastObj.minutes !== undefined ? lastObj.minutes : 30}" placeholder="30">
+                    </div>
+                    <div class="direct-field">
+                        <label>消費カロリー (kcal)</label>
+                        <input type="number" id="calories-${idx}" inputmode="numeric" value="${lastObj.calories !== undefined ? lastObj.calories : ''}" placeholder="150">
+                    </div>
                 </div>
-                <div class="direct-field">
-                    <label>回数 (reps)</label>
-                    <input type="number" id="reps-${idx}" inputmode="numeric" value="${lastObj.reps !== undefined ? lastObj.reps : 10}" placeholder="10">
+            `;
+        } else {
+            // 筋トレ用の入力欄（重量・回数・セット）
+            block.innerHTML = `
+                <div class="log-exercise-title">${e.name} <span style="font-size:0.8rem; font-weight:normal; color:var(--text-sub);">(${e.detail})</span></div>
+                <div class="direct-input-group" data-cardio="false">
+                    <div class="direct-field">
+                        <label>重量 (kg)</label>
+                        <input type="number" id="weight-${idx}" step="0.5" inputmode="decimal" value="${lastObj.weight !== undefined ? lastObj.weight : ''}" placeholder="0">
+                    </div>
+                    <div class="direct-field">
+                        <label>回数 (reps)</label>
+                        <input type="number" id="reps-${idx}" inputmode="numeric" value="${lastObj.reps !== undefined ? lastObj.reps : 10}" placeholder="10">
+                    </div>
+                    <div class="direct-field">
+                        <label>セット数</label>
+                        <input type="number" id="sets-${idx}" inputmode="numeric" value="${lastObj.sets !== undefined ? lastObj.sets : 3}" placeholder="3">
+                    </div>
                 </div>
-                <div class="direct-field">
-                    <label>セット数</label>
-                    <input type="number" id="sets-${idx}" inputmode="numeric" value="${lastObj.sets !== undefined ? lastObj.sets : 3}" placeholder="3">
-                </div>
-            </div>
-        `;
+            `;
+        }
         container.appendChild(block);
     });
 }
@@ -432,19 +543,8 @@ function addExtraExerciseInput() {
             <input type="text" class="form-input extra-name-input" placeholder="種目名（新規入力）" onblur="prefillLastLogValues(this.closest('.extra-log-block'), this.value.trim())">
             <button type="button" class="btn-remove-row" onclick="this.closest('.extra-log-block').remove()">&times;</button>
         </div>
-        <div class="direct-input-group">
-            <div class="direct-field">
-                <label>重量 (kg)</label>
-                <input type="number" class="extra-weight" step="0.5" inputmode="decimal" placeholder="0">
-            </div>
-            <div class="direct-field">
-                <label>回数 (reps)</label>
-                <input type="number" class="extra-reps" inputmode="numeric" placeholder="10">
-            </div>
-            <div class="direct-field">
-                <label>セット数</label>
-                <input type="number" class="extra-sets" inputmode="numeric" placeholder="3">
-            </div>
+        <div class="extra-fields-container">
+            <!-- ラベルに応じて動的に描画されます -->
         </div>
     `;
 
@@ -452,11 +552,46 @@ function addExtraExerciseInput() {
     renderExerciseChipsForBlock(block);
 }
 
-// ブロック内のラベル選択に応じて、種目チップ（かわいいピル型ボタン）を描画する
 function renderExerciseChipsForBlock(block) {
     const label = block.querySelector('.extra-label-select').value;
     const chipList = block.querySelector('.extra-chip-list');
     const nameInput = block.querySelector('.extra-name-input');
+    const fieldsContainer = block.querySelector('.extra-fields-container');
+
+    const isCardio = (label === '有酸素運動');
+
+    // ラベルに応じて入力フィールドを切り替え
+    if (isCardio) {
+        fieldsContainer.innerHTML = `
+            <div class="direct-input-group" data-cardio="true">
+                <div class="direct-field">
+                    <label>時間 (分)</label>
+                    <input type="number" class="extra-minutes" inputmode="numeric" placeholder="30">
+                </div>
+                <div class="direct-field">
+                    <label>消費カロリー (kcal)</label>
+                    <input type="number" class="extra-calories" inputmode="numeric" placeholder="150">
+                </div>
+            </div>
+        `;
+    } else {
+        fieldsContainer.innerHTML = `
+            <div class="direct-input-group" data-cardio="false">
+                <div class="direct-field">
+                    <label>重量 (kg)</label>
+                    <input type="number" class="extra-weight" step="0.5" inputmode="decimal" placeholder="0">
+                </div>
+                <div class="direct-field">
+                    <label>回数 (reps)</label>
+                    <input type="number" class="extra-reps" inputmode="numeric" placeholder="10">
+                </div>
+                <div class="direct-field">
+                    <label>セット数</label>
+                    <input type="number" class="extra-sets" inputmode="numeric" placeholder="3">
+                </div>
+            </div>
+        `;
+    }
 
     const names = state.exerciseLibrary[label] || [];
 
@@ -504,31 +639,20 @@ function submitWorkoutLog() {
     const dateEl = document.getElementById('select-log-date');
     const selectedISO = (dateEl && dateEl.value) ? dateEl.value : getTodayISO();
 
-    // オフ（休養日）の場合の保存処理
     if (isOff) {
         state.logs = state.logs.filter(l => l.date !== selectedISO);
-
-        state.logs.push({
-            date: selectedISO,
-            menuId: 'OFF',
-            exerciseLogs: {}
-        });
-
+        state.logs.push({ date: selectedISO, menuId: 'OFF', exerciseLogs: {} });
         state.logs.sort((a, b) => a.date.localeCompare(b.date));
-
         recalculateLastCompleted();
         saveState();
         renderRecommendation();
         renderCalendar();
         renderMenuTable();
-
         closeWorkoutLogModal();
         const [y, m, d] = selectedISO.split('-');
-        alert(`${parseInt(m)}/${parseInt(d)} をオフ日として記録しました！`);
         return;
     }
 
-    // 通常メニュー・自由入力の場合の保存処理
     const selectedMenuId = document.getElementById('select-log-menu').value;
     const menu = state.menus.find(m => m.id === selectedMenuId);
     const exerciseLogs = {};
@@ -536,15 +660,27 @@ function submitWorkoutLog() {
     if (!isFree) {
         // メニュー通りモード
         menu.exercises.forEach((e, idx) => {
-            const weight = document.getElementById(`weight-${idx}`).value;
-            const reps = document.getElementById(`reps-${idx}`).value;
-            const sets = document.getElementById(`sets-${idx}`).value;
-
-            exerciseLogs[e.name] = {
-                weight: weight !== '' ? parseFloat(weight) : 0,
-                reps: reps !== '' ? parseInt(reps, 10) : 0,
-                sets: sets !== '' ? parseInt(sets, 10) : 0
-            };
+            const minEl = document.getElementById(`minutes-${idx}`);
+            if (minEl) {
+                // 有酸素種目の場合
+                const minutes = minEl.value;
+                const calories = document.getElementById(`calories-${idx}`).value;
+                exerciseLogs[e.name] = {
+                    isCardio: true,
+                    minutes: minutes !== '' ? parseInt(minutes, 10) : 0,
+                    calories: calories !== '' ? parseInt(calories, 10) : 0
+                };
+            } else {
+                // 筋トレ種目の場合
+                const weight = document.getElementById(`weight-${idx}`).value;
+                const reps = document.getElementById(`reps-${idx}`).value;
+                const sets = document.getElementById(`sets-${idx}`).value;
+                exerciseLogs[e.name] = {
+                    weight: weight !== '' ? parseFloat(weight) : 0,
+                    reps: reps !== '' ? parseInt(reps, 10) : 0,
+                    sets: sets !== '' ? parseInt(sets, 10) : 0
+                };
+            }
         });
     }
 
@@ -554,28 +690,38 @@ function submitWorkoutLog() {
 
     extraBlocks.forEach(block => {
         const name = block.querySelector('.extra-name-input').value.trim();
-        const weight = block.querySelector('.extra-weight').value;
-        const reps = block.querySelector('.extra-reps').value;
-        const sets = block.querySelector('.extra-sets').value;
+        const minInput = block.querySelector('.extra-minutes');
         const labelSelect = block.querySelector('.extra-label-select');
         const label = labelSelect ? labelSelect.value : state.exerciseLabels[0];
 
         if (name) {
             freeEntryCount++;
             const key = isFree ? name : `【追加】${name}`;
-            exerciseLogs[key] = {
-                weight: weight !== '' ? parseFloat(weight) : 0,
-                reps: reps !== '' ? parseInt(reps, 10) : 0,
-                sets: sets !== '' ? parseInt(sets, 10) : 0,
-                label: label
-            };
 
-            if (!state.exerciseLibrary[label]) {
-                state.exerciseLibrary[label] = [];
+            if (minInput) {
+                // 有酸素種目の場合
+                const calories = block.querySelector('.extra-calories').value;
+                exerciseLogs[key] = {
+                    isCardio: true,
+                    minutes: minInput.value !== '' ? parseInt(minInput.value, 10) : 0,
+                    calories: calories !== '' ? parseInt(calories, 10) : 0,
+                    label: label
+                };
+            } else {
+                // 筋トレ種目の場合
+                const weight = block.querySelector('.extra-weight').value;
+                const reps = block.querySelector('.extra-reps').value;
+                const sets = block.querySelector('.extra-sets').value;
+                exerciseLogs[key] = {
+                    weight: weight !== '' ? parseFloat(weight) : 0,
+                    reps: reps !== '' ? parseInt(reps, 10) : 0,
+                    sets: sets !== '' ? parseInt(sets, 10) : 0,
+                    label: label
+                };
             }
-            if (!state.exerciseLibrary[label].includes(name)) {
-                state.exerciseLibrary[label].push(name);
-            }
+
+            if (!state.exerciseLibrary[label]) state.exerciseLibrary[label] = [];
+            if (!state.exerciseLibrary[label].includes(name)) state.exerciseLibrary[label].push(name);
         }
     });
 
@@ -584,9 +730,7 @@ function submitWorkoutLog() {
         return;
     }
 
-    // 重複データを上書き排除して保存
     state.logs = state.logs.filter(l => l.date !== selectedISO);
-
     state.logs.push({
         date: selectedISO,
         menuId: selectedMenuId,
@@ -604,7 +748,6 @@ function submitWorkoutLog() {
 
     closeWorkoutLogModal();
     const [y, m, d] = selectedISO.split('-');
-    alert(`${selectedMenuId} の記録を完了しました！（${parseInt(m)}/${parseInt(d)}）`);
 }
 
 function openDetailLogModal(logIndex) {
@@ -617,7 +760,7 @@ function openDetailLogModal(logIndex) {
     const bodyEl = document.getElementById('detail-log-body');
 
     if (log.menuId === 'OFF') {
-        titleEl.textContent = 'オフ';
+        titleEl.textContent = 'オフ (休養日)';
         bodyEl.innerHTML = '<p style="color:var(--text-sub);">この日は休養日として記録されています。</p>';
     } else {
         const menu = state.menus.find(m => m.id === log.menuId);
@@ -654,6 +797,15 @@ function openDetailLogModal(logIndex) {
             closeDetailLogModal();
         }
     };
+
+    // ▼ ここを追加：編集ボタンを押したら入力モーダルを開く
+    const editBtn = document.getElementById('btn-edit-detail-log');
+    if (editBtn) {
+        editBtn.onclick = () => {
+            closeDetailLogModal();
+            openWorkoutLogModal(log.menuId, log.date);
+        };
+    }
 
     document.getElementById('detail-log-modal').classList.add('active');
 }
