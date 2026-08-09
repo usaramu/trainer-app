@@ -784,18 +784,25 @@ function openDetailLogModal(logIndex) {
         let html = '';
         if (log.exerciseLogs && Object.keys(log.exerciseLogs).length > 0) {
             html += '<div style="display:flex; flex-direction:column; gap:8px;">';
+            
             for (const [exName, logVal] of Object.entries(log.exerciseLogs)) {
-                const formatted = formatLogObj(logVal);
                 const isExtra = exName.startsWith('【追加】');
                 const styleAttr = isExtra ? 'color: var(--primary-color); font-weight:600;' : 'font-weight:500;';
 
-                html += `
-                    <div style="display:flex; justify-content:space-between; border-bottom:1px dashed var(--border-color); padding-bottom:6px;">
-                        <span style="${styleAttr}">${exName}</span>
-                        <span style="color:var(--text-sub); font-size:0.9rem;">${formatted}</span>
-                    </div>
-                `;
+                // 配列（複数記録）でも単一データでも配列に統一してループ処理
+                const valArray = Array.isArray(logVal) ? logVal : [logVal];
+
+                valArray.forEach(item => {
+                    const formatted = formatSingleLogObj(item);
+                    html += `
+                        <div style="display:flex; justify-content:space-between; border-bottom:1px dashed var(--border-color); padding-bottom:6px;">
+                            <span style="${styleAttr}">${exName}</span>
+                            <span style="color:var(--text-sub); font-size:0.9rem;">${formatted}</span>
+                        </div>
+                    `;
+                });
             }
+            
             html += '</div>';
         } else {
             html = '<p style="color:var(--text-sub);">各種目の詳細ログはありません。</p>';
@@ -811,7 +818,6 @@ function openDetailLogModal(logIndex) {
         }
     };
 
-    // ▼ ここを追加：編集ボタンを押したら入力モーダルを開く
     const editBtn = document.getElementById('btn-edit-detail-log');
     if (editBtn) {
         editBtn.onclick = () => {
