@@ -481,7 +481,7 @@ h1 {
 .menu-table {
     width: 100%;
     border-collapse: separate;
-    border-spacing: 0 12px;
+    border-spacing: 0 16px;
     text-align: left;
     font-size: 0.8125rem;
 }
@@ -497,6 +497,7 @@ h1 {
     box-shadow: 0 6px 18px -10px rgba(61, 44, 58, 0.18);
     padding: 16px 16px 14px;
     position: relative;
+    margin-bottom: 16px;
 }
 
 .menu-table td {
@@ -1063,4 +1064,43 @@ footer {
     font-size: 0.8125rem;
     margin-top: 8px;
     font-weight: 500;
+}
+
+/* フッター領域の調整 */
+footer {
+    margin-top: 36px;
+    margin-bottom: 24px;
+    text-align: center;
+    font-size: 0.8125rem;
+    color: var(--text-sub);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+/* フッター内の設定ボタン配置 */
+.footer-tools {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+/* 控えめなボタンデザイン */
+.btn-footer-tool {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-sub);
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-footer-tool:hover {
+    background-color: var(--primary-soft);
+    color: var(--primary-hover);
+    border-color: transparent;
 }

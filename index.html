@@ -12,14 +12,8 @@
 <body>
 
     <header>
-        <div class="header-top-row">
-            <button class="btn-settings-gear" id="btn-open-exercise-library" title="種目リスト管理">📋</button>
-            <div>
-                <h1>Workout Tracker</h1>
-                <div class="subtitle">うさトレ</div>
-            </div>
-            <button class="btn-settings-gear" id="btn-open-rotation-settings" title="ローテーション設定">⚙️</button>
-        </div>
+        <h1>Workout Tracker</h1>
+        <div class="subtitle">うさトレ</div>
     </header>
 
     <!-- メイン：今日の推奨表示バナー -->
@@ -42,7 +36,7 @@
 
     <!-- カレンダーセクション -->
     <section class="log-section">
-        <h2>Calendar</h2>
+        <h2>ログ</h2>
         <div class="calendar-card">
             <div class="calendar-header">
                 <button onclick="changeMonth(-1)">&lt;</button>
@@ -107,26 +101,30 @@
     <div class="modal-overlay" id="workout-log-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>ワークアウト記録</h2>
+                <h2>トレーニング記録</h2>
                 <button class="btn-close" onclick="closeWorkoutLogModal()">&times;</button>
             </div>
             <div class="modal-body">
-                <label class="form-label">記録する日付</label>
+                <label class="form-label">日付</label>
                 <input type="date" id="select-log-date" class="form-input">
 
-                <label class="form-label">記録タイプ</label>
+                <label class="form-label">タイプ</label>
                 <div class="rotation-mode-options" style="margin-bottom: 16px;">
                     <label class="rotation-mode-option">
                         <input type="radio" name="record-type" id="record-type-menu" onchange="toggleRecordType()">
-                        <span>メニュー通り</span>
+                        <span>メニューから</span>
                     </label>
                     <label class="rotation-mode-option">
                         <input type="radio" name="record-type" id="record-type-free" onchange="toggleRecordType()">
-                        <span>自由入力（部位だけ合わせる）</span>
+                        <span>自由入力</span>
+                    </label>
+                    <label class="rotation-mode-option">
+                        <input type="radio" name="record-type" id="record-type-off" onchange="toggleRecordType()">
+                        <span>オフ</span>
                     </label>
                 </div>
 
-                <label class="form-label" id="select-log-menu-label">実施するメニューを選択</label>
+                <label class="form-label" id="select-log-menu-label">実施メニューを選択</label>
                 <select id="select-log-menu" class="form-input" onchange="onLogMenuSelectChange(this.value)">
                     <!-- JSで選択肢を自動生成 -->
                 </select>
@@ -136,7 +134,7 @@
                 </div>
 
                 <div class="extra-exercise-section" id="free-exercise-section">
-                    <label class="form-label" id="extra-exercise-label">追加でやった種目（任意）</label>
+                    <label class="form-label" id="extra-exercise-label">追加種目</label>
                     <div id="extra-exercise-container">
                         <!-- 動的に追加種目行が生成されます -->
                     </div>
@@ -182,11 +180,11 @@
                 <div class="rotation-mode-options">
                     <label class="rotation-mode-option">
                         <input type="radio" name="rotation-mode" id="rotation-mode-sequence" onchange="toggleWeekdaySection()">
-                        <span>順番通り（A→B→C→D→E→F）</span>
+                        <span>順番通り</span>
                     </label>
                     <label class="rotation-mode-option">
                         <input type="radio" name="rotation-mode" id="rotation-mode-weekday" onchange="toggleWeekdaySection()">
-                        <span>曜日で固定する</span>
+                        <span>曜日固定</span>
                     </label>
                 </div>
 
@@ -229,7 +227,7 @@
                 </div>
 
                 <div class="library-add-row">
-                    <input type="text" id="library-new-exercise-input" class="form-input" placeholder="新しい種目名を入力" style="margin-bottom:0;">
+                    <input type="text" id="library-new-exercise-input" class="form-input" placeholder="新しい種目を追加" style="margin-bottom:0;">
                     <button type="button" class="btn-library-add" onclick="addLibraryExercise()">追加</button>
                 </div>
             </div>
@@ -240,6 +238,10 @@
     </div>
 
     <footer>
+        <div class="footer-tools">
+            <button class="btn-footer-tool" id="btn-open-exercise-library">📋 種目リスト管理</button>
+            <button class="btn-footer-tool" id="btn-open-rotation-settings">⚙️ ローテーション設定</button>
+        </div>
         <button class="btn-reset" onclick="resetData()">履歴・メニュー設定を初期化</button>
     </footer>
 

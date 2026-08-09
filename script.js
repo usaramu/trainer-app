@@ -108,7 +108,7 @@ function init() {
 }
 
 // ★メニュー内容をコードで書き換えたら、この数字を 2, 3, 4... と増やす！
-const CURRENT_VERSION = 3; 
+const CURRENT_VERSION = 5; 
 
 function loadState() {
     const savedState = localStorage.getItem('workout_tracker_state');
@@ -118,6 +118,7 @@ function loadState() {
         // 保存データのバージョンが古い場合は、メニューだけコード側（最新）で上書きする
         if (!parsed.version || parsed.version < CURRENT_VERSION) {
             state.menus = JSON.parse(JSON.stringify(initialDefaultMenus));
+            state.sequenceOrder = ['A', 'B', 'F', 'C', 'D', 'E'];
             state.logs = parsed.logs || []; // ※過去のトレー二ング記録は消えずに残ります
         } else {
             if (parsed.menus) state.menus = parsed.menus;
@@ -127,10 +128,10 @@ function loadState() {
         state.lastCompletedDate = parsed.lastCompletedDate || null;
         state.rotationMode = parsed.rotationMode || 'sequence';
         state.weekdayMenus = parsed.weekdayMenus || { 0: 'F', 1: 'A', 2: 'B', 3: 'C', 4: 'D', 5: 'E', 6: 'OFF' };
-        state.sequenceOrder = parsed.sequenceOrder || ['A', 'B', 'C', 'D', 'E', 'F'];
+        sequenceOrder: ['A', 'B', 'F', 'C', 'D', 'E'],
         state.exerciseLabels = parsed.exerciseLabels || ['胸', '背中', '脚', '肩', '腕', 'お尻', '腹筋', '有酸素運動', 'その他'];
         // exerciseLibrary の中身をあらかじめ充実させたので、古いスキーマのデータは作り直す
-        if (parsed.exerciseLibrarySchema === 'label-v2' && parsed.exerciseLibrary) {
+        if (parsed.exerciseLibrarySchema === 'label-v3' && parsed.exerciseLibrary) {
             state.exerciseLibrary = parsed.exerciseLibrary;
         } else {
             state.exerciseLibrary = buildDefaultExerciseLibrary();
@@ -148,7 +149,7 @@ function buildDefaultExerciseLibrary() {
         '脚': ['アダクション', 'ブルガリアンスクワット', 'スクワット', 'スミスマシン・バーベルスクワット', 'レッグプレス', 'レッグエクステンション', 'レッグカール'],
         '肩': ['サイドレイズ', 'ショルダープレス', 'フロントレイズ', 'ダンベルショルダープレス', 'ケーブルフェイスプル'],
         '腕': ['バーベルカール', 'アームカール', 'ケーブルプレスダウン'],
-        'お尻': ['ヒップアブダクション', 'ヒップスラスト'],
+        'お尻': ['ヒップアブダクション（骨盤前傾）', 'ヒップアブダクション（骨盤立て）','ヒップアブダクション（骨盤後傾）','ヒップスラスト'],
         '腹筋': ['アブドミナル', 'トーソ・ローテーション', 'プランク', '上体起こし'],
         '有酸素運動': ['トレッドミル'],
         'その他': []
@@ -166,7 +167,7 @@ function saveState() {
         weekdayMenus: state.weekdayMenus,
         sequenceOrder: state.sequenceOrder,
         exerciseLabels: state.exerciseLabels,
-        exerciseLibrarySchema: 'label-v2',
+        exerciseLibrarySchema: 'label-v3',
         exerciseLibrary: state.exerciseLibrary
     }));
 }
@@ -213,15 +214,15 @@ function renderRecommendation() {
         document.getElementById('rec-title').textContent = '今日は設定上オフの日です';
     } else {
         const targetMenu = state.menus.find(m => m.id === nextId);
-        document.getElementById('rec-id').textContent = `メニュー ${targetMenu.id}`;
+        document.getElementById('rec-id').textContent = ` ${targetMenu.id}`;
         document.getElementById('rec-title').textContent = targetMenu.title;
     }
 
     const lastInfoEl = document.getElementById('last-completed-info');
     if (state.lastCompletedId && state.lastCompletedDate) {
-        lastInfoEl.textContent = `前回完了: メニュー ${state.lastCompletedId} (${state.lastCompletedDate})`;
+        lastInfoEl.textContent = `前回完了:  ${state.lastCompletedId} (${state.lastCompletedDate})`;
     } else {
-        lastInfoEl.textContent = '前回完了: なし（記録を始めましょう！）';
+        lastInfoEl.textContent = '前回完了: なし';
     }
 }
 
@@ -305,48 +306,76 @@ function openWorkoutLogModal(defaultMenuId, presetDateISO) {
     const selectEl = document.getElementById('select-log-menu');
     selectEl.innerHTML = '';
 
+    const offOption = document.createElement('option');
+    offOption.value = 'OFF';
+    offOption.textContent = 'オフ';
+    if (defaultMenuId === 'OFF') {
+        offOption.selected = true;
+    }
+    selectEl.appendChild(offOption);
+
     state.menus.forEach(menu => {
         const option = document.createElement('option');
         option.value = menu.id;
-        option.textContent = `メニュー ${menu.id} : ${menu.title}`;
+        option.textContent = ` ${menu.id} : ${menu.title}`;
         if (menu.id === defaultMenuId) {
             option.selected = true;
         }
         selectEl.appendChild(option);
     });
 
-    // 日付欄はデフォルトで今日をセット（カレンダーの日付をクリックした場合はその日付をセット）
+    // 日付欄の設定
     const dateEl = document.getElementById('select-log-date');
     if (dateEl) {
         dateEl.value = presetDateISO || getTodayISO();
-        dateEl.max = getTodayISO(); // 未来日は記録できないようにする
+        dateEl.max = getTodayISO();
     }
 
-    // 記録タイプはデフォルトで「メニュー通り」に戻す
-    document.getElementById('record-type-menu').checked = true;
-    document.getElementById('record-type-free').checked = false;
+    // ラジオボタンの切り替え
+    if (defaultMenuId === 'OFF') {
+        document.getElementById('record-type-off').checked = true;
+    } else {
+        document.getElementById('record-type-menu').checked = true;
+    }
+
     toggleRecordType();
 
-    renderWorkoutLogInputs(defaultMenuId);
+    renderWorkoutLogInputs(defaultMenuId === 'OFF' ? 'A' : defaultMenuId);
     document.getElementById('extra-exercise-container').innerHTML = '';
     document.getElementById('workout-log-modal').classList.add('active');
 }
 
 function toggleRecordType() {
     const isFree = document.getElementById('record-type-free').checked;
+    const isOff = document.getElementById('record-type-off').checked;
 
-    document.getElementById('workout-log-inputs').style.display = isFree ? 'none' : 'block';
-    document.getElementById('select-log-menu-label').textContent = isFree ? '対象部位（タグ用に選択）' : '実施するメニューを選択';
-    document.getElementById('extra-exercise-label').textContent = isFree ? '実施した種目' : '追加でやった種目（任意）';
+    const selectMenuLabel = document.getElementById('select-log-menu-label');
+    const selectMenu = document.getElementById('select-log-menu');
+    const logInputs = document.getElementById('workout-log-inputs');
+    const freeSection = document.getElementById('free-exercise-section');
 
-    const addBtn = document.querySelector('#free-exercise-section .btn-add-extra');
-    if (addBtn) addBtn.textContent = isFree ? '+ 種目を足す' : '+ 種目を足す';
+    if (isOff) {
+        // オフ選択時は種目入力やメニュー選択をすべて非表示
+        selectMenuLabel.style.display = 'none';
+        selectMenu.style.display = 'none';
+        logInputs.style.display = 'none';
+        freeSection.style.display = 'none';
+    } else {
+        // 通常・自由入力時は表示に戻す
+        selectMenuLabel.style.display = 'block';
+        selectMenu.style.display = 'block';
+        
+        logInputs.style.display = isFree ? 'none' : 'block';
+        freeSection.style.display = 'block';
 
-    // 自由入力に切り替えた瞬間、行が1つもなければ最初の1行を自動で出す
-    if (isFree) {
-        const container = document.getElementById('extra-exercise-container');
-        if (container.children.length === 0) {
-            addExtraExerciseInput();
+        selectMenuLabel.textContent = isFree ? '対象部位' : 'メニュー選択';
+        document.getElementById('extra-exercise-label').textContent = isFree ? '実施した種目' : '追加でやった種目（任意）';
+
+        if (isFree) {
+            const container = document.getElementById('extra-exercise-container');
+            if (container.children.length === 0) {
+                addExtraExerciseInput();
+            }
         }
     }
 }
@@ -400,7 +429,7 @@ function addExtraExerciseInput() {
         </select>
         <div class="exercise-chip-list extra-chip-list"></div>
         <div class="extra-title-row">
-            <input type="text" class="form-input extra-name-input" placeholder="種目名（上のチップから選ぶ or 新規入力）" onblur="prefillLastLogValues(this.closest('.extra-log-block'), this.value.trim())">
+            <input type="text" class="form-input extra-name-input" placeholder="種目名（新規入力）" onblur="prefillLastLogValues(this.closest('.extra-log-block'), this.value.trim())">
             <button type="button" class="btn-remove-row" onclick="this.closest('.extra-log-block').remove()">&times;</button>
         </div>
         <div class="direct-input-group">
@@ -470,17 +499,42 @@ function closeWorkoutLogModal() {
 }
 
 function submitWorkoutLog() {
-    const selectedMenuId = document.getElementById('select-log-menu').value;
-    const menu = state.menus.find(m => m.id === selectedMenuId);
+    const isOff = document.getElementById('record-type-off').checked;
     const isFree = document.getElementById('record-type-free').checked;
-
     const dateEl = document.getElementById('select-log-date');
     const selectedISO = (dateEl && dateEl.value) ? dateEl.value : getTodayISO();
 
+    // オフ（休養日）の場合の保存処理
+    if (isOff) {
+        state.logs = state.logs.filter(l => l.date !== selectedISO);
+
+        state.logs.push({
+            date: selectedISO,
+            menuId: 'OFF',
+            exerciseLogs: {}
+        });
+
+        state.logs.sort((a, b) => a.date.localeCompare(b.date));
+
+        recalculateLastCompleted();
+        saveState();
+        renderRecommendation();
+        renderCalendar();
+        renderMenuTable();
+
+        closeWorkoutLogModal();
+        const [y, m, d] = selectedISO.split('-');
+        alert(`${parseInt(m)}/${parseInt(d)} をオフ日として記録しました！`);
+        return;
+    }
+
+    // 通常メニュー・自由入力の場合の保存処理
+    const selectedMenuId = document.getElementById('select-log-menu').value;
+    const menu = state.menus.find(m => m.id === selectedMenuId);
     const exerciseLogs = {};
 
     if (!isFree) {
-        // メニュー通りモード：固定の種目リストを記録
+        // メニュー通りモード
         menu.exercises.forEach((e, idx) => {
             const weight = document.getElementById(`weight-${idx}`).value;
             const reps = document.getElementById(`reps-${idx}`).value;
@@ -494,7 +548,7 @@ function submitWorkoutLog() {
         });
     }
 
-    // 自由入力モードでは、この「追加でやった種目」欄がメインの入力欄になる
+    // 追加・自由入力種目の取得
     const extraBlocks = document.querySelectorAll('.extra-log-block');
     let freeEntryCount = 0;
 
@@ -516,7 +570,6 @@ function submitWorkoutLog() {
                 label: label
             };
 
-            // 初めて使う種目名なら、選んだラベルの候補として次回から選べるよう記憶しておく
             if (!state.exerciseLibrary[label]) {
                 state.exerciseLibrary[label] = [];
             }
@@ -531,7 +584,7 @@ function submitWorkoutLog() {
         return;
     }
 
-    // 同じ日付の記録がすでにあれば、上書き（重複登録を防ぐ）
+    // 重複データを上書き排除して保存
     state.logs = state.logs.filter(l => l.date !== selectedISO);
 
     state.logs.push({
@@ -541,7 +594,6 @@ function submitWorkoutLog() {
         exerciseLogs: exerciseLogs
     });
 
-    // 日付順に並べ直す（過去日を後から追記した場合でも正しい順序を保つ）
     state.logs.sort((a, b) => a.date.localeCompare(b.date));
 
     recalculateLastCompleted();
@@ -552,7 +604,7 @@ function submitWorkoutLog() {
 
     closeWorkoutLogModal();
     const [y, m, d] = selectedISO.split('-');
-    alert(`メニュー ${selectedMenuId} の記録を完了しました！（${parseInt(m)}/${parseInt(d)}）`);
+    alert(`${selectedMenuId} の記録を完了しました！（${parseInt(m)}/${parseInt(d)}）`);
 }
 
 function openDetailLogModal(logIndex) {
@@ -565,7 +617,7 @@ function openDetailLogModal(logIndex) {
     const bodyEl = document.getElementById('detail-log-body');
 
     if (log.menuId === 'OFF') {
-        titleEl.textContent = 'オフ (休養日)';
+        titleEl.textContent = 'オフ';
         bodyEl.innerHTML = '<p style="color:var(--text-sub);">この日は休養日として記録されています。</p>';
     } else {
         const menu = state.menus.find(m => m.id === log.menuId);
@@ -796,7 +848,7 @@ function resetData() {
         state.logs = [];
         state.rotationMode = 'sequence';
         state.weekdayMenus = { 0: 'F', 1: 'A', 2: 'B', 3: 'C', 4: 'D', 5: 'E', 6: 'OFF' };
-        state.sequenceOrder = ['A', 'B', 'C', 'D', 'E', 'F'];
+        state.sequenceOrder = ['A', 'B', 'F', 'C', 'D', 'E'];
         state.exerciseLabels = ['胸', '背中', '脚', '肩', '腕', 'お尻', '腹筋', '有酸素運動', 'その他'];
         state.exerciseLibrary = buildDefaultExerciseLibrary();
         init();
@@ -875,7 +927,7 @@ function renderWeekdayAssignmentInputs() {
 
         const currentVal = state.weekdayMenus[day] || 'OFF';
 
-        let optionsHTML = '<option value="OFF">オフ（休養日）</option>';
+        let optionsHTML = '<option value="OFF">オフ</option>';
         state.menus.forEach(menu => {
             const selected = currentVal === menu.id ? 'selected' : '';
             optionsHTML += `<option value="${menu.id}" ${selected}>メニュー ${menu.id}：${menu.title}</option>`;
