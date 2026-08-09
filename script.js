@@ -108,7 +108,7 @@ function init() {
 }
 
 // ★メニュー内容をコードで書き換えたら、この数字を 2, 3, 4... と増やす！
-const CURRENT_VERSION = 2; 
+const CURRENT_VERSION = 3; 
 
 function loadState() {
     const savedState = localStorage.getItem('workout_tracker_state');
