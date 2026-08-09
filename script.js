@@ -242,23 +242,34 @@ function getLastExerciseLogObj(exerciseName) {
 function formatLogObj(logObj) {
     if (!logObj) return '';
     if (typeof logObj === 'string') return logObj;
-    
-    // 有酸素運動の記録（minutes や calories がある場合）
+
+    // 複数セット・複数記録がある場合は「, 」で繋ぐ（スラッシュの乱立を防止）
+    if (Array.isArray(logObj)) {
+        return logObj.map(item => formatSingleLogObj(item)).filter(Boolean).join(', ');
+    }
+
+    return formatSingleLogObj(logObj);
+}
+
+function formatSingleLogObj(logObj) {
+    if (!logObj) return '';
+
+    // ▼ 有酸素運動の記録（時間・カロリー）
     if (logObj.isCardio || logObj.minutes !== undefined || logObj.calories !== undefined) {
         const parts = [];
         if (logObj.minutes) parts.push(`${logObj.minutes}分`);
-        if (logObj.calories) parts.push(`${logObj.calories}kcal`);
-        return parts.join(' / ');
+        if (logObj.calories) parts.push(`(${logObj.calories}kcal)`); // カロリーはカッコ表示
+        return parts.join(' '); // スラッシュを使わずスペースで繋ぐ（例: 30分 (180kcal)）
     }
 
-    // 通常の筋トレの記録
+    // ▼ 通常の筋トレの記録
     const parts = [];
     if (logObj.weight !== null && logObj.weight !== undefined && logObj.weight !== '') {
         parts.push(`${logObj.weight}kg`);
     }
     if (logObj.reps) parts.push(`${logObj.reps}回`);
     if (logObj.sets) parts.push(`${logObj.sets}set`);
-    return parts.join(' × ');
+    return parts.join(' × '); // 例: 50kg × 10回 × 3set
 }
 
 // ページ最下部：テーブル表示描画
@@ -649,7 +660,6 @@ function submitWorkoutLog() {
         renderCalendar();
         renderMenuTable();
         closeWorkoutLogModal();
-        const [y, m, d] = selectedISO.split('-');
         return;
     }
 
@@ -657,29 +667,35 @@ function submitWorkoutLog() {
     const menu = state.menus.find(m => m.id === selectedMenuId);
     const exerciseLogs = {};
 
+    // ログ追加用ヘルパー関数（既存があれば配列化して追加）
+    const appendExerciseLog = (key, dataObj) => {
+        if (!exerciseLogs[key]) {
+            exerciseLogs[key] = [];
+        }
+        exerciseLogs[key].push(dataObj);
+    };
+
     if (!isFree) {
         // メニュー通りモード
         menu.exercises.forEach((e, idx) => {
             const minEl = document.getElementById(`minutes-${idx}`);
             if (minEl) {
-                // 有酸素種目の場合
                 const minutes = minEl.value;
                 const calories = document.getElementById(`calories-${idx}`).value;
-                exerciseLogs[e.name] = {
+                appendExerciseLog(e.name, {
                     isCardio: true,
                     minutes: minutes !== '' ? parseInt(minutes, 10) : 0,
                     calories: calories !== '' ? parseInt(calories, 10) : 0
-                };
+                });
             } else {
-                // 筋トレ種目の場合
                 const weight = document.getElementById(`weight-${idx}`).value;
                 const reps = document.getElementById(`reps-${idx}`).value;
                 const sets = document.getElementById(`sets-${idx}`).value;
-                exerciseLogs[e.name] = {
+                appendExerciseLog(e.name, {
                     weight: weight !== '' ? parseFloat(weight) : 0,
                     reps: reps !== '' ? parseInt(reps, 10) : 0,
                     sets: sets !== '' ? parseInt(sets, 10) : 0
-                };
+                });
             }
         });
     }
@@ -699,25 +715,23 @@ function submitWorkoutLog() {
             const key = isFree ? name : `【追加】${name}`;
 
             if (minInput) {
-                // 有酸素種目の場合
                 const calories = block.querySelector('.extra-calories').value;
-                exerciseLogs[key] = {
+                appendExerciseLog(key, {
                     isCardio: true,
                     minutes: minInput.value !== '' ? parseInt(minInput.value, 10) : 0,
                     calories: calories !== '' ? parseInt(calories, 10) : 0,
                     label: label
-                };
+                });
             } else {
-                // 筋トレ種目の場合
                 const weight = block.querySelector('.extra-weight').value;
                 const reps = block.querySelector('.extra-reps').value;
                 const sets = block.querySelector('.extra-sets').value;
-                exerciseLogs[key] = {
+                appendExerciseLog(key, {
                     weight: weight !== '' ? parseFloat(weight) : 0,
                     reps: reps !== '' ? parseInt(reps, 10) : 0,
                     sets: sets !== '' ? parseInt(sets, 10) : 0,
                     label: label
-                };
+                });
             }
 
             if (!state.exerciseLibrary[label]) state.exerciseLibrary[label] = [];
@@ -747,7 +761,6 @@ function submitWorkoutLog() {
     renderMenuTable();
 
     closeWorkoutLogModal();
-    const [y, m, d] = selectedISO.split('-');
 }
 
 function openDetailLogModal(logIndex) {
