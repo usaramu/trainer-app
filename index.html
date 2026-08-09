@@ -13,7 +13,7 @@
 
     <header>
         <div class="header-top-row">
-            <div class="header-spacer"></div>
+            <button class="btn-settings-gear" id="btn-open-exercise-library" title="種目リスト管理">📋</button>
             <div>
                 <h1>Workout Tracker</h1>
                 <div class="subtitle">うさトレ</div>
@@ -35,14 +35,14 @@
             前回完了: なし
         </div>
         <div class="banner-actions">
-            <button class="btn-complete" id="btn-start-today">記録・完了</button>
+            <button class="btn-complete" id="btn-start-today">記録する</button>
             <button class="btn-offday" onclick="recordOffDay()">オフ</button>
         </div>
     </div>
 
     <!-- カレンダーセクション -->
     <section class="log-section">
-        <h2>実施ログ & カレンダー</h2>
+        <h2>Calendar</h2>
         <div class="calendar-card">
             <div class="calendar-header">
                 <button onclick="changeMonth(-1)">&lt;</button>
@@ -57,7 +57,7 @@
 
     <!-- 全メニュー比較表セクション（最下部） -->
     <section class="table-section">
-        <h2>全メニュー詳細一覧表</h2>
+        <h2>メニュー一覧</h2>
         <div class="table-wrapper">
             <table class="menu-table">
                 <thead>
@@ -111,21 +111,36 @@
                 <button class="btn-close" onclick="closeWorkoutLogModal()">&times;</button>
             </div>
             <div class="modal-body">
-                <label class="form-label">実施するメニューを選択</label>
+                <label class="form-label">記録する日付</label>
+                <input type="date" id="select-log-date" class="form-input">
+
+                <label class="form-label">記録タイプ</label>
+                <div class="rotation-mode-options" style="margin-bottom: 16px;">
+                    <label class="rotation-mode-option">
+                        <input type="radio" name="record-type" id="record-type-menu" onchange="toggleRecordType()">
+                        <span>メニュー通り</span>
+                    </label>
+                    <label class="rotation-mode-option">
+                        <input type="radio" name="record-type" id="record-type-free" onchange="toggleRecordType()">
+                        <span>自由入力（部位だけ合わせる）</span>
+                    </label>
+                </div>
+
+                <label class="form-label" id="select-log-menu-label">実施するメニューを選択</label>
                 <select id="select-log-menu" class="form-input" onchange="onLogMenuSelectChange(this.value)">
                     <!-- JSで選択肢を自動生成 -->
                 </select>
 
                 <div id="workout-log-inputs">
-                    <!-- 基本メニューの数値入力欄 -->
+                    <!-- 基本メニューの数値入力欄（メニュー通りモード） -->
                 </div>
 
-                <div class="extra-exercise-section">
-                    <label class="form-label">追加でやった種目（任意）</label>
+                <div class="extra-exercise-section" id="free-exercise-section">
+                    <label class="form-label" id="extra-exercise-label">追加でやった種目（任意）</label>
                     <div id="extra-exercise-container">
                         <!-- 動的に追加種目行が生成されます -->
                     </div>
-                    <button type="button" class="btn-add-extra" onclick="addExtraExerciseInput()">+ 追加の種目を足す</button>
+                    <button type="button" class="btn-add-extra" onclick="addExtraExerciseInput()">+ 種目を足す</button>
                 </div>
             </div>
             <div class="modal-footer">
@@ -192,6 +207,34 @@
             <div class="modal-footer">
                 <button class="btn-cancel" onclick="closeRotationSettingsModal()">キャンセル</button>
                 <button class="btn-save" onclick="saveRotationSettings()">保存する</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 種目リスト管理モーダル -->
+    <div class="modal-overlay" id="exercise-library-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>種目リスト管理</h2>
+                <button class="btn-close" onclick="closeExerciseLibraryModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <label class="form-label">ラベルを選択</label>
+                <div class="label-tab-row" id="library-label-tabs">
+                    <!-- JSでラベルタブを生成 -->
+                </div>
+
+                <div class="exercise-chip-list" id="library-exercise-chips">
+                    <!-- JSで種目チップを生成 -->
+                </div>
+
+                <div class="library-add-row">
+                    <input type="text" id="library-new-exercise-input" class="form-input" placeholder="新しい種目名を入力" style="margin-bottom:0;">
+                    <button type="button" class="btn-library-add" onclick="addLibraryExercise()">追加</button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeExerciseLibraryModal()">閉じる</button>
             </div>
         </div>
     </div>
