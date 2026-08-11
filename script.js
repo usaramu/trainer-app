@@ -1145,7 +1145,7 @@ state.logs.forEach((log, index) => {
                     }
                 }
 
-                tag.textContent = log.recordType === 'free' ? `${shortLabel}✎` : shortLabel;
+                tag.textContent = log.recordType === 'free' ? `${shortLabel}` : shortLabel;
                 
                 tag.onclick = (e) => {
                     e.stopPropagation();
