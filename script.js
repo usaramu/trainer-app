@@ -280,6 +280,7 @@ function formatLogObj(logObj) {
 function formatSingleLogObj(logObj) {
     if (!logObj) return '';
 
+    // 有酸素運動の表示
     if (logObj.isCardio || logObj.minutes !== undefined || logObj.calories !== undefined) {
         const parts = [];
         if (logObj.minutes) parts.push(`${logObj.minutes}分`);
@@ -287,6 +288,40 @@ function formatSingleLogObj(logObj) {
         return parts.join(' ');
     }
 
+    // セット配列（setsArray）が存在する場合のスマート統合表示
+    if (logObj.setsArray && Array.isArray(logObj.setsArray) && logObj.setsArray.length > 0) {
+        // 連続する同じ重量・回数のセットをグループ化
+        const groupedSets = [];
+        let currentGroup = null;
+
+        logObj.setsArray.forEach(set => {
+            if (currentGroup && currentGroup.weight === set.weight && currentGroup.reps === set.reps) {
+                currentGroup.count++;
+            } else {
+                if (currentGroup) {
+                    groupedSets.push(currentGroup);
+                }
+                currentGroup = {
+                    weight: set.weight,
+                    reps: set.reps,
+                    count: 1
+                };
+            }
+        });
+        if (currentGroup) {
+            groupedSets.push(currentGroup);
+        }
+
+        // グループ化した結果を「5kg×12回 × 2set」形式で整形してカンマで結合
+        return groupedSets.map(g => {
+            if (g.count > 1) {
+                return `${g.weight}kg×${g.reps}回 × ${g.count}set`;
+            }
+            return `${g.weight}kg×${g.reps}回`;
+        }).join(', ');
+    }
+
+    // 旧フォーマットの表示
     const parts = [];
     if (logObj.weight !== null && logObj.weight !== undefined && logObj.weight !== '') {
         parts.push(`${logObj.weight}kg`);
@@ -621,71 +656,88 @@ function addSuggestedExerciseInput(exerciseName, detailStr = '', menuId = '', fo
     const container = document.getElementById('suggested-fields-container');
     const lastObj = getLastExerciseLogObj(exerciseName) || {};
 
-    // 明示的に forceCardio が指定されていればそれを優先、なければ種目名から判定
     let isCardio = false;
     if (forceCardio !== null && forceCardio !== undefined) {
         isCardio = forceCardio;
     } else {
         const nameLower = exerciseName.toLowerCase();
-        isCardio = nameLower.includes('ウォーキング') || 
-                   nameLower.includes('ランニング') || 
-                   nameLower.includes('トレッドミル') || 
-                   nameLower.includes('有酸素') || 
-                   nameLower.includes('バイク') || 
-                   nameLower.includes('エアロバイク');
+        isCardio = nameLower.includes('ウォーキング') || nameLower.includes('ランニング') || nameLower.includes('有酸素');
     }
 
     const block = document.createElement('div');
     block.className = 'extra-log-block';
 
-    let fieldsHTML = '';
     if (isCardio) {
-        fieldsHTML = `
+        block.innerHTML = `
+            <div class="extra-title-row" style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                <input type="text" class="form-input extra-name-input" value="${exerciseName}" readonly style="font-weight:700; background-color:var(--primary-soft); color:var(--text-main); margin-bottom:0; flex: 1;">
+                <button type="button" class="btn-remove-row" onclick="this.closest('.extra-log-block').remove()">&times;</button>
+            </div>
             <div class="direct-input-group" data-cardio="true">
-                <div class="direct-field">
-                    <label>時間 (分)</label>
-                    <input type="number" class="extra-minutes" inputmode="numeric" value="${lastObj.minutes !== undefined ? lastObj.minutes : 30}" placeholder="30">
-                </div>
-                <div class="direct-field">
-                    <label>消費カロリー (kcal)</label>
-                    <input type="number" class="extra-calories" inputmode="numeric" value="${lastObj.calories !== undefined ? lastObj.calories : ''}" placeholder="150">
-                </div>
+                <div class="direct-field"><label>時間 (分)</label><input type="number" class="extra-minutes" value="${lastObj.minutes !== undefined ? lastObj.minutes : 30}"></div>
+                <div class="direct-field"><label>カロリー(kcal)</label><input type="number" class="extra-calories" value="${lastObj.calories !== undefined ? lastObj.calories : ''}"></div>
             </div>
         `;
     } else {
-        fieldsHTML = `
-            <div class="direct-input-group" data-cardio="false">
-                <div class="direct-field">
-                    <label>重量 (kg)</label>
-                    <input type="number" class="extra-weight" step="0.5" inputmode="decimal" value="${lastObj.weight !== undefined ? lastObj.weight : ''}" placeholder="0">
-                </div>
-                <div class="direct-field">
-                    <label>回数 (reps)</label>
-                    <input type="number" class="extra-reps" inputmode="numeric" value="${lastObj.reps !== undefined ? lastObj.reps : 10}" placeholder="10">
-                </div>
-                <div class="direct-field">
-                    <label>セット数</label>
-                    <input type="number" class="extra-sets" inputmode="numeric" value="${lastObj.sets !== undefined ? lastObj.sets : 3}" placeholder="3">
-                </div>
+        block.innerHTML = `
+            <div class="extra-title-row" style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                <input type="text" class="form-input extra-name-input" value="${exerciseName}" readonly style="font-weight:700; background-color:var(--primary-soft); color:var(--text-main); margin-bottom:0; flex: 1;">
+                <button type="button" class="btn-remove-row" onclick="this.closest('.extra-log-block').remove()">&times;</button>
             </div>
+            <div class="sets-container"></div>
+            <button type="button" class="btn-add-set-row" onclick="addSetRowToBlock(this.closest('.extra-log-block'))">＋ セットを追加</button>
         `;
+        
+        // 初期状態で3セット分作成
+        const setsContainer = block.querySelector('.sets-container');
+        for (let s = 1; s <= 3; s++) {
+            addSetRowToBlock(block, s === 1 ? (lastObj.weight || 10) : null, s === 1 ? (lastObj.reps || 10) : null);
+        }
     }
 
-    const hasLast = lastObj && Object.keys(lastObj).length > 0;
-    const copyBtnHTML = hasLast 
-        ? `<button type="button" class="btn-copy-last" onclick="prefillLastLogValues(this.closest('.extra-log-block'), '${exerciseName}')">⚡ 前回と同じ</button>` 
-        : '';
+    container.appendChild(block);
+}
 
-    block.innerHTML = `
-        <div class="extra-title-row" style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-            <input type="text" class="form-input extra-name-input" value="${exerciseName}" readonly style="font-weight:700; background-color:var(--primary-soft); color:var(--text-main); margin-bottom:0; flex: 1;">
-            ${copyBtnHTML}
-            <button type="button" class="btn-remove-row" onclick="this.closest('.extra-log-block').remove()">&times;</button>
+// セット行を追加するヘルパー関数（調整ボタン非表示版）
+function addSetRowToBlock(blockEl, initWeight = null, initReps = null) {
+    const setsContainer = blockEl.querySelector('.sets-container');
+    if (!setsContainer) return;
+
+    const setNum = setsContainer.children.length + 1;
+    
+    // 前のセットの数値を引き継ぐ
+    let w = initWeight;
+    let r = initReps;
+    if (w === null || r === null) {
+        const lastRow = setsContainer.lastElementChild;
+        if (lastRow) {
+            w = lastRow.querySelector('.set-weight').value;
+            r = lastRow.querySelector('.set-reps').value;
+        }
+    }
+
+    const setRow = document.createElement('div');
+    setRow.className = 'set-input-row';
+    setRow.innerHTML = `
+        <span class="set-label">${setNum}set</span>
+        <div class="set-field-group">
+            <input type="number" class="form-input set-weight" step="0.5" value="${w !== null ? w : ''}" placeholder="0"><span class="set-unit">kg</span>
+            <input type="number" class="form-input set-reps" value="${r !== null ? r : ''}" placeholder="0"><span class="set-unit">回</span>
         </div>
-        ${fieldsHTML}
     `;
 
-    container.appendChild(block);
+    setsContainer.appendChild(setRow);
+}
+
+// クイック調整ボタンの動作関数
+function adjustInputValue(btnEl, targetSelector, delta) {
+    const row = btnEl.closest('.set-input-row');
+    const input = row.querySelector(targetSelector);
+    if (input) {
+        let val = parseFloat(input.value) || 0;
+        val = Math.max(0, val + delta);
+        input.value = val;
+    }
 }
 
 // 追加・自由入力行の追加処理
@@ -752,22 +804,16 @@ function renderExerciseChipsForBlock(block) {
             </div>
         `;
     } else {
+        // ★ セット別入力（sets-container）を生成するように修正！
         fieldsContainer.innerHTML = `
-            <div class="direct-input-group" data-cardio="false">
-                <div class="direct-field">
-                    <label>重量 (kg)</label>
-                    <input type="number" class="extra-weight" step="0.5" inputmode="decimal" placeholder="0">
-                </div>
-                <div class="direct-field">
-                    <label>回数 (reps)</label>
-                    <input type="number" class="extra-reps" inputmode="numeric" placeholder="10">
-                </div>
-                <div class="direct-field">
-                    <label>セット数</label>
-                    <input type="number" class="extra-sets" inputmode="numeric" placeholder="3">
-                </div>
-            </div>
+            <div class="sets-container"></div>
+            <button type="button" class="btn-add-set-row" onclick="addSetRowToBlock(this.closest('.extra-log-block'))">＋ セットを追加</button>
         `;
+        
+        // 初期状態で3セット分自動作成
+        for (let s = 1; s <= 3; s++) {
+            addSetRowToBlock(block);
+        }
     }
 
     const names = state.exerciseLibrary[label] || [];
@@ -874,20 +920,12 @@ function submitWorkoutLog() {
     const blocks = document.querySelectorAll(`#${containerId} .extra-log-block`);
 
     blocks.forEach(block => {
-        // ドロップダウン（.extra-name-select）とテキスト表示（.extra-name-input）の両方に対応[cite: 8]
         const nameSelect = block.querySelector('.extra-name-select');
         const nameInput = block.querySelector('.extra-name-input');
-        
-        let name = '';
-        if (nameSelect && nameSelect.value) {
-            name = nameSelect.value.trim();
-        } else if (nameInput && nameInput.value) {
-            name = nameInput.value.trim();
-        }
+        let name = nameSelect && nameSelect.value ? nameSelect.value.trim() : (nameInput ? nameInput.value.trim() : '');
 
         const minInput = block.querySelector('.extra-minutes');
-        const labelSelect = block.querySelector('.extra-label-select');
-        const label = labelSelect ? labelSelect.value : state.exerciseLabels[0];
+        const setRows = block.querySelectorAll('.set-input-row');
 
         if (name) {
             if (minInput) {
@@ -895,19 +933,24 @@ function submitWorkoutLog() {
                 appendExerciseLog(name, {
                     isCardio: true,
                     minutes: minInput.value !== '' ? parseInt(minInput.value, 10) : 0,
-                    calories: calories !== '' ? parseInt(calories, 10) : 0,
-                    label: label
+                    calories: calories !== '' ? parseInt(calories, 10) : 0
                 });
-            } else {
-                const weight = block.querySelector('.extra-weight').value;
-                const reps = block.querySelector('.extra-reps').value;
-                const sets = block.querySelector('.extra-sets').value;
-                appendExerciseLog(name, {
-                    weight: weight !== '' ? parseFloat(weight) : 0,
-                    reps: reps !== '' ? parseInt(reps, 10) : 0,
-                    sets: sets !== '' ? parseInt(sets, 10) : 0,
-                    label: label
+            } else if (setRows.length > 0) {
+                const setsArray = [];
+                setRows.forEach(row => {
+                    const w = row.querySelector('.set-weight').value;
+                    const r = row.querySelector('.set-reps').value;
+                    if (w !== '' || r !== '') {
+                        setsArray.push({
+                            weight: w !== '' ? parseFloat(w) : 0,
+                            reps: r !== '' ? parseInt(r, 10) : 0
+                        });
+                    }
                 });
+
+                if (setsArray.length > 0) {
+                    appendExerciseLog(name, { setsArray: setsArray });
+                }
             }
         }
     });
@@ -1509,7 +1552,7 @@ function renderHistoryLogs() {
 
             let exHTML = '';
             if (log.menuId === 'OFF') {
-                exHTML = '<div class="history-ex-empty">☕ 休みもだいじ</div>';
+                exHTML = '<div class="history-ex-empty">☕ やすみもだいじ</div>';
             } else if (log.exerciseLogs && Object.keys(log.exerciseLogs).length > 0) {
                 exHTML = '<div class="history-ex-list">';
                 for (const [exName, logVal] of Object.entries(log.exerciseLogs)) {

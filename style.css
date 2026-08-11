@@ -1329,18 +1329,23 @@ footer {
 .history-ex-list {
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 6px;
     background-color: #FBF7F9;
-    padding: 6px 10px;
-    border-radius: 8px;
+    padding: 8px 10px;
+    border-radius: 10px;
 }
 
 .history-ex-item {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.75rem; /* 小さめサイズでスッキリ */
-    line-height: 1.4;
+    flex-direction: column; /* 縦並びにして長文の崩れを防止 */
+    gap: 2px;
+    padding-bottom: 4px;
+    border-bottom: 1px dashed var(--border-color);
+}
+
+.history-ex-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
 }
 
 .history-ex-name {
@@ -1350,8 +1355,10 @@ footer {
 
 .history-ex-val {
     color: var(--primary-hover);
-    font-weight: 700;
-    font-size: 0.75rem;
+    font-weight: 600;
+    font-size: 0.72rem;
+    padding-left: 8px; /* 少しインデントを入れて読みやすく */
+    word-break: break-all;
 }
 
 .history-ex-empty {
@@ -1453,4 +1460,206 @@ footer {
 
 .history-month-group.active .history-month-body {
     padding: 8px 10px 2px;
+}
+
+/* ▼ セット別横並び入力用の追加スタイル（崩れ防止・強力適用） */
+#workout-log-modal .sets-container {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+#workout-log-modal .set-input-row {
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    gap: 6px !important;
+    background-color: #ffffff !important;
+    padding: 6px 8px !important;
+    border-radius: 10px !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+#workout-log-modal .set-label {
+    font-size: 0.75rem !important;
+    font-weight: 800 !important;
+    color: var(--primary-hover) !important;
+    min-width: 34px !important;
+    flex-shrink: 0 !important;
+}
+
+#workout-log-modal .set-field-group {
+    display: flex !important;
+    align-items: center !important;
+    gap: 3px !important;
+}
+
+/* 巨大化していた入力枠をキュッとコンパクト化 */
+#workout-log-modal .set-field-group input.form-input {
+    width: 52px !important;
+    height: 32px !important;
+    padding: 2px 4px !important;
+    margin-bottom: 0 !important; /* 縦余白を消去 */
+    text-align: center !important;
+    font-size: 0.875rem !important;
+    font-weight: 700 !important;
+    border-radius: 8px !important;
+    background-color: #FBF7F9 !important;
+}
+
+#workout-log-modal .set-unit {
+    font-size: 0.72rem !important;
+    color: var(--text-sub) !important;
+    font-weight: 700 !important;
+    margin-right: 4px !important;
+}
+
+#workout-log-modal .set-quick-btns {
+    display: flex !important;
+    gap: 3px !important;
+    margin-left: auto !important; /* 右側に寄せる */
+}
+
+/* クイック調整ボタンのかわいいスタイリング */
+#workout-log-modal .btn-quick-adjust {
+    background-color: var(--primary-soft) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--primary-hover) !important;
+    padding: 4px 6px !important;
+    border-radius: 6px !important;
+    font-size: 0.6875rem !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
+    line-height: 1 !important;
+}
+
+#workout-log-modal .btn-quick-adjust:hover {
+    background-color: var(--primary-color) !important;
+    color: #ffffff !important;
+}
+
+/* 「＋セットを追加」ボタンのスタイリング */
+#workout-log-modal .btn-add-set-row {
+    background: #ffffff !important;
+    border: 1.5px dashed var(--primary-color) !important;
+    color: var(--primary-color) !important;
+    width: 100% !important;
+    padding: 6px !important;
+    border-radius: 10px !important;
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    margin-top: 4px !important;
+}
+
+/* ▼ セット別横並び入力用のスタイル（スッキリシンプル版） */
+#workout-log-modal .sets-container {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+#workout-log-modal .set-input-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    background-color: #ffffff !important;
+    padding: 6px 10px !important;
+    border-radius: 10px !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+#workout-log-modal .set-label {
+    font-size: 0.78rem !important;
+    font-weight: 800 !important;
+    color: var(--primary-hover) !important;
+    min-width: 36px !important;
+    flex-shrink: 0 !important;
+}
+
+#workout-log-modal .set-field-group {
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+}
+
+#workout-log-modal .set-field-group input.form-input {
+    width: 60px !important;
+    height: 32px !important;
+    padding: 2px 4px !important;
+    margin-bottom: 0 !important;
+    text-align: center !important;
+    font-size: 0.875rem !important;
+    font-weight: 700 !important;
+    border-radius: 8px !important;
+    background-color: #FBF7F9 !important;
+}
+
+#workout-log-modal .set-unit {
+    font-size: 0.75rem !important;
+    color: var(--text-sub) !important;
+    font-weight: 700 !important;
+    margin-right: 8px !important;
+}
+
+#workout-log-modal .btn-add-set-row {
+    background: #ffffff !important;
+    border: 1.5px dashed var(--primary-color) !important;
+    color: var(--primary-color) !important;
+    width: 100% !important;
+    padding: 6px !important;
+    border-radius: 10px !important;
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    margin-top: 4px !important;
+}
+
+/* ▼ 編集モーダル内の超省スペース＆スリム化スタイル */
+#workout-log-modal .extra-log-block {
+    padding: 6px 8px !important;
+    margin-bottom: 6px !important;
+    border-radius: 8px !important;
+}
+
+#workout-log-modal .sets-container {
+    gap: 3px !important; /* 行同士の隙間を詰める */
+    margin-bottom: 4px !important;
+}
+
+#workout-log-modal .set-input-row {
+    padding: 2px 6px !important; /* 行内の上下余白を最小化 */
+    border: none !important; /* 枠線を消してスッキリ */
+    background-color: transparent !important;
+    gap: 6px !important;
+}
+
+#workout-log-modal .set-label {
+    font-size: 0.72rem !important;
+    min-width: 30px !important;
+    color: var(--text-sub) !important;
+}
+
+#workout-log-modal .set-field-group input.form-input {
+    width: 50px !important;
+    height: 26px !important; /* 高さをスリムに */
+    padding: 0 4px !important;
+    font-size: 0.8125rem !important;
+    border-radius: 6px !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+#workout-log-modal .set-unit {
+    font-size: 0.7rem !important;
+    margin-right: 6px !important;
+}
+
+#workout-log-modal .btn-add-set-row {
+    padding: 3px !important; /* 追加ボタンの高さもコンパクトに */
+    font-size: 0.7rem !important;
+    border-radius: 6px !important;
+    margin-top: 2px !important;
 }
