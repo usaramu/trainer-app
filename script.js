@@ -119,7 +119,7 @@ function init() {
     }
 }
 
-const CURRENT_VERSION = 7; 
+const CURRENT_VERSION = 8; 
 
 function loadState() {
     const savedState = localStorage.getItem('workout_tracker_state');
@@ -1499,7 +1499,7 @@ function renderHistoryLogs() {
 
             let titleText = '';
             if (log.menuId === 'OFF') {
-                titleText = '休養日 (OFF)';
+                titleText = 'OFF';
             } else if (log.menuId === 'ALL') {
                 titleText = '全身トレーニング';
             } else {
@@ -1509,7 +1509,7 @@ function renderHistoryLogs() {
 
             let exHTML = '';
             if (log.menuId === 'OFF') {
-                exHTML = '<div class="history-ex-empty">☕ ゆっくり身体を休めました</div>';
+                exHTML = '<div class="history-ex-empty">☕ 休みもだいじ</div>';
             } else if (log.exerciseLogs && Object.keys(log.exerciseLogs).length > 0) {
                 exHTML = '<div class="history-ex-list">';
                 for (const [exName, logVal] of Object.entries(log.exerciseLogs)) {
