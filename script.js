@@ -67,14 +67,14 @@ const initialDefaultMenus = [
 ];
 
 const MENU_LABELS = {
-    'A': '上半身',
-    'B': '下半身',
-    'C': '下半身',
-    'D': '上半身',
-    'E': '下半身',
-    'F': '有酸素',
-    'ALL': '全身',
-    'OFF': 'OFF'
+    'A': '上',
+    'B': '下',
+    'C': '下',
+    'D': '上',
+    'E': '下',
+    'F': '🏃',
+    'ALL': '全',
+    'OFF': '休'
 };
 
 // アプリ全体の状態
@@ -589,7 +589,7 @@ function renderWorkoutLogInputs(menuId) {
 
     const summaryEl = document.createElement('summary');
     summaryEl.style.cssText = 'padding: 8px 12px; font-size: 0.8125rem; font-weight: 700; color: var(--primary-hover); cursor: pointer; user-select: none; display: flex; justify-content: space-between; align-items: center;';
-    summaryEl.innerHTML = `<span>💡 ${menu.title} の種目候補</span><span style="font-size: 0.75rem; color: var(--text-sub);">開閉 ▾</span>`;
+    summaryEl.innerHTML = `<span>💡 ${menu.title} の種目候補</span><span style="font-size: 0.75rem; color: var(--text-sub);">▾</span>`;
     detailsEl.appendChild(summaryEl);
 
     const chipList = document.createElement('div');
@@ -1127,14 +1127,25 @@ function renderCalendar() {
 
         let hasLog = false;
 
-        state.logs.forEach((log, index) => {
+state.logs.forEach((log, index) => {
             if (log.date === dateStr) {
                 hasLog = true;
                 const tag = document.createElement('div');
                 tag.className = `cal-tag ${log.menuId}`;
                 
-                const labelName = MENU_LABELS[log.menuId] || log.menuId;
-                tag.textContent = log.recordType === 'free' ? `${labelName}✎` : labelName;
+                // ★ 1文字・絵文字化の表示判定
+                let shortLabel = MENU_LABELS[log.menuId] || log.menuId;
+                
+                if (log.menuId !== 'ALL' && log.menuId !== 'OFF') {
+                    const menu = state.menus.find(m => m.id === log.menuId);
+                    if (menu) {
+                        if (menu.title.includes('上半身')) shortLabel = '上';
+                        else if (menu.title.includes('下半身')) shortLabel = '下';
+                        else if (menu.title.includes('有酸素') || menu.title.includes('リカバリー')) shortLabel = '🏃';
+                    }
+                }
+
+                tag.textContent = log.recordType === 'free' ? `${shortLabel}✎` : shortLabel;
                 
                 tag.onclick = (e) => {
                     e.stopPropagation();
@@ -1435,7 +1446,7 @@ function switchMainTab(tabName) {
     }
 }
 
-// 記録一覧（タイムライン）の描画処理（アルファベットバッジ非表示版）
+// HISTORYタブの描画処理（滑らかなスライドアニメーション対応）
 function renderHistoryLogs() {
     const container = document.getElementById('history-log-container');
     if (!container) return;
@@ -1447,63 +1458,114 @@ function renderHistoryLogs() {
         return;
     }
 
-    // 新しい順（降順）にソート
-    const sortedLogs = [...state.logs].sort((a, b) => b.date.localeCompare(a.date));
+    // 古い順（昇順）にソート
+    const sortedLogs = [...state.logs].sort((a, b) => a.date.localeCompare(b.date));
 
-    sortedLogs.forEach((log) => {
-        const card = document.createElement('div');
-        card.className = 'history-card';
-
-        // 日付（YYYY/MM/DD (曜日)）
-        const [y, m, d] = log.date.split('-');
-        const dateObj = new Date(parseInt(y, 10), parseInt(m, 10) - 1, parseInt(d, 10));
-        const dayOfWeek = ['日', '月', '火', '水', '木', '金', '土'][dateObj.getDay()];
-        const formattedDate = `${y}/${parseInt(m, 10)}/${parseInt(d, 10)} (${dayOfWeek})`;
-
-        let titleText = '';
-        if (log.menuId === 'OFF') {
-            titleText = 'おやすみ';
-        } else if (log.menuId === 'ALL') {
-            titleText = '全身トレーニング';
-        } else {
-            const menu = state.menus.find(m => m.id === log.menuId);
-            titleText = menu ? menu.title : log.menuId;
+    // 月ごとにグループ化
+    const groupedByMonth = {};
+    sortedLogs.forEach(log => {
+        const [y, m] = log.date.split('-');
+        const monthKey = `${y}年 ${parseInt(m, 10)}月`;
+        if (!groupedByMonth[monthKey]) {
+            groupedByMonth[monthKey] = [];
         }
+        groupedByMonth[monthKey].push(log);
+    });
 
-        let exHTML = '';
-        if (log.menuId === 'OFF') {
-            exHTML = '<div class="history-ex-empty">休憩もだいじ</div>';
-        } else if (log.exerciseLogs && Object.keys(log.exerciseLogs).length > 0) {
-            exHTML = '<div class="history-ex-list">';
-            for (const [exName, logVal] of Object.entries(log.exerciseLogs)) {
-                const cleanName = exName.replace('【追加】', '');
-                const valArray = Array.isArray(logVal) ? logVal : [logVal];
+    const monthKeys = Object.keys(groupedByMonth);
+    const latestMonthKey = monthKeys[monthKeys.length - 1];
 
-                valArray.forEach(item => {
-                    const formatted = formatSingleLogObj(item);
-                    exHTML += `
-                        <div class="history-ex-item">
-                            <span class="history-ex-name">• ${cleanName}</span>
-                            <span class="history-ex-val">${formatted}</span>
-                        </div>
-                    `;
-                });
+    monthKeys.forEach(monthKey => {
+        const monthLogs = groupedByMonth[monthKey];
+
+        const groupEl = document.createElement('div');
+        groupEl.className = 'history-month-group';
+
+        const summaryEl = document.createElement('div');
+        summaryEl.className = 'history-month-summary';
+        summaryEl.innerHTML = `<span>📅 ${monthKey} (${monthLogs.length}回)</span><span class="arrow-icon">▾</span>`;
+
+        const bodyEl = document.createElement('div');
+        bodyEl.className = 'history-month-body';
+
+        monthLogs.forEach(log => {
+            const card = document.createElement('div');
+            card.className = 'history-card';
+
+            const [y, m, d] = log.date.split('-');
+            const dateObj = new Date(parseInt(y, 10), parseInt(m, 10) - 1, parseInt(d, 10));
+            const dayOfWeek = ['日', '月', '火', '水', '木', '金', '土'][dateObj.getDay()];
+            const formattedDate = `${y}/${parseInt(m, 10)}/${parseInt(d, 10)} (${dayOfWeek})`;
+
+            let titleText = '';
+            if (log.menuId === 'OFF') {
+                titleText = '休養日 (OFF)';
+            } else if (log.menuId === 'ALL') {
+                titleText = '全身トレーニング';
+            } else {
+                const menu = state.menus.find(m => m.id === log.menuId);
+                titleText = menu ? menu.title : log.menuId;
             }
-            exHTML += '</div>';
-        } else {
-            exHTML = '<div class="history-ex-empty">詳細ログはありません</div>';
+
+            let exHTML = '';
+            if (log.menuId === 'OFF') {
+                exHTML = '<div class="history-ex-empty">☕ ゆっくり身体を休めました</div>';
+            } else if (log.exerciseLogs && Object.keys(log.exerciseLogs).length > 0) {
+                exHTML = '<div class="history-ex-list">';
+                for (const [exName, logVal] of Object.entries(log.exerciseLogs)) {
+                    const cleanName = exName.replace('【追加】', '');
+                    const valArray = Array.isArray(logVal) ? logVal : [logVal];
+
+                    valArray.forEach(item => {
+                        const formatted = formatSingleLogObj(item);
+                        exHTML += `
+                            <div class="history-ex-item">
+                                <span class="history-ex-name">• ${cleanName}</span>
+                                <span class="history-ex-val">${formatted}</span>
+                            </div>
+                        `;
+                    });
+                }
+                exHTML += '</div>';
+            } else {
+                exHTML = '<div class="history-ex-empty">詳細ログはありません</div>';
+            }
+
+            card.innerHTML = `
+                <div class="history-card-header">
+                    <span class="history-date">${formattedDate}</span>
+                </div>
+                <div class="history-title">${titleText}</div>
+                ${exHTML}
+            `;
+
+            bodyEl.appendChild(card);
+        });
+
+        groupEl.appendChild(summaryEl);
+        groupEl.appendChild(bodyEl);
+
+        // クリック時の滑らかなスライドアニメーション処理
+        summaryEl.onclick = () => {
+            const isActive = groupEl.classList.contains('active');
+            if (isActive) {
+                bodyEl.style.maxHeight = '0px';
+                groupEl.classList.remove('active');
+            } else {
+                groupEl.classList.add('active');
+                bodyEl.style.maxHeight = bodyEl.scrollHeight + 16 + 'px';
+            }
+        };
+
+        container.appendChild(groupEl);
+
+        // 最新月は初期状態から開いておく
+        if (monthKey === latestMonthKey) {
+            setTimeout(() => {
+                groupEl.classList.add('active');
+                bodyEl.style.maxHeight = bodyEl.scrollHeight + 16 + 'px';
+            }, 50);
         }
-
-        // アルファベットバッジを削除し、日付とタイトルだけに整理
-        card.innerHTML = `
-            <div class="history-card-header">
-                <span class="history-date">${formattedDate}</span>
-            </div>
-            <div class="history-title">${titleText}</div>
-            ${exHTML}
-        `;
-
-        container.appendChild(card);
     });
 }
 

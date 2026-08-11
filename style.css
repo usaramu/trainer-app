@@ -426,21 +426,22 @@ h1 {
     overflow: hidden; /* 万が一の溢れを防止 */
 }
 
-/* カレンダー内のバッジ（タグ） */
+
+/* カレンダー内のバッジ（1文字・絵文字に合わせたスタイリング） */
 .cal-tag {
-    font-size: 0.625rem; /* ★文字サイズをほんの少しだけコンパクトに */
+    font-size: 0.6875rem;
     font-weight: 800;
     font-family: "Zen Maru Gothic", sans-serif;
-    padding: 1px 4px; /* ★内側の余白を詰める */
+    padding: 2px 5px;
     border-radius: 6px;
-    margin-top: 2px; /* ★日付との隙間を詰める */
+    margin-top: 2px;
     color: #fff;
     cursor: pointer;
     transition: transform 0.1s, opacity 0.1s;
-    white-space: nowrap; /* 改行を防止 */
-    max-width: 95%; /* マス幅からはみ出さないようにガード */
-    text-overflow: ellipsis;
-    overflow: hidden;
+    white-space: nowrap;
+    display: inline-block;
+    text-align: center;
+    min-width: 18px;
 }
 
 .cal-cell.today {
@@ -1404,4 +1405,52 @@ footer {
     font-weight: 700;
     color: var(--primary-hover);
     white-space: nowrap;
+}
+
+/* 滑らかな開閉アニメーション用のアコーディオン */
+.history-month-group {
+    margin-bottom: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    overflow: hidden;
+    background-color: var(--card-bg);
+}
+
+.history-month-summary {
+    padding: 10px 14px;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: var(--primary-hover);
+    background-color: var(--primary-soft);
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.2s ease;
+}
+
+.history-month-summary:hover {
+    background-color: #e2ddf8;
+}
+
+.history-month-summary .arrow-icon {
+    font-size: 0.72rem;
+    color: var(--text-sub);
+    transition: transform 0.3s ease;
+}
+
+.history-month-group.active .arrow-icon {
+    transform: rotate(180deg);
+}
+
+.history-month-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 0 10px;
+}
+
+.history-month-group.active .history-month-body {
+    padding: 8px 10px 2px;
 }
