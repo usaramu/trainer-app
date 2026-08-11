@@ -409,19 +409,38 @@ h1 {
     padding: 4px 0 8px;
 }
 
+/* カレンダーの1日分のセル */
 .cal-cell {
-    aspect-ratio: 1;
-    min-height: 44px;
+    height: 52px; /* ★高さを少しだけ広げて収まりを確保 */
+    padding: 3px 2px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    border-radius: 12px;
-    font-size: 0.8125rem;
+    justify-content: flex-start;
+    border-radius: 10px;
+    font-size: 0.75rem;
     font-weight: 500;
     position: relative;
     background-color: #FBF7F9;
     color: var(--text-main);
+    overflow: hidden; /* 万が一の溢れを防止 */
+}
+
+/* カレンダー内のバッジ（タグ） */
+.cal-tag {
+    font-size: 0.625rem; /* ★文字サイズをほんの少しだけコンパクトに */
+    font-weight: 800;
+    font-family: "Zen Maru Gothic", sans-serif;
+    padding: 1px 4px; /* ★内側の余白を詰める */
+    border-radius: 6px;
+    margin-top: 2px; /* ★日付との隙間を詰める */
+    color: #fff;
+    cursor: pointer;
+    transition: transform 0.1s, opacity 0.1s;
+    white-space: nowrap; /* 改行を防止 */
+    max-width: 95%; /* マス幅からはみ出さないようにガード */
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 .cal-cell.today {
@@ -440,30 +459,22 @@ h1 {
     transform: scale(1.04);
 }
 
-.cal-tag {
-    font-size: 0.6875rem;
-    font-weight: 800;
-    font-family: "Zen Maru Gothic", sans-serif;
-    padding: 2px 7px;
-    border-radius: 8px;
-    margin-top: 3px;
-    color: #fff;
-    cursor: pointer;
-    transition: transform 0.1s, opacity 0.1s;
-}
-
 .cal-tag:hover {
     opacity: 0.85;
     transform: scale(1.08);
 }
 
-.cal-tag.A { background-color: #E091AE; }
-.cal-tag.B { background-color: #A08CE0; }
-.cal-tag.C { background-color: #C9A0E0; }
-.cal-tag.D { background-color: #4ECDA1; }
-.cal-tag.E { background-color: #5EB6E8; }
-.cal-tag.F { background-color: #8B7FD9; }
-.cal-tag.OFF { background-color: var(--offday-color); }
+/* カレンダーのバッジカラーを部位グループごとに整理 */
+.cal-tag.A { background-color: #E091AE; } /* 上半身 (ピンク) */
+.cal-tag.D { background-color: #E091AE; } /* 上半身 (ピンク) */
+
+.cal-tag.B { background-color: #A08CE0; } /* 下半身 (パープル) */
+.cal-tag.C { background-color: #A08CE0; } /* 下半身 (パープル) */
+.cal-tag.E { background-color: #A08CE0; } /* 下半身 (パープル) */
+
+.cal-tag.F { background-color: #8B7FD9; } /* 有酸素 (ブルーラベンダー) */
+.cal-tag.ALL { background-color: #F59E0B; } /* 全身 (オレンジ) */
+.cal-tag.OFF { background-color: var(--offday-color); } /* OFF (グレー) */
 
 /* 全メニュー一覧：スマホはカード形式、PCは表形式 */
 .table-section {
@@ -1103,4 +1114,294 @@ footer {
     background-color: var(--primary-soft);
     color: var(--primary-hover);
     border-color: transparent;
+}
+
+.cal-tag.ALL { background-color: #F59E0B; } /* 全身用バッジ */
+
+/* 記録モーダル内のコンパクト化 */
+#workout-log-modal .modal-body {
+    padding: 12px 16px;
+}
+
+/* タイプ選択ラジオボタンを横1行に */
+#workout-log-modal .rotation-mode-options {
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+#workout-log-modal .rotation-mode-option {
+    flex: 1;
+    padding: 8px 6px;
+    font-size: 0.8125rem;
+    justify-content: center;
+    border-radius: 10px;
+}
+
+/* フォームラベルの余白削減 */
+#workout-log-modal .form-label {
+    margin-bottom: 4px;
+    font-size: 0.75rem;
+}
+
+#workout-log-modal .form-input {
+    padding: 8px 12px;
+    margin-bottom: 10px;
+    font-size: 0.9375rem;
+}
+
+/* 入力ブロック全体のコンパクト化 */
+.log-exercise-block, .extra-log-block {
+    padding: 8px 10px !important;
+    margin-bottom: 8px !important;
+    border-radius: 12px !important;
+}
+
+.log-exercise-title {
+    font-size: 0.875rem;
+    margin-bottom: 4px;
+}
+
+/* 数値入力フィールドを小さく */
+.direct-field label {
+    font-size: 0.6875rem;
+    margin-bottom: 2px;
+}
+
+.direct-field input {
+    padding: 6px 4px !important;
+    font-size: 0.9375rem !important;
+    border-radius: 8px !important;
+}
+
+/* 追加種目セクションの余白削減 */
+.extra-exercise-section {
+    margin-top: 10px;
+    padding-top: 10px;
+}
+
+/* サジェストエリアのコンパクト化 */
+.menu-suggest-wrapper {
+    padding: 8px 10px !important;
+    margin-bottom: 10px !important;
+    border-radius: 12px !important;
+}
+
+.menu-suggest-wrapper .exercise-chip {
+    padding: 4px 10px !important;
+    font-size: 0.75rem !important;
+}
+/* 種目候補トグルのスタイリング */
+.menu-suggest-toggle summary::-webkit-details-marker {
+    display: none; /* デフォルトの三角矢印を非表示 */
+}
+
+.menu-suggest-toggle summary {
+    list-style: none; /* Firefox用の矢印消去 */
+}
+
+.menu-suggest-toggle[open] summary {
+    border-bottom: 1px dashed var(--border-color);
+}
+
+/* 前回と同じ入力ボタン */
+.btn-copy-last {
+    background-color: var(--primary-soft);
+    border: 1px solid var(--primary-color);
+    color: var(--primary-hover);
+    padding: 3px 8px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+}
+
+.btn-copy-last:hover {
+    background-color: var(--primary-color);
+    color: #ffffff;
+}
+
+/* 自由入力カードのデザインをメリハリ化 */
+.extra-log-block {
+    background-color: #ffffff !important; /* 背景を白にしてクッキリ */
+    border: 1px solid var(--border-color) !important;
+    border-left: 4px solid var(--primary-color) !important; /* 左側にアクセントライン */
+    padding: 10px 12px !important;
+    border-radius: 12px !important;
+    margin-bottom: 10px !important;
+    box-shadow: 0 3px 10px rgba(139, 127, 217, 0.08); /* 控えめな影で浮き出させる */
+}
+
+/* カード内のラベル・項目見出しの視認性アップ */
+.extra-label-select-label {
+    color: var(--primary-hover) !important;
+    font-size: 0.72rem !important;
+    font-weight: 700 !important;
+}
+
+/* カード内のドロップダウンや入力欄の背景 */
+.extra-log-block .form-input {
+    background-color: #FBF7F9 !important;
+}
+
+.extra-log-block .form-input:focus {
+    background-color: #ffffff !important;
+}
+
+/* メインタブのスタイリング */
+.main-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 18px;
+    background-color: var(--card-bg);
+    padding: 4px;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px -6px rgba(139, 127, 217, 0.2);
+}
+
+.main-tab-btn {
+    flex: 1;
+    max-width: 200px;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 12px;
+    background-color: transparent;
+    color: var(--text-sub);
+    font-size: 0.875rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 0.05em; /* 文字間隔を少し広げてスタイリッシュに */
+    font-size: 0.8125rem;
+}
+
+.main-tab-btn.active {
+    background: linear-gradient(120deg, var(--primary-color), var(--primary-hover));
+    color: #ffffff;
+    box-shadow: 0 4px 10px -4px rgba(139, 127, 217, 0.5);
+}
+
+/* タブコンテンツの表示制御 */
+.main-tab-content {
+    display: none;
+}
+
+.main-tab-content.active {
+    display: block;
+}
+
+/* 記録一覧（タイムライン）の超コンパクトデザイン */
+.history-card {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    box-shadow: 0 2px 8px -4px rgba(139, 127, 217, 0.12);
+    border: 1px solid var(--border-color);
+}
+
+.history-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.history-date {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-sub);
+}
+
+.history-title {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 6px;
+    font-family: "Zen Maru Gothic", sans-serif;
+}
+
+.history-ex-list {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    background-color: #FBF7F9;
+    padding: 6px 10px;
+    border-radius: 8px;
+}
+
+.history-ex-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.75rem; /* 小さめサイズでスッキリ */
+    line-height: 1.4;
+}
+
+.history-ex-name {
+    font-weight: 500;
+    color: var(--text-main);
+}
+
+.history-ex-val {
+    color: var(--primary-hover);
+    font-weight: 700;
+    font-size: 0.75rem;
+}
+
+.history-ex-empty {
+    font-size: 0.72rem;
+    color: var(--text-sub);
+    padding: 2px 0;
+}
+
+/* 部位選択ガイドバナー用スタイリング（1行4並び・コンパクト版） */
+.category-select-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 1行に4つ並べる */
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.btn-category-select {
+    background: rgba(255, 255, 255, 0.95);
+    border: none;
+    border-radius: 12px;
+    padding: 8px 2px; /* 上下余白をスリム化 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 8px -4px rgba(0, 0, 0, 0.15);
+    transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.btn-category-select:hover {
+    transform: translateY(-1px);
+    background-color: #ffffff;
+}
+
+.btn-category-select:active {
+    transform: translateY(0);
+}
+
+.btn-category-select .cat-label {
+    font-size: 0.75rem; /* 小さめフォントで収まり良く */
+    font-weight: 800;
+    color: var(--text-main);
+    font-family: "Zen Maru Gothic", sans-serif;
+    margin-bottom: 1px;
+    white-space: nowrap;
+}
+
+.btn-category-select .cat-days {
+    font-size: 0.625rem; /* 日付表示も控えめに */
+    font-weight: 700;
+    color: var(--primary-hover);
+    white-space: nowrap;
 }

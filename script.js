@@ -1,4 +1,6 @@
-// ご提示いただいたセッション1〜6に基づく初期メニュー構成データ
+let isEditingLogMode = false;
+
+// 初期メニュー構成データ
 const initialDefaultMenus = [
     {
         id: 'A',
@@ -13,7 +15,7 @@ const initialDefaultMenus = [
     },
     {
         id: 'B',
-        title: '下半身A（お尻・裏もも・腰肉）',
+        title: '下半身（お尻・裏もも・腰）',
         memo: '前ももを使わず、もも裏とお尻の境目を作って小尻・脚長を狙う。',
         exercises: [
             { name: 'バーベル/ダンベル・ルーマニアンデッドリフト', detail: '15~20回 × 3セット' },
@@ -23,7 +25,7 @@ const initialDefaultMenus = [
     },
     {
         id: 'C',
-        title: '下半身B（ヒップトップ・体幹・脂肪燃焼）',
+        title: '下半身（ヒップトップ・体幹・脂肪燃焼）',
         memo: 'お尻の高さを出しつつ、体脂肪削減を加速させる。',
         exercises: [
             { name: 'ヒップスラスト', detail: '15~20回 × 3セット' },
@@ -45,7 +47,7 @@ const initialDefaultMenus = [
     },
     {
         id: 'E',
-        title: '下半身C（裏ももストレッチ＆ヒップアップ）',
+        title: '下半身（裏ももストレッチ＆ヒップアップ）',
         memo: 'もも裏のストレッチ感を重視し、前ももの張りを予防しながらお尻を引き締める。',
         exercises: [
             { name: 'ケーブル・グルートキックバック', detail: '左右各15〜20回 × 3セット' },
@@ -64,6 +66,17 @@ const initialDefaultMenus = [
     }
 ];
 
+const MENU_LABELS = {
+    'A': '上半身',
+    'B': '下半身',
+    'C': '下半身',
+    'D': '上半身',
+    'E': '下半身',
+    'F': '有酸素',
+    'ALL': '全身',
+    'OFF': 'OFF'
+};
+
 // アプリ全体の状態
 let state = {
     lastCompletedId: null,
@@ -73,11 +86,11 @@ let state = {
     calendarYear: new Date().getFullYear(),
     calendarMonth: new Date().getMonth(),
     editingMenuId: null,
-    rotationMode: 'sequence', // 'sequence'（順番通り） or 'weekday'（曜日固定）
-    weekdayMenus: { 0: 'F', 1: 'A', 2: 'B', 3: 'C', 4: 'D', 5: 'E', 6: 'OFF' }, // 0=日曜〜6=土曜
-    sequenceOrder: ['A', 'B', 'C', 'D', 'E', 'F'], // 「順番通り」モードでの実施順（並び替え可能）
-    exerciseLabels: ['胸', '背中', '脚', '肩', '腕', 'お尻', '腹筋', '有酸素運動', 'その他'], // 種目のラベル分類
-    exerciseLibrary: {} // ラベルごとに、自由入力で使った種目名を記憶しておくライブラリ
+    rotationMode: 'sequence',
+    weekdayMenus: { 0: 'F', 1: 'A', 2: 'B', 3: 'C', 4: 'D', 5: 'E', 6: 'OFF' },
+    sequenceOrder: ['A', 'B', 'F', 'C', 'D', 'E'],
+    exerciseLabels: ['胸', '背中', '脚', '肩', '腕', 'お尻', '腹筋', '全身', '有酸素運動', 'その他'],
+    exerciseLibrary: {}
 };
 
 function init() {
@@ -87,7 +100,6 @@ function init() {
     renderCalendar();
     renderMenuTable();
 
-    // イベントリスナーの設定をDOM読み込み完了後（init内）に行う
     const startBtn = document.getElementById('btn-start-today');
     if (startBtn) {
         startBtn.addEventListener('click', () => {
@@ -107,30 +119,28 @@ function init() {
     }
 }
 
-// ★メニュー内容をコードで書き換えたら、この数字を 2, 3, 4... と増やす！
-const CURRENT_VERSION = 5; 
+const CURRENT_VERSION = 7; 
 
 function loadState() {
     const savedState = localStorage.getItem('workout_tracker_state');
     if (savedState) {
         const parsed = JSON.parse(savedState);
         
-        // 保存データのバージョンが古い場合は、メニューだけコード側（最新）で上書きする
         if (!parsed.version || parsed.version < CURRENT_VERSION) {
             state.menus = JSON.parse(JSON.stringify(initialDefaultMenus));
             state.sequenceOrder = ['A', 'B', 'F', 'C', 'D', 'E'];
-            state.logs = parsed.logs || []; // ※過去のトレー二ング記録は消えずに残ります
+            state.logs = parsed.logs || [];
         } else {
             if (parsed.menus) state.menus = parsed.menus;
             if (parsed.logs) state.logs = parsed.logs;
+            if (parsed.sequenceOrder) state.sequenceOrder = parsed.sequenceOrder;
         }
         state.lastCompletedId = parsed.lastCompletedId || null;
         state.lastCompletedDate = parsed.lastCompletedDate || null;
         state.rotationMode = parsed.rotationMode || 'sequence';
         state.weekdayMenus = parsed.weekdayMenus || { 0: 'F', 1: 'A', 2: 'B', 3: 'C', 4: 'D', 5: 'E', 6: 'OFF' };
-        sequenceOrder: ['A', 'B', 'F', 'C', 'D', 'E'],
-        state.exerciseLabels = parsed.exerciseLabels || ['胸', '背中', '脚', '肩', '腕', 'お尻', '腹筋', '有酸素運動', 'その他'];
-        // exerciseLibrary の中身をあらかじめ充実させたので、古いスキーマのデータは作り直す
+        state.exerciseLabels = parsed.exerciseLabels || ['胸', '背中', '脚', '肩', '腕', 'お尻', '腹筋', '全身', '有酸素運動', 'その他'];
+        
         if (parsed.exerciseLibrarySchema === 'label-v3' && parsed.exerciseLibrary) {
             state.exerciseLibrary = parsed.exerciseLibrary;
         } else {
@@ -141,7 +151,6 @@ function loadState() {
     }
 }
 
-// ラベルごとの種目リストの初期値（よく使う種目をあらかじめ登録しておき、使うたびに追加もできる）
 function buildDefaultExerciseLibrary() {
     return {
         '胸': ['インクラインプレス', 'ベンチプレス', 'ペックフライ', 'チェストプレス', 'スミスマシン・インクラインベンチプレス', 'ケーブルクロス', 'ディップス', 'ダンベルフライ', 'ダンベルプレス', 'インクラインダンベルプレス'],
@@ -151,14 +160,15 @@ function buildDefaultExerciseLibrary() {
         '腕': ['バーベルカール', 'アームカール', 'ケーブルプレスダウン'],
         'お尻': ['ヒップアブダクション（骨盤前傾）', 'ヒップアブダクション（骨盤立て）','ヒップアブダクション（骨盤後傾）','ヒップスラスト'],
         '腹筋': ['アブドミナル', 'トーソ・ローテーション', 'プランク', '上体起こし'],
-        '有酸素運動': ['トレッドミル'],
+        '全身': ['クリーン', 'スナッチ', 'バーピー'],
+        '有酸素運動': ['トレッドミル', '傾斜ウォーキング'],
         'その他': []
     };
 }
 
 function saveState() {
     localStorage.setItem('workout_tracker_state', JSON.stringify({
-        version: CURRENT_VERSION, // バージョン番号も一緒に保存する
+        version: CURRENT_VERSION,
         lastCompletedId: state.lastCompletedId,
         lastCompletedDate: state.lastCompletedDate,
         menus: state.menus,
@@ -195,35 +205,50 @@ function getNextMenuId(currentId) {
     return sequence[currentIndex + 1];
 }
 
-// 現在のローテーション設定（順番通り／曜日固定）に応じて、今日おすすめのメニューIDを返す
 function getRecommendedMenuId() {
     if (state.rotationMode === 'weekday') {
-        const todayWeekday = new Date().getDay(); // 0=日曜〜6=土曜
+        const todayWeekday = new Date().getDay();
         return state.weekdayMenus[todayWeekday] || 'OFF';
     }
     return getNextMenuId(state.lastCompletedId);
 }
 
+// 部位ごとの前回からの経過日数を計算して更新する
 function renderRecommendation() {
-    const nextId = getRecommendedMenuId();
+    const calcDaysAgo = (category) => {
+        const catLogs = state.logs.filter(l => {
+            if (l.menuId === 'OFF') return false;
+            const menu = state.menus.find(m => m.id === l.menuId);
+            const title = menu ? menu.title : '';
+            if (category === '上半身') return title.includes('上半身');
+            if (category === '下半身') return title.includes('下半身');
+            if (category === '有酸素') return title.includes('有酸素') || title.includes('リカバリー') || l.menuId === 'F';
+            return false;
+        });
 
-    const startBtn = document.getElementById('btn-start-today');
+        if (catLogs.length === 0) return '未記録';
 
-    if (nextId === 'OFF') {
-        document.getElementById('rec-id').textContent = 'お休み';
-        document.getElementById('rec-title').textContent = '今日は設定上オフの日です';
-    } else {
-        const targetMenu = state.menus.find(m => m.id === nextId);
-        document.getElementById('rec-id').textContent = ` ${targetMenu.id}`;
-        document.getElementById('rec-title').textContent = targetMenu.title;
-    }
+        const latestLog = catLogs[catLogs.length - 1];
+        const [y, m, d] = latestLog.date.split('-');
+        const lastDate = new Date(parseInt(y, 10), parseInt(m, 10) - 1, parseInt(d, 10));
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
 
-    const lastInfoEl = document.getElementById('last-completed-info');
-    if (state.lastCompletedId && state.lastCompletedDate) {
-        lastInfoEl.textContent = `前回完了:  ${state.lastCompletedId} (${state.lastCompletedDate})`;
-    } else {
-        lastInfoEl.textContent = '前回完了: なし';
-    }
+        const diffTime = today - lastDate;
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 0) return '今日';
+        if (diffDays === 1) return '昨日';
+        return `${diffDays}日前`;
+    };
+
+    const upperEl = document.getElementById('days-upper');
+    const lowerEl = document.getElementById('days-lower');
+    const cardioEl = document.getElementById('days-cardio');
+
+    if (upperEl) upperEl.textContent = `前回: ${calcDaysAgo('上半身')}`;
+    if (lowerEl) lowerEl.textContent = `前回: ${calcDaysAgo('下半身')}`;
+    if (cardioEl) cardioEl.textContent = `前回: ${calcDaysAgo('有酸素')}`;
 }
 
 function getLastExerciseLogObj(exerciseName) {
@@ -231,7 +256,9 @@ function getLastExerciseLogObj(exerciseName) {
         const log = state.logs[i];
         if (log.exerciseLogs && log.exerciseLogs[exerciseName] !== undefined) {
             const val = log.exerciseLogs[exerciseName];
-            if (typeof val === 'object' && val !== null) {
+            if (Array.isArray(val) && val.length > 0) {
+                return val[val.length - 1];
+            } else if (typeof val === 'object' && val !== null) {
                 return val;
             }
         }
@@ -243,7 +270,6 @@ function formatLogObj(logObj) {
     if (!logObj) return '';
     if (typeof logObj === 'string') return logObj;
 
-    // 複数セット・複数記録がある場合は「, 」で繋ぐ（スラッシュの乱立を防止）
     if (Array.isArray(logObj)) {
         return logObj.map(item => formatSingleLogObj(item)).filter(Boolean).join(', ');
     }
@@ -254,32 +280,48 @@ function formatLogObj(logObj) {
 function formatSingleLogObj(logObj) {
     if (!logObj) return '';
 
-    // ▼ 有酸素運動の記録（時間・カロリー）
     if (logObj.isCardio || logObj.minutes !== undefined || logObj.calories !== undefined) {
         const parts = [];
         if (logObj.minutes) parts.push(`${logObj.minutes}分`);
-        if (logObj.calories) parts.push(`(${logObj.calories}kcal)`); // カロリーはカッコ表示
-        return parts.join(' '); // スラッシュを使わずスペースで繋ぐ（例: 30分 (180kcal)）
+        if (logObj.calories) parts.push(`(${logObj.calories}kcal)`);
+        return parts.join(' ');
     }
 
-    // ▼ 通常の筋トレの記録
     const parts = [];
     if (logObj.weight !== null && logObj.weight !== undefined && logObj.weight !== '') {
         parts.push(`${logObj.weight}kg`);
     }
     if (logObj.reps) parts.push(`${logObj.reps}回`);
     if (logObj.sets) parts.push(`${logObj.sets}set`);
-    return parts.join(' × '); // 例: 50kg × 10回 × 3set
+    return parts.join(' × ');
 }
 
-// ページ最下部：テーブル表示描画
+// ページ最下部：テーブル表示描画（上半身 → 下半身 → 有酸素 の順にソート）
 function renderMenuTable() {
     const tbody = document.getElementById('menu-table-body');
     if (!tbody) return;
 
     tbody.innerHTML = '';
 
-    state.menus.forEach(menu => {
+    // 表示用の優先順位グループ（1: 上半身, 2: 下半身, 3: 有酸素, 9: その他）
+    const getMenuGroupOrder = (menu) => {
+        if (menu.title.includes('上半身')) return 1;
+        if (menu.title.includes('下半身')) return 2;
+        if (menu.title.includes('有酸素') || menu.title.includes('リカバリー')) return 3;
+        return 9;
+    };
+
+    // 元の配列を崩さず、コピーを作ってグループ順に並び替え
+    const sortedMenus = [...state.menus].sort((a, b) => {
+        const orderA = getMenuGroupOrder(a);
+        const orderB = getMenuGroupOrder(b);
+        if (orderA !== orderB) {
+            return orderA - orderB;
+        }
+        return a.id.localeCompare(b.id); // 同じグループ内（上半身AとDなど）はID順
+    });
+
+    sortedMenus.forEach(menu => {
         const tr = document.createElement('tr');
 
         let exListHTML = menu.exercises.map(e => {
@@ -303,14 +345,10 @@ function renderMenuTable() {
     });
 }
 
-
 function recordOffDay() {
     const todayISO = getTodayISO();
-    const todayStr = getTodayFormatted();
 
-    // 同じ日付の記録がすでにあれば、上書き（重複登録を防ぐ）
     state.logs = state.logs.filter(l => l.date !== todayISO);
-
     state.logs.push({
         date: todayISO,
         menuId: 'OFF',
@@ -319,25 +357,41 @@ function recordOffDay() {
 
     saveState();
     renderCalendar();
-
 }
 
-function openWorkoutLogModal(defaultMenuId, presetDateISO) {
+function openWorkoutLogModal(defaultMenuId, presetDateISO, isEdit = false) {
+    isEditingLogMode = isEdit;
     const targetDate = presetDateISO || getTodayISO();
     const existingLog = state.logs.find(l => l.date === targetDate);
 
     const selectEl = document.getElementById('select-log-menu');
     selectEl.innerHTML = '';
 
-    const offOption = document.createElement('option');
-    offOption.value = 'OFF';
-    offOption.textContent = 'オフ（休養日）';
-    selectEl.appendChild(offOption);
+    const allOption = document.createElement('option');
+    allOption.value = 'ALL';
+    allOption.textContent = '全身（部位ミックス・自由入力）';
+    selectEl.appendChild(allOption);
 
-    state.menus.forEach(menu => {
+    const getMenuGroupOrder = (menu) => {
+        if (menu.title.includes('上半身')) return 1;
+        if (menu.title.includes('下半身')) return 2;
+        if (menu.title.includes('有酸素') || menu.title.includes('リカバリー')) return 3;
+        return 9;
+    };
+
+    const sortedMenus = [...state.menus].sort((a, b) => {
+        const orderA = getMenuGroupOrder(a);
+        const orderB = getMenuGroupOrder(b);
+        if (orderA !== orderB) {
+            return orderA - orderB;
+        }
+        return a.id.localeCompare(b.id);
+    });
+
+    sortedMenus.forEach(menu => {
         const option = document.createElement('option');
         option.value = menu.id;
-        option.textContent = ` ${menu.id} : ${menu.title}`;
+        option.textContent = menu.title;
         selectEl.appendChild(option);
     });
 
@@ -347,9 +401,9 @@ function openWorkoutLogModal(defaultMenuId, presetDateISO) {
         dateEl.max = getTodayISO();
     }
 
-    // 既存の記録がある場合はそのモード・メニューを再現
     let currentMenuId = defaultMenuId;
-    if (existingLog) {
+
+    if (isEdit && existingLog) {
         if (existingLog.menuId === 'OFF') {
             document.getElementById('record-type-off').checked = true;
         } else if (existingLog.recordType === 'free') {
@@ -367,80 +421,89 @@ function openWorkoutLogModal(defaultMenuId, presetDateISO) {
         }
     }
 
-    if (currentMenuId && currentMenuId !== 'OFF') {
+    if (currentMenuId) {
         selectEl.value = currentMenuId;
     }
 
     toggleRecordType();
 
-    const activeMenuId = (selectEl.value === 'OFF' || !selectEl.value) ? 'A' : selectEl.value;
+    const activeMenuId = (selectEl.value === 'OFF' || selectEl.value === 'ALL' || !selectEl.value) ? 'A' : selectEl.value;
+    
+    // ★ 1. まず入力エリア全体を描画・セットアップする
     renderWorkoutLogInputs(activeMenuId);
 
-    // 既存記録の数値をフォームに反映
-    if (existingLog && existingLog.exerciseLogs && existingLog.menuId !== 'OFF') {
-        const menu = state.menus.find(m => m.id === existingLog.menuId);
+    // ★ 2. 前回のカードや退避データが残らないよう、コンテナ内を一度完全にクリアする！
+    const suggestedContainer = document.getElementById('suggested-fields-container');
+    if (suggestedContainer) suggestedContainer.innerHTML = '';
+    
+    const extraContainer = document.getElementById('extra-exercise-container');
+    if (extraContainer) extraContainer.innerHTML = '';
+
+    // 編集モード時：過去の記録データを正しい形式で1回だけ復元する処理
+    if (isEdit && existingLog && existingLog.exerciseLogs && existingLog.menuId !== 'OFF') {
+        const isFree = existingLog.recordType === 'free';
         
-        // メニュー通りの種目の反映
-        if (menu && existingLog.recordType !== 'free') {
-            menu.exercises.forEach((e, idx) => {
-                const logObj = existingLog.exerciseLogs[e.name];
-                if (logObj) {
-                    if (logObj.isCardio) {
-                        const minEl = document.getElementById(`minutes-${idx}`);
-                        const calEl = document.getElementById(`calories-${idx}`);
-                        if (minEl) minEl.value = logObj.minutes !== undefined ? logObj.minutes : '';
-                        if (calEl) calEl.value = logObj.calories !== undefined ? logObj.calories : '';
-                    } else {
-                        const wEl = document.getElementById(`weight-${idx}`);
-                        const rEl = document.getElementById(`reps-${idx}`);
-                        const sEl = document.getElementById(`sets-${idx}`);
-                        if (wEl) wEl.value = logObj.weight !== undefined ? logObj.weight : '';
-                        if (rEl) rEl.value = logObj.reps !== undefined ? logObj.reps : '';
-                        if (sEl) sEl.value = logObj.sets !== undefined ? logObj.sets : '';
+        for (const [exName, logVal] of Object.entries(existingLog.exerciseLogs)) {
+            const valArray = Array.isArray(logVal) ? logVal : [logVal];
+            
+            valArray.forEach(item => {
+                const itemIsCardio = item.isCardio === true || (item.weight === undefined && item.reps === undefined && item.minutes !== undefined);
+
+                if (!isFree) {
+                    addSuggestedExerciseInput(exName, '', selectEl.value, itemIsCardio);
+                    const container = document.getElementById('suggested-fields-container');
+                    const lastBlock = container ? container.lastElementChild : null;
+                    if (lastBlock) {
+                        if (itemIsCardio) {
+                            const minInput = lastBlock.querySelector('.extra-minutes');
+                            const calInput = lastBlock.querySelector('.extra-calories');
+                            if (minInput) minInput.value = item.minutes !== undefined ? item.minutes : '';
+                            if (calInput) calInput.value = item.calories !== undefined ? item.calories : '';
+                        } else {
+                            const wInput = lastBlock.querySelector('.extra-weight');
+                            const rInput = lastBlock.querySelector('.extra-reps');
+                            const sInput = lastBlock.querySelector('.extra-sets');
+                            if (wInput) wInput.value = item.weight !== undefined ? item.weight : '';
+                            if (rInput) rInput.value = item.reps !== undefined ? item.reps : '';
+                            if (sInput) sInput.value = item.sets !== undefined ? item.sets : '';
+                        }
+                    }
+                } else {
+                    addExtraExerciseInput();
+                    const container = document.getElementById('extra-exercise-container');
+                    const currentBlock = container ? container.lastElementChild : null;
+                    
+                    if (currentBlock) {
+                        if (item.label) {
+                            const labelSelect = currentBlock.querySelector('.extra-label-select');
+                            if (labelSelect) {
+                                labelSelect.value = item.label;
+                                renderExerciseChipsForBlock(currentBlock);
+                            }
+                        }
+
+                        const nameSelect = currentBlock.querySelector('.extra-name-select');
+                        if (nameSelect) {
+                            nameSelect.value = exName;
+                        }
+
+                        if (itemIsCardio) {
+                            const minInput = currentBlock.querySelector('.extra-minutes');
+                            const calInput = currentBlock.querySelector('.extra-calories');
+                            if (minInput) minInput.value = item.minutes !== undefined ? item.minutes : '';
+                            if (calInput) calInput.value = item.calories !== undefined ? item.calories : '';
+                        } else {
+                            const wInput = currentBlock.querySelector('.extra-weight');
+                            const rInput = currentBlock.querySelector('.extra-reps');
+                            const sInput = currentBlock.querySelector('.extra-sets');
+                            if (wInput) wInput.value = item.weight !== undefined ? item.weight : '';
+                            if (rInput) rInput.value = item.reps !== undefined ? item.reps : '';
+                            if (sInput) sInput.value = item.sets !== undefined ? item.sets : '';
+                        }
                     }
                 }
             });
         }
-
-        // 追加種目・自由入力種目の復元
-        document.getElementById('extra-exercise-container').innerHTML = '';
-        for (const [exName, logObj] of Object.entries(existingLog.exerciseLogs)) {
-            const isNormalEx = menu && menu.exercises.some(e => e.name === exName);
-            if (!isNormalEx || existingLog.recordType === 'free') {
-                const cleanName = exName.replace('【追加】', '');
-                addExtraExerciseInput();
-                const container = document.getElementById('extra-exercise-container');
-                const lastBlock = container.lastElementChild;
-                if (lastBlock) {
-                    const nameInput = lastBlock.querySelector('.extra-name-input');
-                    if (nameInput) nameInput.value = cleanName;
-
-                    if (logObj.label) {
-                        const labelSelect = lastBlock.querySelector('.extra-label-select');
-                        if (labelSelect) {
-                            labelSelect.value = logObj.label;
-                            renderExerciseChipsForBlock(lastBlock);
-                        }
-                    }
-
-                    if (logObj.isCardio) {
-                        const minInput = lastBlock.querySelector('.extra-minutes');
-                        const calInput = lastBlock.querySelector('.extra-calories');
-                        if (minInput) minInput.value = logObj.minutes !== undefined ? logObj.minutes : '';
-                        if (calInput) calInput.value = logObj.calories !== undefined ? logObj.calories : '';
-                    } else {
-                        const wInput = lastBlock.querySelector('.extra-weight');
-                        const rInput = lastBlock.querySelector('.extra-reps');
-                        const sInput = lastBlock.querySelector('.extra-sets');
-                        if (wInput) wInput.value = logObj.weight !== undefined ? logObj.weight : '';
-                        if (rInput) rInput.value = logObj.reps !== undefined ? logObj.reps : '';
-                        if (sInput) sInput.value = logObj.sets !== undefined ? logObj.sets : '';
-                    }
-                }
-            }
-        }
-    } else {
-        document.getElementById('extra-exercise-container').innerHTML = '';
     }
 
     document.getElementById('workout-log-modal').classList.add('active');
@@ -454,30 +517,40 @@ function toggleRecordType() {
     const selectMenu = document.getElementById('select-log-menu');
     const logInputs = document.getElementById('workout-log-inputs');
     const freeSection = document.getElementById('free-exercise-section');
+    const extraLabel = document.getElementById('extra-exercise-label');
+    const addExtraBtn = freeSection ? freeSection.querySelector('.btn-add-extra') : null;
 
     if (isOff) {
-        // オフ選択時は種目入力やメニュー選択をすべて非表示
         selectMenuLabel.style.display = 'none';
         selectMenu.style.display = 'none';
         logInputs.style.display = 'none';
         freeSection.style.display = 'none';
-    } else {
-        // 通常・自由入力時は表示に戻す
+    } else if (isFree) {
+        // 自由入力モード
         selectMenuLabel.style.display = 'block';
         selectMenu.style.display = 'block';
-        
-        logInputs.style.display = isFree ? 'none' : 'block';
+        logInputs.style.display = 'none';
         freeSection.style.display = 'block';
 
-        selectMenuLabel.textContent = isFree ? '対象部位' : 'メニュー選択';
-        document.getElementById('extra-exercise-label').textContent = isFree ? '実施した種目' : '追加でやった種目（任意）';
+        selectMenuLabel.textContent = '対象部位';
+        if (extraLabel) extraLabel.textContent = '実施した種目';
+        if (addExtraBtn) addExtraBtn.style.display = 'inline-block';
 
-        if (isFree) {
-            const container = document.getElementById('extra-exercise-container');
-            if (container.children.length === 0) {
-                addExtraExerciseInput();
-            }
+        const container = document.getElementById('extra-exercise-container');
+        if (container.children.length === 0) {
+            addExtraExerciseInput();
         }
+    } else {
+        // メニューからモード（枠自体は表示しておき、追加カードを挿入可能にする）
+        selectMenuLabel.style.display = 'block';
+        selectMenu.style.display = 'block';
+        logInputs.style.display = 'block';
+        freeSection.style.display = 'block';
+
+        selectMenuLabel.textContent = 'メニュー選択';
+        // 下部の見出しと重複ボタンだけを非表示
+        if (extraLabel) extraLabel.textContent = '';
+        if (addExtraBtn) addExtraBtn.style.display = 'none';
     }
 }
 
@@ -485,93 +558,186 @@ function onLogMenuSelectChange(selectedMenuId) {
     renderWorkoutLogInputs(selectedMenuId);
 }
 
+// メニュー選択時の表示（メニューを変えても入力済みのカードを保持する仕様）
 function renderWorkoutLogInputs(menuId) {
     const menu = state.menus.find(m => m.id === menuId);
     const container = document.getElementById('workout-log-inputs');
+    if (!container) return;
+
+    // ★ 変更前に入力されていたカード群を一時退避・保持する
+    const existingFieldsContainer = document.getElementById('suggested-fields-container');
+    const existingCards = existingFieldsContainer ? Array.from(existingFieldsContainer.children) : [];
+
     container.innerHTML = '';
 
-    menu.exercises.forEach((e, idx) => {
-        const lastObj = getLastExerciseLogObj(e.name) || {};
-        // 種目名やメニューIDから有酸素かどうか判定
-        const isCardio = menuId === 'F' || e.name.includes('ウォーキング') || e.name.includes('有酸素') || e.name.includes('トレッドミル') || e.name.includes('ランニング');
+    if (!menu || !menu.exercises || menu.exercises.length === 0) return;
 
-        const block = document.createElement('div');
-        block.className = 'log-exercise-block';
+    // ヘッダー（右上「+ 種目を追加」ボタン）
+    const headerRow = document.createElement('div');
+    headerRow.style.cssText = 'display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;';
+    headerRow.innerHTML = `
+        <label class="form-label" style="margin-bottom: 0;">メニュー種目</label>
+        <button type="button" class="btn-add-extra" style="width: auto; padding: 6px 12px; font-size: 0.8125rem;" onclick="addExtraExerciseInput()">+ 種目を追加</button>
+    `;
+    container.appendChild(headerRow);
 
-        if (isCardio) {
-            // 有酸素用の入力欄（時間・カロリー）
-            block.innerHTML = `
-                <div class="log-exercise-title">${e.name} <span style="font-size:0.8rem; font-weight:normal; color:var(--text-sub);">(${e.detail})</span></div>
-                <div class="direct-input-group" data-cardio="true">
-                    <div class="direct-field">
-                        <label>時間 (分)</label>
-                        <input type="number" id="minutes-${idx}" inputmode="numeric" value="${lastObj.minutes !== undefined ? lastObj.minutes : 30}" placeholder="30">
-                    </div>
-                    <div class="direct-field">
-                        <label>消費カロリー (kcal)</label>
-                        <input type="number" id="calories-${idx}" inputmode="numeric" value="${lastObj.calories !== undefined ? lastObj.calories : ''}" placeholder="150">
-                    </div>
-                </div>
-            `;
-        } else {
-            // 筋トレ用の入力欄（重量・回数・セット）
-            block.innerHTML = `
-                <div class="log-exercise-title">${e.name} <span style="font-size:0.8rem; font-weight:normal; color:var(--text-sub);">(${e.detail})</span></div>
-                <div class="direct-input-group" data-cardio="false">
-                    <div class="direct-field">
-                        <label>重量 (kg)</label>
-                        <input type="number" id="weight-${idx}" step="0.5" inputmode="decimal" value="${lastObj.weight !== undefined ? lastObj.weight : ''}" placeholder="0">
-                    </div>
-                    <div class="direct-field">
-                        <label>回数 (reps)</label>
-                        <input type="number" id="reps-${idx}" inputmode="numeric" value="${lastObj.reps !== undefined ? lastObj.reps : 10}" placeholder="10">
-                    </div>
-                    <div class="direct-field">
-                        <label>セット数</label>
-                        <input type="number" id="sets-${idx}" inputmode="numeric" value="${lastObj.sets !== undefined ? lastObj.sets : 3}" placeholder="3">
-                    </div>
-                </div>
-            `;
-        }
-        container.appendChild(block);
+    // 新しく選んだメニューの種目候補トグル
+    const detailsEl = document.createElement('details');
+    detailsEl.className = 'menu-suggest-toggle';
+    detailsEl.open = true;
+    detailsEl.style.cssText = 'margin-bottom: 10px; background: var(--primary-soft); border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color);';
+
+    const summaryEl = document.createElement('summary');
+    summaryEl.style.cssText = 'padding: 8px 12px; font-size: 0.8125rem; font-weight: 700; color: var(--primary-hover); cursor: pointer; user-select: none; display: flex; justify-content: space-between; align-items: center;';
+    summaryEl.innerHTML = `<span>💡 ${menu.title} の種目候補</span><span style="font-size: 0.75rem; color: var(--text-sub);">開閉 ▾</span>`;
+    detailsEl.appendChild(summaryEl);
+
+    const chipList = document.createElement('div');
+    chipList.className = 'exercise-chip-list';
+    chipList.style.cssText = 'padding: 8px 12px 10px; margin-bottom: 0; display: flex; flex-wrap: wrap; gap: 6px; border-top: 1px dashed var(--border-color);';
+
+    menu.exercises.forEach(e => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'exercise-chip';
+        btn.textContent = `+ ${e.name}`;
+        btn.onclick = () => {
+            addSuggestedExerciseInput(e.name, e.detail, menuId);
+        };
+        chipList.appendChild(btn);
     });
+
+    detailsEl.appendChild(chipList);
+    container.appendChild(detailsEl);
+
+    // ★ カード入力枠を再作成し、退避しておいた入力済みカードをそのまま復元！
+    const fieldsContainer = document.createElement('div');
+    fieldsContainer.id = 'suggested-fields-container';
+    existingCards.forEach(card => fieldsContainer.appendChild(card));
+    container.appendChild(fieldsContainer);
 }
 
+function addSuggestedExerciseInput(exerciseName, detailStr = '', menuId = '', forceCardio = null) {
+    const container = document.getElementById('suggested-fields-container');
+    const lastObj = getLastExerciseLogObj(exerciseName) || {};
+
+    // 明示的に forceCardio が指定されていればそれを優先、なければ種目名から判定
+    let isCardio = false;
+    if (forceCardio !== null && forceCardio !== undefined) {
+        isCardio = forceCardio;
+    } else {
+        const nameLower = exerciseName.toLowerCase();
+        isCardio = nameLower.includes('ウォーキング') || 
+                   nameLower.includes('ランニング') || 
+                   nameLower.includes('トレッドミル') || 
+                   nameLower.includes('有酸素') || 
+                   nameLower.includes('バイク') || 
+                   nameLower.includes('エアロバイク');
+    }
+
+    const block = document.createElement('div');
+    block.className = 'extra-log-block';
+
+    let fieldsHTML = '';
+    if (isCardio) {
+        fieldsHTML = `
+            <div class="direct-input-group" data-cardio="true">
+                <div class="direct-field">
+                    <label>時間 (分)</label>
+                    <input type="number" class="extra-minutes" inputmode="numeric" value="${lastObj.minutes !== undefined ? lastObj.minutes : 30}" placeholder="30">
+                </div>
+                <div class="direct-field">
+                    <label>消費カロリー (kcal)</label>
+                    <input type="number" class="extra-calories" inputmode="numeric" value="${lastObj.calories !== undefined ? lastObj.calories : ''}" placeholder="150">
+                </div>
+            </div>
+        `;
+    } else {
+        fieldsHTML = `
+            <div class="direct-input-group" data-cardio="false">
+                <div class="direct-field">
+                    <label>重量 (kg)</label>
+                    <input type="number" class="extra-weight" step="0.5" inputmode="decimal" value="${lastObj.weight !== undefined ? lastObj.weight : ''}" placeholder="0">
+                </div>
+                <div class="direct-field">
+                    <label>回数 (reps)</label>
+                    <input type="number" class="extra-reps" inputmode="numeric" value="${lastObj.reps !== undefined ? lastObj.reps : 10}" placeholder="10">
+                </div>
+                <div class="direct-field">
+                    <label>セット数</label>
+                    <input type="number" class="extra-sets" inputmode="numeric" value="${lastObj.sets !== undefined ? lastObj.sets : 3}" placeholder="3">
+                </div>
+            </div>
+        `;
+    }
+
+    const hasLast = lastObj && Object.keys(lastObj).length > 0;
+    const copyBtnHTML = hasLast 
+        ? `<button type="button" class="btn-copy-last" onclick="prefillLastLogValues(this.closest('.extra-log-block'), '${exerciseName}')">⚡ 前回と同じ</button>` 
+        : '';
+
+    block.innerHTML = `
+        <div class="extra-title-row" style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+            <input type="text" class="form-input extra-name-input" value="${exerciseName}" readonly style="font-weight:700; background-color:var(--primary-soft); color:var(--text-main); margin-bottom:0; flex: 1;">
+            ${copyBtnHTML}
+            <button type="button" class="btn-remove-row" onclick="this.closest('.extra-log-block').remove()">&times;</button>
+        </div>
+        ${fieldsHTML}
+    `;
+
+    container.appendChild(block);
+}
+
+// 追加・自由入力行の追加処理
 function addExtraExerciseInput() {
-    const container = document.getElementById('extra-exercise-container');
+    const isFree = document.getElementById('record-type-free') ? document.getElementById('record-type-free').checked : false;
+    
+    // ターゲットコンテナの判定（メニューモード時と自由入力モード時）
+    let container = isFree ? document.getElementById('extra-exercise-container') : document.getElementById('suggested-fields-container');
+    if (!container) {
+        container = document.getElementById('extra-exercise-container') || document.getElementById('workout-log-inputs');
+    }
+
     const block = document.createElement('div');
     block.className = 'extra-log-block';
 
     const labelOptionsHTML = state.exerciseLabels.map(label => `<option value="${label}">${label}</option>`).join('');
 
     block.innerHTML = `
-        <label class="extra-label-select-label">ラベル</label>
-        <select class="form-input extra-label-select" onchange="renderExerciseChipsForBlock(this.closest('.extra-log-block'))">
-            ${labelOptionsHTML}
-        </select>
-        <div class="exercise-chip-list extra-chip-list"></div>
-        <div class="extra-title-row">
-            <input type="text" class="form-input extra-name-input" placeholder="種目名（新規入力）" onblur="prefillLastLogValues(this.closest('.extra-log-block'), this.value.trim())">
+        <div style="display: flex; gap: 8px; align-items: flex-end; margin-bottom: 8px;">
+            <div style="flex: 1;">
+                <label class="extra-label-select-label">部位（ラベル）</label>
+                <select class="form-input extra-label-select" style="margin-bottom: 0;" onchange="renderExerciseChipsForBlock(this.closest('.extra-log-block'))">
+                    ${labelOptionsHTML}
+                </select>
+            </div>
             <button type="button" class="btn-remove-row" onclick="this.closest('.extra-log-block').remove()">&times;</button>
         </div>
+        
+        <div class="extra-chip-list">
+            <!-- ここに種目選択ドロップダウンが入ります -->
+        </div>
+
         <div class="extra-fields-container">
-            <!-- ラベルに応じて動的に描画されます -->
+            <!-- ここに重量・回数・セット数が入ります -->
         </div>
     `;
 
+    // 下に順番にカードを挿入
     container.appendChild(block);
     renderExerciseChipsForBlock(block);
+
+    // スクロールしなくても新しいカードがすぐ見えるように、追加した位置までスクロールする
+    block.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 function renderExerciseChipsForBlock(block) {
     const label = block.querySelector('.extra-label-select').value;
     const chipList = block.querySelector('.extra-chip-list');
-    const nameInput = block.querySelector('.extra-name-input');
     const fieldsContainer = block.querySelector('.extra-fields-container');
 
     const isCardio = (label === '有酸素運動');
 
-    // ラベルに応じて入力フィールドを切り替え
     if (isCardio) {
         fieldsContainer.innerHTML = `
             <div class="direct-input-group" data-cardio="true">
@@ -611,22 +777,45 @@ function renderExerciseChipsForBlock(block) {
         return;
     }
 
-    chipList.innerHTML = names.map(name =>
-        `<button type="button" class="exercise-chip" data-name="${name}">${name}</button>`
-    ).join('');
+    let optionsHTML = '<option value="">-- 種目を選択 --</option>';
+    names.forEach(name => {
+        optionsHTML += `<option value="${name}">${name}</option>`;
+    });
 
-    chipList.querySelectorAll('.exercise-chip').forEach(chip => {
-        chip.addEventListener('click', () => {
-            const name = chip.getAttribute('data-name');
-            nameInput.value = name;
-            chipList.querySelectorAll('.exercise-chip').forEach(c => c.classList.remove('selected'));
-            chip.classList.add('selected');
-            prefillLastLogValues(block, name);
-        });
+    chipList.innerHTML = `
+        <div style="margin-bottom: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <label class="extra-label-select-label" style="margin-bottom: 0;">種目名</label>
+                <div class="last-btn-holder"></div>
+            </div>
+            <select class="form-input extra-name-select" style="margin-bottom: 0; font-weight: 700;">
+                ${optionsHTML}
+            </select>
+        </div>
+    `;
+
+    const nameSelect = chipList.querySelector('.extra-name-select');
+    const holder = chipList.querySelector('.last-btn-holder');
+
+    nameSelect.addEventListener('change', (e) => {
+        const selectedName = e.target.value;
+        holder.innerHTML = '';
+        if (selectedName) {
+            const lastObj = getLastExerciseLogObj(selectedName);
+            if (lastObj) {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'btn-copy-last';
+                btn.textContent = '前回と同じ';
+                btn.onclick = () => prefillLastLogValues(block, selectedName);
+                holder.appendChild(btn);
+            }
+            prefillLastLogValues(block, selectedName);
+        }
     });
 }
 
-// 選んだ種目名の前回記録（重量・回数・セット数）を、その行の入力欄にデフォルト表示する
+// 前回の数値（重量・回数・セット数・時間・カロリー）を入力欄に反映する関数
 function prefillLastLogValues(block, name) {
     const lastObj = getLastExerciseLogObj(name);
     if (!lastObj) return;
@@ -634,10 +823,15 @@ function prefillLastLogValues(block, name) {
     const weightInput = block.querySelector('.extra-weight');
     const repsInput = block.querySelector('.extra-reps');
     const setsInput = block.querySelector('.extra-sets');
+    const minInput = block.querySelector('.extra-minutes');
+    const calInput = block.querySelector('.extra-calories');
 
     if (weightInput && lastObj.weight !== undefined && lastObj.weight !== null) weightInput.value = lastObj.weight;
     if (repsInput && lastObj.reps !== undefined && lastObj.reps !== null) repsInput.value = lastObj.reps;
     if (setsInput && lastObj.sets !== undefined && lastObj.sets !== null) setsInput.value = lastObj.sets;
+
+    if (minInput && lastObj.minutes !== undefined && lastObj.minutes !== null) minInput.value = lastObj.minutes;
+    if (calInput && lastObj.calories !== undefined && lastObj.calories !== null) calInput.value = lastObj.calories;
 }
 
 function closeWorkoutLogModal() {
@@ -664,59 +858,41 @@ function submitWorkoutLog() {
     }
 
     const selectedMenuId = document.getElementById('select-log-menu').value;
-    const menu = state.menus.find(m => m.id === selectedMenuId);
-    const exerciseLogs = {};
+    let finalExerciseLogs = {};
 
-    // ログ追加用ヘルパー関数（既存があれば配列化して追加）
     const appendExerciseLog = (key, dataObj) => {
-        if (!exerciseLogs[key]) {
-            exerciseLogs[key] = [];
+        if (!finalExerciseLogs[key]) {
+            finalExerciseLogs[key] = [];
+        } else if (!Array.isArray(finalExerciseLogs[key])) {
+            finalExerciseLogs[key] = [finalExerciseLogs[key]];
         }
-        exerciseLogs[key].push(dataObj);
+        finalExerciseLogs[key].push(dataObj);
     };
 
-    if (!isFree) {
-        // メニュー通りモード
-        menu.exercises.forEach((e, idx) => {
-            const minEl = document.getElementById(`minutes-${idx}`);
-            if (minEl) {
-                const minutes = minEl.value;
-                const calories = document.getElementById(`calories-${idx}`).value;
-                appendExerciseLog(e.name, {
-                    isCardio: true,
-                    minutes: minutes !== '' ? parseInt(minutes, 10) : 0,
-                    calories: calories !== '' ? parseInt(calories, 10) : 0
-                });
-            } else {
-                const weight = document.getElementById(`weight-${idx}`).value;
-                const reps = document.getElementById(`reps-${idx}`).value;
-                const sets = document.getElementById(`sets-${idx}`).value;
-                appendExerciseLog(e.name, {
-                    weight: weight !== '' ? parseFloat(weight) : 0,
-                    reps: reps !== '' ? parseInt(reps, 10) : 0,
-                    sets: sets !== '' ? parseInt(sets, 10) : 0
-                });
-            }
-        });
-    }
+    // 現在のモードに応じて読み込むコンテナを選択
+    const containerId = isFree ? 'extra-exercise-container' : 'suggested-fields-container';
+    const blocks = document.querySelectorAll(`#${containerId} .extra-log-block`);
 
-    // 追加・自由入力種目の取得
-    const extraBlocks = document.querySelectorAll('.extra-log-block');
-    let freeEntryCount = 0;
+    blocks.forEach(block => {
+        // ドロップダウン（.extra-name-select）とテキスト表示（.extra-name-input）の両方に対応[cite: 8]
+        const nameSelect = block.querySelector('.extra-name-select');
+        const nameInput = block.querySelector('.extra-name-input');
+        
+        let name = '';
+        if (nameSelect && nameSelect.value) {
+            name = nameSelect.value.trim();
+        } else if (nameInput && nameInput.value) {
+            name = nameInput.value.trim();
+        }
 
-    extraBlocks.forEach(block => {
-        const name = block.querySelector('.extra-name-input').value.trim();
         const minInput = block.querySelector('.extra-minutes');
         const labelSelect = block.querySelector('.extra-label-select');
         const label = labelSelect ? labelSelect.value : state.exerciseLabels[0];
 
         if (name) {
-            freeEntryCount++;
-            const key = isFree ? name : `【追加】${name}`;
-
             if (minInput) {
                 const calories = block.querySelector('.extra-calories').value;
-                appendExerciseLog(key, {
+                appendExerciseLog(name, {
                     isCardio: true,
                     minutes: minInput.value !== '' ? parseInt(minInput.value, 10) : 0,
                     calories: calories !== '' ? parseInt(calories, 10) : 0,
@@ -726,21 +902,18 @@ function submitWorkoutLog() {
                 const weight = block.querySelector('.extra-weight').value;
                 const reps = block.querySelector('.extra-reps').value;
                 const sets = block.querySelector('.extra-sets').value;
-                appendExerciseLog(key, {
+                appendExerciseLog(name, {
                     weight: weight !== '' ? parseFloat(weight) : 0,
                     reps: reps !== '' ? parseInt(reps, 10) : 0,
                     sets: sets !== '' ? parseInt(sets, 10) : 0,
                     label: label
                 });
             }
-
-            if (!state.exerciseLibrary[label]) state.exerciseLibrary[label] = [];
-            if (!state.exerciseLibrary[label].includes(name)) state.exerciseLibrary[label].push(name);
         }
     });
 
-    if (isFree && freeEntryCount === 0) {
-        alert('自由入力モードでは、少なくとも1種目は入力してください。');
+    if (Object.keys(finalExerciseLogs).length === 0) {
+        alert('少なくとも1種目は入力してください。');
         return;
     }
 
@@ -749,7 +922,7 @@ function submitWorkoutLog() {
         date: selectedISO,
         menuId: selectedMenuId,
         recordType: isFree ? 'free' : 'menu',
-        exerciseLogs: exerciseLogs
+        exerciseLogs: finalExerciseLogs
     });
 
     state.logs.sort((a, b) => a.date.localeCompare(b.date));
@@ -773,42 +946,39 @@ function openDetailLogModal(logIndex) {
     const bodyEl = document.getElementById('detail-log-body');
 
     if (log.menuId === 'OFF') {
-        titleEl.textContent = 'オフ (休養日)';
+        titleEl.textContent = '休養日 (OFF)';
         bodyEl.innerHTML = '<p style="color:var(--text-sub);">この日は休養日として記録されています。</p>';
+    } else if (log.menuId === 'ALL') {
+        titleEl.textContent = '全身トレーニング';
     } else {
         const menu = state.menus.find(m => m.id === log.menuId);
         const menuTitle = menu ? menu.title : '';
         const freeBadge = log.recordType === 'free' ? ' <span style="font-size:0.75rem; font-weight:700; color:var(--lavender); background:var(--lavender-soft); padding:2px 8px; border-radius:8px; vertical-align:middle;">自由入力</span>' : '';
-        titleEl.innerHTML = `メニュー ${log.menuId} (${menuTitle})${freeBadge}`;
-
-        let html = '';
-        if (log.exerciseLogs && Object.keys(log.exerciseLogs).length > 0) {
-            html += '<div style="display:flex; flex-direction:column; gap:8px;">';
-            
-            for (const [exName, logVal] of Object.entries(log.exerciseLogs)) {
-                const isExtra = exName.startsWith('【追加】');
-                const styleAttr = isExtra ? 'color: var(--primary-color); font-weight:600;' : 'font-weight:500;';
-
-                // 配列（複数記録）でも単一データでも配列に統一してループ処理
-                const valArray = Array.isArray(logVal) ? logVal : [logVal];
-
-                valArray.forEach(item => {
-                    const formatted = formatSingleLogObj(item);
-                    html += `
-                        <div style="display:flex; justify-content:space-between; border-bottom:1px dashed var(--border-color); padding-bottom:6px;">
-                            <span style="${styleAttr}">${exName}</span>
-                            <span style="color:var(--text-sub); font-size:0.9rem;">${formatted}</span>
-                        </div>
-                    `;
-                });
-            }
-            
-            html += '</div>';
-        } else {
-            html = '<p style="color:var(--text-sub);">各種目の詳細ログはありません。</p>';
-        }
-        bodyEl.innerHTML = html;
+        titleEl.innerHTML = `${menuTitle}${freeBadge}`;
     }
+
+    let html = '';
+    if (log.exerciseLogs && Object.keys(log.exerciseLogs).length > 0) {
+        html += '<div style="display:flex; flex-direction:column; gap:8px;">';
+        for (const [exName, logVal] of Object.entries(log.exerciseLogs)) {
+            const cleanName = exName.replace('【追加】', ''); 
+            const valArray = Array.isArray(logVal) ? logVal : [logVal];
+
+            valArray.forEach(item => {
+                const formatted = formatSingleLogObj(item);
+                html += `
+                    <div style="display:flex; justify-content:space-between; border-bottom:1px dashed var(--border-color); padding-bottom:6px;">
+                        <span style="font-weight:500;">${cleanName}</span>
+                        <span style="color:var(--text-sub); font-size:0.9rem;">${formatted}</span>
+                    </div>
+                `;
+            });
+        }
+        html += '</div>';
+    } else {
+        html = '<p style="color:var(--text-sub);">各種目の詳細ログはありません。</p>';
+    }
+    bodyEl.innerHTML = html;
 
     const deleteBtn = document.getElementById('btn-delete-detail-log');
     deleteBtn.onclick = () => {
@@ -822,7 +992,7 @@ function openDetailLogModal(logIndex) {
     if (editBtn) {
         editBtn.onclick = () => {
             closeDetailLogModal();
-            openWorkoutLogModal(log.menuId, log.date);
+            openWorkoutLogModal(log.menuId, log.date, true);
         };
     }
 
@@ -877,6 +1047,9 @@ function addExerciseInput(name = '', detail = '') {
         <button type="button" class="btn-remove-row" onclick="this.parentElement.remove()">&times;</button>
     `;
     container.appendChild(row);
+
+    // スクロールしなくても新しい入力欄がすぐ見えるように、追加した位置までスクロールする
+    row.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 function saveMenuEdit() {
@@ -959,8 +1132,10 @@ function renderCalendar() {
                 hasLog = true;
                 const tag = document.createElement('div');
                 tag.className = `cal-tag ${log.menuId}`;
-                tag.textContent = log.recordType === 'free' ? `${log.menuId}✎` : log.menuId;
-                tag.title = log.recordType === 'free' ? '自由入力の記録：クリックして詳細確認・削除' : 'クリックして詳細確認・削除';
+                
+                const labelName = MENU_LABELS[log.menuId] || log.menuId;
+                tag.textContent = log.recordType === 'free' ? `${labelName}✎` : labelName;
+                
                 tag.onclick = (e) => {
                     e.stopPropagation();
                     openDetailLogModal(index);
@@ -969,7 +1144,6 @@ function renderCalendar() {
             }
         });
 
-        // 記録がまだない今日以前の日付は、クリックでその日付の記録モーダルを開けるようにする
         if (!hasLog && dateStr <= todayISO) {
             cell.classList.add('clickable');
             cell.title = 'クリックしてこの日の記録を追加';
@@ -1020,7 +1194,7 @@ function resetData() {
         state.rotationMode = 'sequence';
         state.weekdayMenus = { 0: 'F', 1: 'A', 2: 'B', 3: 'C', 4: 'D', 5: 'E', 6: 'OFF' };
         state.sequenceOrder = ['A', 'B', 'F', 'C', 'D', 'E'];
-        state.exerciseLabels = ['胸', '背中', '脚', '肩', '腕', 'お尻', '腹筋', '有酸素運動', 'その他'];
+        state.exerciseLabels = ['胸', '背中', '脚', '肩', '腕', 'お尻', '腹筋', '全身', '有酸素運動', 'その他'];
         state.exerciseLibrary = buildDefaultExerciseLibrary();
         init();
     }
@@ -1030,17 +1204,40 @@ const WEEKDAY_LABELS = ['日', '月', '火', '水', '木', '金', '土'];
 
 let tempSequenceOrder = [];
 
+// ローテーション設定モーダルを開く
 function openRotationSettingsModal() {
-    // モード切替ラジオボタンの状態を反映
-    document.getElementById('rotation-mode-sequence').checked = state.rotationMode === 'sequence';
-    document.getElementById('rotation-mode-weekday').checked = state.rotationMode === 'weekday';
+    if (!state.sequenceOrder) state.sequenceOrder = ['A', 'B', 'F', 'C', 'D', 'E'];
+    if (!state.weekdayMenus) state.weekdayMenus = { 0: 'F', 1: 'A', 2: 'B', 3: 'C', 4: 'D', 5: 'E', 6: 'OFF' };
 
-    tempSequenceOrder = [...state.sequenceOrder]; // キャンセル時に戻せるよう作業用コピーを用意
+    const seqRadio = document.getElementById('rotation-mode-sequence');
+    const weekRadio = document.getElementById('rotation-mode-weekday');
+    if (seqRadio) seqRadio.checked = state.rotationMode === 'sequence';
+    if (weekRadio) weekRadio.checked = state.rotationMode === 'weekday';
+
+    tempSequenceOrder = [...state.sequenceOrder];
     renderSequenceOrderInputs();
     renderWeekdayAssignmentInputs();
     toggleWeekdaySection();
 
-    document.getElementById('rotation-settings-modal').classList.add('active');
+    const modal = document.getElementById('rotation-settings-modal');
+    if (modal) modal.classList.add('active');
+}
+
+// 種目リスト管理モーダルを開く
+function openExerciseLibraryModal() {
+    if (!state.exerciseLabels || state.exerciseLabels.length === 0) {
+        state.exerciseLabels = ['胸', '背中', '脚', '肩', '腕', 'お尻', '腹筋', '全身', '有酸素運動', 'その他'];
+    }
+    if (!state.exerciseLibrary) {
+        state.exerciseLibrary = buildDefaultExerciseLibrary();
+    }
+
+    currentLibraryLabel = state.exerciseLabels[0];
+    renderLibraryLabelTabs();
+    renderLibraryExerciseChips();
+
+    const modal = document.getElementById('exercise-library-modal');
+    if (modal) modal.classList.add('active');
 }
 
 function closeRotationSettingsModal() {
@@ -1064,8 +1261,7 @@ function renderSequenceOrderInputs() {
         row.innerHTML = `
             <span class="sequence-row-num">${idx + 1}</span>
             <div class="sequence-row-info">
-                <span class="menu-badge menu-badge-${menuId}">${menuId}</span>
-                <span class="sequence-row-title">${menu ? menu.title : ''}</span>
+                <span class="sequence-row-title">${menu ? menu.title : menuId}</span>
             </div>
             <div class="sequence-row-actions">
                 <button type="button" class="btn-seq-move" data-idx="${idx}" data-dir="-1" ${idx === 0 ? 'disabled' : ''}>↑</button>
@@ -1098,10 +1294,10 @@ function renderWeekdayAssignmentInputs() {
 
         const currentVal = state.weekdayMenus[day] || 'OFF';
 
-        let optionsHTML = '<option value="OFF">オフ</option>';
+        let optionsHTML = '<option value="OFF">☕ オフ（休養日）</option>';
         state.menus.forEach(menu => {
             const selected = currentVal === menu.id ? 'selected' : '';
-            optionsHTML += `<option value="${menu.id}" ${selected}>メニュー ${menu.id}：${menu.title}</option>`;
+            optionsHTML += `<option value="${menu.id}" ${selected}>${menu.title}</option>`;
         });
         if (currentVal === 'OFF') {
             optionsHTML = optionsHTML.replace('value="OFF"', 'value="OFF" selected');
@@ -1212,9 +1408,119 @@ function addLibraryExercise() {
     renderLibraryExerciseChips();
 }
 
-// DOM読み込み完了時に初期化を実行（このファイル内で init() を呼ぶのはここ1箇所だけ）
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
 } else {
     init();
+}
+
+// メインタブ切り替え処理（並び順変更対応版）
+function switchMainTab(tabName) {
+    const buttons = document.querySelectorAll('.main-tab-btn');
+    buttons.forEach(btn => btn.classList.remove('active'));
+
+    const contents = document.querySelectorAll('.main-tab-content');
+    contents.forEach(content => content.classList.remove('active'));
+
+    if (tabName === 'record') {
+        buttons[0].classList.add('active');
+        document.getElementById('tab-content-record').classList.add('active');
+    } else if (tabName === 'menu-list') {
+        buttons[1].classList.add('active');
+        document.getElementById('tab-content-menu-list').classList.add('active');
+    } else if (tabName === 'history') {
+        buttons[2].classList.add('active');
+        document.getElementById('tab-content-history').classList.add('active');
+        renderHistoryLogs(); // 記録一覧タブを開いた時に最新ログを描画
+    }
+}
+
+// 記録一覧（タイムライン）の描画処理（アルファベットバッジ非表示版）
+function renderHistoryLogs() {
+    const container = document.getElementById('history-log-container');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    if (!state.logs || state.logs.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-sub); text-align:center; padding:24px; font-size:0.8125rem;">まだ記録がありません。</p>';
+        return;
+    }
+
+    // 新しい順（降順）にソート
+    const sortedLogs = [...state.logs].sort((a, b) => b.date.localeCompare(a.date));
+
+    sortedLogs.forEach((log) => {
+        const card = document.createElement('div');
+        card.className = 'history-card';
+
+        // 日付（YYYY/MM/DD (曜日)）
+        const [y, m, d] = log.date.split('-');
+        const dateObj = new Date(parseInt(y, 10), parseInt(m, 10) - 1, parseInt(d, 10));
+        const dayOfWeek = ['日', '月', '火', '水', '木', '金', '土'][dateObj.getDay()];
+        const formattedDate = `${y}/${parseInt(m, 10)}/${parseInt(d, 10)} (${dayOfWeek})`;
+
+        let titleText = '';
+        if (log.menuId === 'OFF') {
+            titleText = 'おやすみ';
+        } else if (log.menuId === 'ALL') {
+            titleText = '全身トレーニング';
+        } else {
+            const menu = state.menus.find(m => m.id === log.menuId);
+            titleText = menu ? menu.title : log.menuId;
+        }
+
+        let exHTML = '';
+        if (log.menuId === 'OFF') {
+            exHTML = '<div class="history-ex-empty">休憩もだいじ</div>';
+        } else if (log.exerciseLogs && Object.keys(log.exerciseLogs).length > 0) {
+            exHTML = '<div class="history-ex-list">';
+            for (const [exName, logVal] of Object.entries(log.exerciseLogs)) {
+                const cleanName = exName.replace('【追加】', '');
+                const valArray = Array.isArray(logVal) ? logVal : [logVal];
+
+                valArray.forEach(item => {
+                    const formatted = formatSingleLogObj(item);
+                    exHTML += `
+                        <div class="history-ex-item">
+                            <span class="history-ex-name">• ${cleanName}</span>
+                            <span class="history-ex-val">${formatted}</span>
+                        </div>
+                    `;
+                });
+            }
+            exHTML += '</div>';
+        } else {
+            exHTML = '<div class="history-ex-empty">詳細ログはありません</div>';
+        }
+
+        // アルファベットバッジを削除し、日付とタイトルだけに整理
+        card.innerHTML = `
+            <div class="history-card-header">
+                <span class="history-date">${formattedDate}</span>
+            </div>
+            <div class="history-title">${titleText}</div>
+            ${exHTML}
+        `;
+
+        container.appendChild(card);
+    });
+}
+
+// 部位ボタンを押したときに該当するメニューを開く
+function openCategoryWorkout(category) {
+    // 該当する部位のメニューを取得
+    const matchedMenus = state.menus.filter(m => {
+        if (category === '上半身') return m.title.includes('上半身');
+        if (category === '下半身') return m.title.includes('下半身');
+        if (category === '有酸素') return m.title.includes('有酸素') || m.title.includes('リカバリー');
+        return false;
+    });
+
+    if (matchedMenus.length > 0) {
+        // 該当する最初のメニューを選択して記録モーダルを開く
+        openWorkoutLogModal(matchedMenus[0].id);
+    } else {
+        openWorkoutLogModal('ALL');
+    }
 }

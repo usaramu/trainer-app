@@ -15,60 +15,93 @@
         <h1>Workout Tracker</h1>
         <div class="subtitle">うさトレ</div>
     </header>
-
-    <!-- メイン：今日の推奨表示バナー -->
-    <div class="recommendation-card">
-        <div class="recommendation-header">TODAY'S WORKOUT</div>
-        <div class="recommendation-main">
-            <div>
-                <span class="target-menu" id="rec-id">メニュー -</span>
-                <span class="target-title" id="rec-title">読み込み中...</span>
-            </div>
-        </div>
-        <div class="last-completed" id="last-completed-info">
-            前回完了: なし
-        </div>
-        <div class="banner-actions">
-            <button class="btn-complete" id="btn-start-today">記録する</button>
-            <button class="btn-offday" onclick="recordOffDay()">オフ</button>
-        </div>
+<!-- ▼ タブ切り替えボタン（3つに拡張） -->
+    <div class="main-tabs">
+        <button type="button" class="main-tab-btn active" onclick="switchMainTab('record')">LOG</button>
+        <button type="button" class="main-tab-btn" onclick="switchMainTab('menu-list')">MENU</button>
+        <button type="button" class="main-tab-btn" onclick="switchMainTab('history')">HISTORY</button>
     </div>
 
-    <!-- カレンダーセクション -->
-    <section class="log-section">
-        <h2>ログ</h2>
-        <div class="calendar-card">
-            <div class="calendar-header">
-                <button onclick="changeMonth(-1)">&lt;</button>
-                <span id="calendar-month-year"></span>
-                <button onclick="changeMonth(1)">&gt;</button>
-            </div>
-            <div class="calendar-grid" id="calendar-grid">
-                <!-- JSで生成 -->
-            </div>
-        </div>
-    </section>
+    <!-- ▼ 1. 記録タブ用コンテンツ -->
+    <div id="tab-content-record" class="main-tab-content active">
+<!-- メイン：部位選択ガイドバナー -->
+        <div class="recommendation-card">
+            <div class="recommendation-header">SELECT WORKOUT</div>
 
-    <!-- 全メニュー比較表セクション（最下部） -->
-    <section class="table-section">
-        <h2>メニュー一覧</h2>
-        <div class="table-wrapper">
-            <table class="menu-table">
-                <thead>
-                    <tr>
-                        <th style="width: 12%;">メニュー</th>
-                        <th style="width: 25%;">対象部位</th>
-                        <th style="width: 38%;">種目と設定</th>
-                        <th style="width: 15%;">メモ / 注意点</th>
-                        <th style="width: 10%;">編集</th>
-                    </tr>
-                </thead>
-                <tbody id="menu-table-body">
-                    <!-- JSでテーブル行を生成 -->
-                </tbody>
-            </table>
+            
+            <!-- 部位選択ボタン群（4つのグリッド表示） -->
+            <div class="category-select-grid">
+                <button type="button" class="btn-category-select" onclick="openCategoryWorkout('上半身')">
+                    <span class="cat-label">上半身</span>
+                    <span class="cat-days" id="days-upper">前回: -日目</span>
+                </button>
+                <button type="button" class="btn-category-select" onclick="openCategoryWorkout('下半身')">
+                    <span class="cat-label">下半身</span>
+                    <span class="cat-days" id="days-lower">前回: -日目</span>
+                </button>
+                <button type="button" class="btn-category-select" onclick="openCategoryWorkout('全身')">
+                    <span class="cat-label">全身</span>
+                    <span class="cat-days" id="days-full">前回: -日目</span>
+                </button>
+                <button type="button" class="btn-category-select" onclick="openCategoryWorkout('有酸素')">
+                    <span class="cat-label">有酸素</span>
+                    <span class="cat-days" id="days-cardio">前回: -日目</span>
+                </button>
+            </div>
+
+            <div class="banner-actions" style="margin-top: 12px;">
+                <button class="btn-offday" onclick="recordOffDay()" style="width: 100%;">今日はオフ</button>
+            </div>
         </div>
-    </section>
+
+        <!-- カレンダーセクション -->
+        <section class="log-section">
+            <div class="calendar-card">
+                <div class="calendar-header">
+                    <button onclick="changeMonth(-1)">&lt;</button>
+                    <span id="calendar-month-year"></span>
+                    <button onclick="changeMonth(1)">&gt;</button>
+                </div>
+                <div class="calendar-grid" id="calendar-grid">
+                    <!-- JSで生成 -->
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ▼ 2. 記録一覧（タイムライン）タブ用コンテンツ -->
+    <div id="tab-content-history" class="main-tab-content">
+            <div id="history-log-container">
+                <!-- JSでタイムラインカードを自動生成 -->
+            </div>
+        </section>
+    </div>
+
+    <!-- ▼ 3. メニュー一覧タブ用コンテンツ -->
+    <div id="tab-content-menu-list" class="main-tab-content">
+        <!-- 全メニュー比較表セクション -->
+        <section class="table-section">
+            <div class="table-wrapper">
+                <table class="menu-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 12%;">メニュー</th>
+                            <th style="width: 25%;">対象部位</th>
+                            <th style="width: 38%;">種目と設定</th>
+                            <th style="width: 15%;">メモ / 注意点</th>
+                            <th style="width: 10%;">編集</th>
+                        </tr>
+                    </thead>
+                    <tbody id="menu-table-body">
+                        <!-- JSでテーブル行を生成 -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+
+    <!-- ▼▼【ここから下を追加】消えていたモーダルウィンドウ群 ▼▼ -->
 
     <!-- メニュー編集用モーダルウィンドウ -->
     <div class="modal-overlay" id="edit-modal">
@@ -90,10 +123,10 @@
                 </div>
                 <button class="btn-add-exercise" onclick="addExerciseInput()">+ 種目を追加</button>
             </div>
-                <div class="modal-footer">
+            <div class="modal-footer">
                 <button class="btn-cancel" onclick="closeEditModal()">キャンセル</button>
                 <button class="btn-save" onclick="saveMenuEdit()">保存する</button>
-                </div>
+            </div>
         </div>
     </div>
 
@@ -130,15 +163,17 @@
                 </select>
 
                 <div id="workout-log-inputs">
-                    <!-- 基本メニューの数値入力欄（メニュー通りモード） -->
+                    <!-- 基本メニューの数値入力欄 -->
                 </div>
 
                 <div class="extra-exercise-section" id="free-exercise-section">
-                    <label class="form-label" id="extra-exercise-label">追加種目</label>
-                    <div id="extra-exercise-container">
-                        <!-- 動的に追加種目行が生成されます -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <label class="form-label" id="extra-exercise-label" style="margin-bottom: 0;">実施した種目</label>
+                        <button type="button" class="btn-add-extra" style="width: auto; padding: 6px 12px; font-size: 0.8125rem;" onclick="addExtraExerciseInput()">+ 種目を追加</button>
                     </div>
-                    <button type="button" class="btn-add-extra" onclick="addExtraExerciseInput()">+ 種目を追加</button>
+                    <div id="extra-exercise-container">
+                        <!-- カード追加用エリア -->
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -162,7 +197,6 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <!-- ▼ ここに「編集する」ボタンを追加！ -->
                 <button class="btn-save" id="btn-edit-detail-log" style="margin-right: auto;">編集する</button>
                 <button class="btn-reset" style="margin-top:0; color:#ef4444;" id="btn-delete-detail-log">この記録を削除する</button>
                 <button class="btn-cancel" onclick="closeDetailLogModal()">閉じる</button>
@@ -239,12 +273,14 @@
         </div>
     </div>
 
+    <!-- ▲▲【ここまで追加】▲▲ -->
+
     <footer>
         <div class="footer-tools">
-            <button class="btn-footer-tool" id="btn-open-exercise-library">📋 種目リスト管理</button>
-            <button class="btn-footer-tool" id="btn-open-rotation-settings">⚙️ ローテーション設定</button>
+            <button type="button" class="btn-footer-tool" id="btn-open-exercise-library" onclick="openExerciseLibraryModal()">📋 種目リスト管理</button>
+            <button type="button" class="btn-footer-tool" id="btn-open-rotation-settings" onclick="openRotationSettingsModal()">⚙️ ローテーション設定</button>
         </div>
-        <button class="btn-reset" onclick="resetData()">履歴・メニュー設定を初期化</button>
+        <button type="button" class="btn-reset" onclick="resetData()">履歴・メニュー設定を初期化</button>
     </footer>
 
     <script src="script.js"></script>
