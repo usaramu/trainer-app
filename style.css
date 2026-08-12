@@ -1346,3 +1346,37 @@ html, body, input, select, textarea, button {
 #workout-log-modal .btn-remove-set:hover {
     color: #ef4444 !important; /* ホバー時に赤色 */
 }
+
+/* ==================================================
+   ▲▼ 並び替えボタンのスタイル
+   ================================================== */
+.move-btn-group {
+    display: inline-flex;
+    gap: 3px;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.btn-move-row {
+    background-color: var(--bg-color) !important;
+    border: 1.5px solid var(--border-color) !important;
+    color: var(--primary-color) !important;
+    width: 26px !important;
+    height: 26px !important;
+    border-radius: 8px !important;
+    font-size: 0.65rem !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    transition: all 0.15s ease !important;
+}
+
+.btn-move-row:active {
+    background-color: var(--primary-color) !important;
+    color: #ffffff !important;
+    transform: scale(0.92);
+}

@@ -528,7 +528,7 @@ function toggleRecordType() {
         freeSection.style.display = 'block';
 
         selectMenuLabel.textContent = '対象部位';
-        if (extraLabel) extraLabel.textContent = '実施した種目（⋮⋮ ドラッグで並び替え）';
+        if (extraLabel) extraLabel.textContent = '実施した種目（▲▼ボタンで並び替え）';
         if (addExtraBtn) addExtraBtn.style.display = 'inline-block';
 
         const container = document.getElementById('extra-exercise-container');
@@ -566,7 +566,7 @@ function renderWorkoutLogInputs(menuId) {
     const headerRow = document.createElement('div');
     headerRow.style.cssText = 'display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;';
     headerRow.innerHTML = `
-        <label class="form-label" style="margin-bottom: 0;"></label>
+        <label class="form-label" style="margin-bottom: 0;">メニュー種目（▲▼で並び替え）</label>
         <button type="button" class="btn-add-extra" style="width: auto; padding: 6px 12px; font-size: 0.8125rem;" onclick="addExtraExerciseInput()">+ 種目を追加</button>
     `;
     container.appendChild(headerRow);
@@ -603,8 +603,6 @@ function renderWorkoutLogInputs(menuId) {
     fieldsContainer.id = 'suggested-fields-container';
     existingCards.forEach(card => fieldsContainer.appendChild(card));
     container.appendChild(fieldsContainer);
-
-    makeSortable(fieldsContainer);
 }
 
 // メニュー種目追加時：前回の記録をメニュー名の上に小さく配置する版
@@ -622,19 +620,24 @@ function addSuggestedExerciseInput(exerciseName, detailStr = '', menuId = '', fo
 
     const block = document.createElement('div');
     block.className = 'extra-log-block';
-    block.draggable = true;
 
-    // 前回の実績テキスト整形
     const lastFormatted = formatSingleLogObj(lastObj);
     const lastBadgeHTML = lastFormatted 
-        ? `<div style="font-size:0.72rem; color:var(--primary-hover); font-weight:700; margin-bottom:4px; padding-left:22px;">前回: ${lastFormatted}</div>` 
-        : '<div style="font-size:0.72rem; color:var(--text-sub); margin-bottom:4px; padding-left:22px;">前回: なし</div>';
+        ? `<div style="font-size:0.72rem; color:var(--primary-hover); font-weight:700; margin-bottom:4px; padding-left:2px;">前回: ${lastFormatted}</div>` 
+        : '<div style="font-size:0.72rem; color:var(--text-sub); margin-bottom:4px; padding-left:2px;">前回: なし</div>';
+
+    const moveBtnsHTML = `
+        <div class="move-btn-group">
+            <button type="button" class="btn-move-row" onclick="moveBlock(this, -1)">▲</button>
+            <button type="button" class="btn-move-row" onclick="moveBlock(this, 1)">▼</button>
+        </div>
+    `;
 
     if (isCardio) {
         block.innerHTML = `
             ${lastBadgeHTML}
             <div class="extra-title-row" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px;">
-                <span class="drag-handle">⋮⋮</span>
+                ${moveBtnsHTML}
                 <input type="text" class="form-input extra-name-input" value="${exerciseName}" readonly style="font-weight:700; background-color:var(--primary-soft); color:var(--text-main); margin-bottom:0; flex: 1;">
                 <button type="button" class="btn-remove-row" onclick="this.closest('.extra-log-block').remove()">&times;</button>
             </div>
@@ -647,7 +650,7 @@ function addSuggestedExerciseInput(exerciseName, detailStr = '', menuId = '', fo
         block.innerHTML = `
             ${lastBadgeHTML}
             <div class="extra-title-row" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px;">
-                <span class="drag-handle">⋮⋮</span>
+                ${moveBtnsHTML}
                 <input type="text" class="form-input extra-name-input" value="${exerciseName}" readonly style="font-weight:700; background-color:var(--primary-soft); color:var(--text-main); margin-bottom:0; flex: 1;">
                 <button type="button" class="btn-remove-row" onclick="this.closest('.extra-log-block').remove()">&times;</button>
             </div>
@@ -665,7 +668,6 @@ function addSuggestedExerciseInput(exerciseName, detailStr = '', menuId = '', fo
     }
 
     container.appendChild(block);
-    makeSortable(container);
 }
 
 // セット行を追加する関数（削除ボタン＆自動再番号振り対応）
@@ -725,13 +727,15 @@ function addExtraExerciseInput() {
 
     const block = document.createElement('div');
     block.className = 'extra-log-block';
-    block.draggable = true;
 
     const labelOptionsHTML = state.exerciseLabels.map(label => `<option value="${label}">${label}</option>`).join('');
 
     block.innerHTML = `
         <div style="display: flex; gap: 8px; align-items: flex-end; margin-bottom: 8px;">
-            <span class="drag-handle" style="margin-bottom: 6px;">⋮⋮</span>
+            <div class="move-btn-group" style="margin-bottom: 4px;">
+                <button type="button" class="btn-move-row" onclick="moveBlock(this, -1)">▲</button>
+                <button type="button" class="btn-move-row" onclick="moveBlock(this, 1)">▼</button>
+            </div>
             <div style="flex: 1;">
                 <label class="extra-label-select-label">部位（ラベル）</label>
                 <select class="form-input extra-label-select" style="margin-bottom: 0;" onchange="renderExerciseChipsForBlock(this.closest('.extra-log-block'))">
@@ -747,10 +751,8 @@ function addExtraExerciseInput() {
 
     container.appendChild(block);
     renderExerciseChipsForBlock(block);
-    makeSortable(container);
     block.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
-
 /* ★ ドラッグ＆ドロップ実装 */
 function makeSortable(containerEl) {
     if (!containerEl) return;
@@ -1079,15 +1081,16 @@ function addExerciseInput(name = '', detail = '') {
     const container = document.getElementById('exercise-inputs-container');
     const row = document.createElement('div');
     row.className = 'exercise-row';
-    row.draggable = true;
     row.innerHTML = `
-        <span class="drag-handle">⋮⋮</span>
+        <div class="move-btn-group">
+            <button type="button" class="btn-move-row" onclick="moveBlock(this, -1)">▲</button>
+            <button type="button" class="btn-move-row" onclick="moveBlock(this, 1)">▼</button>
+        </div>
         <input type="text" class="form-input input-name" placeholder="種目名" value="${name}" style="margin-bottom:0; flex:1;">
         <input type="text" class="form-input input-detail" placeholder="目安セット・回数" value="${detail}" style="margin-bottom:0; flex:1;">
         <button type="button" class="btn-remove-row" onclick="this.parentElement.remove()">&times;</button>
     `;
     container.appendChild(row);
-    makeSortable(container);
     row.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
@@ -1499,5 +1502,27 @@ function importPastLogs() {
         }
     } catch (e) {
         alert("データの形式が正しくありません。");
+    }
+}
+
+// ▲▼ ボタンで要素を上下に移動させる共通関数
+function moveBlock(btnEl, direction) {
+    const block = btnEl.closest('.extra-log-block') || btnEl.closest('.exercise-row');
+    if (!block) return;
+    const container = block.parentElement;
+    if (!container) return;
+
+    if (direction === -1) {
+        // 上に移動
+        const prev = block.previousElementSibling;
+        if (prev) {
+            container.insertBefore(block, prev);
+        }
+    } else if (direction === 1) {
+        // 下に移動
+        const next = block.nextElementSibling;
+        if (next) {
+            container.insertBefore(next, block);
+        }
     }
 }
