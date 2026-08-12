@@ -1142,12 +1142,12 @@ footer {
 }
 
 /* ==================================================
-   モーダル幅・横スクロール防止の調整（縦スクロールのみに制限）
+   モーダル幅・全要素の自動フィット調整（見切れ完全防止）
    ================================================== */
 
-/* 画面全体の横揺れ・はみ出しを防止 */
+/* 画面外へのはみ出し・横揺れを防止 */
 html, body {
-    overflow-x: hidden !important;
+    overflow-x: hidden;
     width: 100%;
 }
 
@@ -1162,71 +1162,116 @@ html, body {
     display: none;
     justify-content: center;
     align-items: center;
-    padding: 12px;
+    padding: 8px; /* スマホ用に余白を少しコンパクトに */
     z-index: 100;
-    overflow-x: hidden !important; /* オーバーフロー遮断 */
+    box-sizing: border-box;
 }
 
 .modal-content {
     background-color: var(--card-bg);
     border-radius: 22px;
     width: 100%;
-    max-width: 480px; /* スマホ画面に収まりやすい幅 */
-    max-height: 85vh;
+    max-width: 460px;
+    max-height: 88vh;
     display: flex;
     flex-direction: column;
-    overflow: hidden !important; /* 横スクロール遮断 */
+    overflow: hidden;
     box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
     border: 2px solid #FFFFFF;
-    box-sizing: border-box !important;
+    box-sizing: border-box;
 }
 
 .modal-body {
-    padding: 16px 14px;
-    overflow-y: auto !important; /* 縦スクロールのみ許可 */
-    overflow-x: hidden !important; /* 横スクロールを完全に禁止 */
+    padding: 14px 10px; /* 左右余白を最適化して表示領域を広げる */
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
     flex-grow: 1;
     -webkit-overflow-scrolling: touch;
     width: 100%;
-    box-sizing: border-box !important;
+    box-sizing: border-box;
 }
 
-/* フォーム入力要素のはみ出し防止 */
-.form-input, .form-textarea, select.form-input {
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-}
-
-/* モーダル内のカード枠・要素が幅を超えないように制御 */
+/* カード要素がモーダル幅を超えないように制御 */
 #workout-log-modal .extra-log-block, 
 #edit-modal .exercise-row {
     width: 100% !important;
     box-sizing: border-box !important;
+    padding: 8px 8px !important;
 }
 
-/* セット入力行のレイアウト折り返し・折りたたみ調整 */
+/* ★ セット入力行（1set 〇kg 〇回）の自動縮小・画面ピッタリ配置 */
 #workout-log-modal .set-input-row {
     width: 100% !important;
     box-sizing: border-box !important;
+    display: flex !important;
+    align-items: center !important;
     justify-content: space-between !important;
+    gap: 4px !important;
+}
+
+#workout-log-modal .set-label {
+    font-size: 0.72rem !important;
+    font-weight: 900 !important;
+    min-width: 28px !important;
+    color: var(--primary-color) !important;
+    flex-shrink: 0 !important; /* ラベルがつぶれないように保護 */
 }
 
 #workout-log-modal .set-field-group {
     display: flex !important;
     align-items: center !important;
-    gap: 4px !important;
-    flex-wrap: wrap !important; /* 幅が狭くても綺麗に収める */
+    gap: 3px !important;
+    flex: 1 !important;
+    justify-content: flex-end !important;
+    min-width: 0 !important; /* 狭い画面でも柔軟に縮小を許可 */
 }
 
+/* 数値入力ボックスの可変フィット設定 */
 #workout-log-modal .set-field-group input.form-input {
-    width: 48px !important; /* 入力枠の幅を少しコンパクトに調整 */
+    width: 42px !important; /* 幅をコンパクトにし、見切れを防止 */
+    min-width: 32px !important;
+    height: 28px !important;
+    padding: 0 2px !important;
+    font-size: 0.8125rem !important;
+    border-radius: 8px !important;
+    border: 1.5px solid var(--border-color) !important;
+    background-color: var(--bg-color) !important;
+    text-align: center !important;
+    margin-bottom: 0 !important;
 }
 
-/* テーマ切り替えグリッドのスマホ対応 */
-.theme-select-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
-    width: 100%;
+#workout-log-modal .set-unit {
+    font-size: 0.7rem !important;
+    margin-right: 4px !important;
+    font-weight: 700 !important;
+    flex-shrink: 0 !important;
+}
+
+#workout-log-modal .set-unit:last-child {
+    margin-right: 0 !important;
+}
+
+/* 有酸素（時間・カロリー）入力行の自動収まり設定 */
+.direct-input-group[data-cardio="true"] {
+    display: flex !important;
+    gap: 8px !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
     box-sizing: border-box !important;
+}
+
+.direct-input-group[data-cardio="true"] .direct-field {
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+}
+
+.direct-input-group[data-cardio="true"] input.extra-minutes,
+.direct-input-group[data-cardio="true"] input.extra-calories {
+    width: 100% !important;
+    max-width: 58px !important;
+    min-width: 36px !important;
 }
