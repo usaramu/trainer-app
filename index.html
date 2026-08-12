@@ -112,7 +112,7 @@
                 <label class="form-label">メモ・フォームの注意点</label>
                 <textarea id="edit-menu-memo" class="form-input form-textarea" placeholder="例: シートの高さは3、グリップは広め"></textarea>
 
-                <label class="form-label">種目リスト</label>
+                <label class="form-label">種目リスト（⋮⋮ ドラッグで並び替え）</label>
                 <div id="exercise-inputs-container">
                     <!-- Dynamic exercise inputs -->
                 </div>
@@ -199,43 +199,36 @@
         </div>
     </div>
 
-    <!-- ローテーション設定モーダル -->
-    <div class="modal-overlay" id="rotation-settings-modal">
+    <!-- テーマ設定モーダル -->
+    <div class="modal-overlay" id="theme-settings-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>ローテーション設定</h2>
-                <button class="btn-close" onclick="closeRotationSettingsModal()">&times;</button>
+                <h2>🎨 カラーテーマ切り替え</h2>
+                <button class="btn-close" onclick="closeThemeSettingsModal()">&times;</button>
             </div>
             <div class="modal-body">
-                <label class="form-label">おすすめメニューの決め方</label>
-                <div class="rotation-mode-options">
-                    <label class="rotation-mode-option">
-                        <input type="radio" name="rotation-mode" id="rotation-mode-sequence" onchange="toggleWeekdaySection()">
-                        <span>順番通り</span>
-                    </label>
-                    <label class="rotation-mode-option">
-                        <input type="radio" name="rotation-mode" id="rotation-mode-weekday" onchange="toggleWeekdaySection()">
-                        <span>曜日固定</span>
-                    </label>
-                </div>
-
-                <div id="sequence-order-section">
-                    <label class="form-label" style="margin-top: 6px;">実施する順番（↑↓で並び替え）</label>
-                    <div id="sequence-order-container">
-                        <!-- JSで並び替え行を生成 -->
-                    </div>
-                </div>
-
-                <div id="weekday-assignment-section">
-                    <label class="form-label" style="margin-top: 6px;">曜日ごとのメニュー</label>
-                    <div id="weekday-assignment-container">
-                        <!-- JSで曜日行を生成 -->
-                    </div>
+                <label class="form-label">お好みのカラーテーマを選んでください</label>
+                <div class="theme-select-grid">
+                    <button type="button" class="btn-theme-option" onclick="changeTheme('blue')">
+                        <span class="theme-color-dot" style="background:#82A0C2;"></span>
+                        アイスブルー
+                    </button>
+                    <button type="button" class="btn-theme-option" onclick="changeTheme('pink')">
+                        <span class="theme-color-dot" style="background:#EAA4B2;"></span>
+                        パステルピンク
+                    </button>
+                    <button type="button" class="btn-theme-option" onclick="changeTheme('green')">
+                        <span class="theme-color-dot" style="background:#88C4B8;"></span>
+                        セージグリーン
+                    </button>
+                    <button type="button" class="btn-theme-option" onclick="changeTheme('lavender')">
+                        <span class="theme-color-dot" style="background:#A49BCE;"></span>
+                        ラベンダー
+                    </button>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn-cancel" onclick="closeRotationSettingsModal()">キャンセル</button>
-                <button class="btn-save" onclick="saveRotationSettings()">保存する</button>
+                <button class="btn-cancel" onclick="closeThemeSettingsModal()">閉じる</button>
             </div>
         </div>
     </div>
@@ -271,7 +264,7 @@
     <footer>
         <div class="footer-tools">
             <button type="button" class="btn-footer-tool" id="btn-open-exercise-library" onclick="openExerciseLibraryModal()">📋 種目リスト管理</button>
-            <button type="button" class="btn-footer-tool" id="btn-open-rotation-settings" onclick="openRotationSettingsModal()">⚙️ ローテーション設定</button>
+            <button type="button" class="btn-footer-tool" onclick="openThemeSettingsModal()">🎨 テーマ切り替え</button>
             <button type="button" class="btn-footer-tool" onclick="importPastLogs()">📥 過去データ一括登録</button>
         </div>
         <button type="button" class="btn-reset" onclick="resetData()">履歴・メニュー設定を初期化</button>

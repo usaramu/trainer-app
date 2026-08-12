@@ -20,7 +20,7 @@ const initialDefaultMenus = [
         exercises: [
             { name: 'バーベル/ダンベル・ルーマニアンデッドリフト', detail: '15~20回 × 3セット' },
             { name: 'ブルガリアンスクワット', detail: '左右各12~15回 × 3セット' },
-            { name: 'ヒップアブダクション', detail: '骨盤後継 / 20回 × 3セット ' },
+            { name: 'ヒップアブダクション（骨盤後傾）', detail: '20回 × 3セット ' },
         ]
     },
     {
@@ -31,7 +31,7 @@ const initialDefaultMenus = [
             { name: 'ヒップスラスト', detail: '15~20回 × 3セット' },
             { name: 'バックエクステンション', detail: '自重 / 15回 × 3セット' },
             { name: 'ハンギングレッグレイズ', detail: '12〜15回 × 3セット' },
-            { name: 'ヒップアブダクション', detail: '骨盤前傾 / 15~20回 × 3セット' },
+            { name: 'ヒップアブダクション（骨盤前傾）', detail: '15~20回 × 3セット' },
         ]
     },
     {
@@ -53,7 +53,7 @@ const initialDefaultMenus = [
             { name: 'ケーブル・グルートキックバック', detail: '左右各15〜20回 × 3セット' },
             { name: 'バーベル・グッドモーニング', detail: '空バー〜軽め15~20回 × 3セット' },
             { name: 'ライイング・レッグカール', detail: 'マシン軽め / 15~20回 × 3セット' },
-            { name: 'ヒップアブダクション', detail: '骨盤立てる / 15~20回 × 3セット' },
+            { name: 'ヒップアブダクション（骨盤立て）', detail: '15~20回 × 3セット' },
         ]
     },
     {
@@ -67,51 +67,27 @@ const initialDefaultMenus = [
 ];
 
 const MENU_LABELS = {
-    'A': '上',
-    'B': '下',
-    'C': '下',
-    'D': '上',
-    'E': '下',
-    'F': '🏃',
-    'ALL': '全',
-    'OFF': '休'
+    'A': '上', 'B': '下', 'C': '下', 'D': '上', 'E': '下', 'F': '🏃', 'ALL': '全', 'OFF': '休'
 };
 
 // アプリ全体の状態
 let state = {
-    lastCompletedId: null,
-    lastCompletedDate: null,
+    theme: 'blue',
     menus: JSON.parse(JSON.stringify(initialDefaultMenus)),
     logs: [],
     calendarYear: new Date().getFullYear(),
     calendarMonth: new Date().getMonth(),
     editingMenuId: null,
-    rotationMode: 'sequence',
-    weekdayMenus: { 0: 'F', 1: 'A', 2: 'B', 3: 'C', 4: 'D', 5: 'E', 6: 'OFF' },
-    sequenceOrder: ['A', 'B', 'F', 'C', 'D', 'E'],
     exerciseLabels: ['胸', '背中', '脚', '肩', '腕', 'お尻', '腹筋', '全身', '有酸素運動', 'その他'],
     exerciseLibrary: {}
 };
 
 function init() {
     loadState();
-    recalculateLastCompleted();
+    applyTheme(state.theme);
     renderRecommendation();
     renderCalendar();
     renderMenuTable();
-
-    const startBtn = document.getElementById('btn-start-today');
-    if (startBtn) {
-        startBtn.addEventListener('click', () => {
-            const currentRecId = getRecommendedMenuId();
-            openWorkoutLogModal(currentRecId === 'OFF' ? 'A' : currentRecId);
-        });
-    }
-
-    const settingsBtn = document.getElementById('btn-open-rotation-settings');
-    if (settingsBtn) {
-        settingsBtn.addEventListener('click', openRotationSettingsModal);
-    }
 
     const libraryBtn = document.getElementById('btn-open-exercise-library');
     if (libraryBtn) {
@@ -119,18 +95,28 @@ function init() {
     }
 }
 
+// 既存データ内のヒップアブダクションを自動的に上書き分類する処理を追加
 function loadState() {
     const savedState = localStorage.getItem('workout_tracker_state');
     if (savedState) {
         const parsed = JSON.parse(savedState);
+        if (parsed.theme) state.theme = parsed.theme;
         
-        if (parsed.menus) state.menus = parsed.menus;
+        if (parsed.menus) {
+            state.menus = parsed.menus;
+            // 既存のメニュー内の「ヒップアブダクション」を自動修正（マイグレーション）
+            state.menus.forEach(menu => {
+                if (menu.id === 'B') {
+                    menu.exercises.forEach(ex => { if (ex.name === 'ヒップアブダクション') ex.name = 'ヒップアブダクション（骨盤後傾）'; });
+                } else if (menu.id === 'C') {
+                    menu.exercises.forEach(ex => { if (ex.name === 'ヒップアブダクション') ex.name = 'ヒップアブダクション（骨盤前傾）'; });
+                } else if (menu.id === 'E') {
+                    menu.exercises.forEach(ex => { if (ex.name === 'ヒップアブダクション') ex.name = 'ヒップアブダクション（骨盤立て）'; });
+                }
+            });
+        }
+        
         if (parsed.logs) state.logs = parsed.logs;
-        if (parsed.sequenceOrder) state.sequenceOrder = parsed.sequenceOrder;
-        state.lastCompletedId = parsed.lastCompletedId || null;
-        state.lastCompletedDate = parsed.lastCompletedDate || null;
-        state.rotationMode = parsed.rotationMode || 'sequence';
-        state.weekdayMenus = parsed.weekdayMenus || { 0: 'F', 1: 'A', 2: 'B', 3: 'C', 4: 'D', 5: 'E', 6: 'OFF' };
         state.exerciseLabels = parsed.exerciseLabels || ['胸', '背中', '脚', '肩', '腕', 'お尻', '腹筋', '全身', '有酸素運動', 'その他'];
         
         if (parsed.exerciseLibrarySchema === 'label-v3' && parsed.exerciseLibrary) {
@@ -145,17 +131,44 @@ function loadState() {
 
 function saveState() {
     localStorage.setItem('workout_tracker_state', JSON.stringify({
-        lastCompletedId: state.lastCompletedId,
-        lastCompletedDate: state.lastCompletedDate,
+        theme: state.theme,
         menus: state.menus,
         logs: state.logs,
-        rotationMode: state.rotationMode,
-        weekdayMenus: state.weekdayMenus,
-        sequenceOrder: state.sequenceOrder,
         exerciseLabels: state.exerciseLabels,
         exerciseLibrarySchema: 'label-v3',
         exerciseLibrary: state.exerciseLibrary
     }));
+}
+
+/* ★ テーマ変更機能 */
+function applyTheme(themeName) {
+    document.body.classList.remove('theme-pink', 'theme-green', 'theme-lavender');
+    if (themeName !== 'blue') {
+        document.body.classList.add(`theme-${themeName}`);
+    }
+    state.theme = themeName;
+}
+
+function openThemeSettingsModal() {
+    const grid = document.querySelector('.theme-select-grid');
+    if (grid) {
+        grid.querySelectorAll('.btn-theme-option').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        const currentBtn = grid.querySelector(`[onclick="changeTheme('${state.theme}')"]`);
+        if (currentBtn) currentBtn.classList.add('active');
+    }
+    document.getElementById('theme-settings-modal').classList.add('active');
+}
+
+function closeThemeSettingsModal() {
+    document.getElementById('theme-settings-modal').classList.remove('active');
+}
+
+function changeTheme(themeName) {
+    applyTheme(themeName);
+    saveState();
+    openThemeSettingsModal();
 }
 
 function buildDefaultExerciseLibrary() {
@@ -173,38 +186,7 @@ function buildDefaultExerciseLibrary() {
     };
 }
 
-function recalculateLastCompleted() {
-    const workoutLogs = state.logs.filter(l => l.menuId !== 'OFF');
-    if (workoutLogs.length > 0) {
-        const latest = workoutLogs[workoutLogs.length - 1];
-        state.lastCompletedId = latest.menuId;
-        const [y, m, d] = latest.date.split('-');
-        state.lastCompletedDate = `${y}/${parseInt(m)}/${parseInt(d)}`;
-    } else {
-        state.lastCompletedId = null;
-        state.lastCompletedDate = null;
-    }
-}
-
-function getNextMenuId(currentId) {
-    const sequence = state.sequenceOrder;
-    if (!currentId) return sequence[0];
-    const currentIndex = sequence.indexOf(currentId);
-    if (currentIndex === -1 || currentIndex === sequence.length - 1) {
-        return sequence[0];
-    }
-    return sequence[currentIndex + 1];
-}
-
-function getRecommendedMenuId() {
-    if (state.rotationMode === 'weekday') {
-        const todayWeekday = new Date().getDay();
-        return state.weekdayMenus[todayWeekday] || 'OFF';
-    }
-    return getNextMenuId(state.lastCompletedId);
-}
-
-// 部位ごとの前回からの経過日数を計算して更新する（完全分離版）
+// 部位ごとの前回からの経過日数を計算して更新する
 function renderRecommendation() {
     const calcDaysAgo = (category) => {
         const catLogs = state.logs.filter(l => {
@@ -214,7 +196,6 @@ function renderRecommendation() {
             const title = menu ? menu.title : '';
             const isAll = l.menuId === 'ALL' || title.includes('全身');
 
-            // 各部位の記録を完全分離して判定
             if (category === '上半身') return title.includes('上半身');
             if (category === '下半身') return title.includes('下半身');
             if (category === '全身') return isAll;
@@ -228,7 +209,6 @@ function renderRecommendation() {
         const [y, m, d] = latestLog.date.split('-');
         const lastDate = new Date(parseInt(y, 10), parseInt(m, 10) - 1, parseInt(d, 10));
         
-        // 本日の日付（時刻を00:00:00にリセット）
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
@@ -237,7 +217,7 @@ function renderRecommendation() {
 
         if (diffDays === 0) return '今日';
         if (diffDays === 1) return '昨日';
-        return `${diffDays}日前`;
+        return `${diffDays}年前` ? `${diffDays}日前` : '未記録';
     };
 
     const upperEl = document.getElementById('days-upper');
@@ -285,17 +265,6 @@ function fillSetsContainerFromItem(block, item) {
     });
 }
 
-function formatLogObj(logObj) {
-    if (!logObj) return '';
-    if (typeof logObj === 'string') return logObj;
-
-    if (Array.isArray(logObj)) {
-        return logObj.map(item => formatSingleLogObj(item)).filter(Boolean).join(', ');
-    }
-
-    return formatSingleLogObj(logObj);
-}
-
 function formatSingleLogObj(logObj) {
     if (!logObj) return '';
 
@@ -317,31 +286,20 @@ function formatSingleLogObj(logObj) {
                 if (currentGroup) {
                     groupedSets.push(currentGroup);
                 }
-                currentGroup = {
-                    weight: set.weight,
-                    reps: set.reps,
-                    count: 1
-                };
+                currentGroup = { weight: set.weight, reps: set.reps, count: 1 };
             }
         });
-        if (currentGroup) {
-            groupedSets.push(currentGroup);
-        }
+        if (currentGroup) groupedSets.push(currentGroup);
 
         return groupedSets.map(g => {
-            if (g.count > 1) {
-                return `${g.weight}kg×${g.reps}回 × ${g.count}set`;
-            }
+            if (g.count > 1) return `${g.weight}kg×${g.reps}回 × ${g.count}set`;
             return `${g.weight}kg×${g.reps}回`;
         }).join(', ');
     }
 
     const parts = [];
-    if (logObj.weight !== null && logObj.weight !== undefined && logObj.weight !== '') {
-        parts.push(`${logObj.weight}kg`);
-    }
+    if (logObj.weight !== null && logObj.weight !== undefined && logObj.weight !== '') parts.push(`${logObj.weight}kg`);
     if (logObj.reps) parts.push(`${logObj.reps}回`);
-    if (logObj.sets) parts.push(`${logObj.sets}set`);
     return parts.join(' × ');
 }
 
@@ -361,29 +319,25 @@ function renderMenuTable() {
     const sortedMenus = [...state.menus].sort((a, b) => {
         const orderA = getMenuGroupOrder(a);
         const orderB = getMenuGroupOrder(b);
-        if (orderA !== orderB) {
-            return orderA - orderB;
-        }
+        if (orderA !== orderB) return orderA - orderB;
         return a.id.localeCompare(b.id);
     });
 
     sortedMenus.forEach(menu => {
         const tr = document.createElement('tr');
 
-        let exListHTML = menu.exercises.map(e => {
-            return `
-                <div class="table-ex-item">
-                    <span class="table-ex-name">• ${e.name}</span> 
-                    <span class="table-ex-meta">${e.detail}</span>
-                </div>
-            `;
-        }).join('');
+        let exListHTML = menu.exercises.map(e => `
+            <div class="table-ex-item">
+                <span class="table-ex-name">• ${e.name}</span> 
+                <span class="table-ex-meta">${e.detail}</span>
+            </div>
+        `).join('');
 
         tr.innerHTML = `
             <td data-label="メニュー"><span class="menu-badge menu-badge-${menu.id}">${menu.id}</span></td>
             <td data-label="対象部位"><strong>${menu.title}</strong></td>
             <td data-label="種目と設定">${exListHTML}</td>
-            <td data-label="メモ" style="color:var(--text-sub); font-size:0.8125rem;">${menu.memo || '-'}</td>
+            <td data-label="メモ" style="color:var(--text-sub); font-size:0.78rem;">${menu.memo || '-'}</td>
             <td data-label=""><button class="btn-table-edit" onclick="openEditModal('${menu.id}')">編集する</button></td>
         `;
 
@@ -395,11 +349,7 @@ function recordOffDay() {
     const todayISO = getTodayISO();
 
     state.logs = state.logs.filter(l => l.date !== todayISO);
-    state.logs.push({
-        date: todayISO,
-        menuId: 'OFF',
-        exerciseLogs: {}
-    });
+    state.logs.push({ date: todayISO, menuId: 'OFF', exerciseLogs: {} });
 
     saveState();
     renderCalendar();
@@ -428,9 +378,7 @@ function openWorkoutLogModal(defaultMenuId, presetDateISO, isEdit = false) {
     const sortedMenus = [...state.menus].sort((a, b) => {
         const orderA = getMenuGroupOrder(a);
         const orderB = getMenuGroupOrder(b);
-        if (orderA !== orderB) {
-            return orderA - orderB;
-        }
+        if (orderA !== orderB) return orderA - orderB;
         return a.id.localeCompare(b.id);
     });
 
@@ -467,9 +415,7 @@ function openWorkoutLogModal(defaultMenuId, presetDateISO, isEdit = false) {
         }
     }
 
-    if (currentMenuId) {
-        selectEl.value = currentMenuId;
-    }
+    if (currentMenuId) selectEl.value = currentMenuId;
 
     toggleRecordType();
 
@@ -620,7 +566,7 @@ function renderWorkoutLogInputs(menuId) {
     const headerRow = document.createElement('div');
     headerRow.style.cssText = 'display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;';
     headerRow.innerHTML = `
-        <label class="form-label" style="margin-bottom: 0;">メニュー種目</label>
+        <label class="form-label" style="margin-bottom: 0;">メニュー種目（⋮⋮ ドラッグで並び替え）</label>
         <button type="button" class="btn-add-extra" style="width: auto; padding: 6px 12px; font-size: 0.8125rem;" onclick="addExtraExerciseInput()">+ 種目を追加</button>
     `;
     container.appendChild(headerRow);
@@ -657,8 +603,11 @@ function renderWorkoutLogInputs(menuId) {
     fieldsContainer.id = 'suggested-fields-container';
     existingCards.forEach(card => fieldsContainer.appendChild(card));
     container.appendChild(fieldsContainer);
+
+    makeSortable(fieldsContainer);
 }
 
+// メニュー種目追加時：前回の記録をメニュー名の上に小さく配置する版
 function addSuggestedExerciseInput(exerciseName, detailStr = '', menuId = '', forceCardio = null) {
     const container = document.getElementById('suggested-fields-container');
     const lastObj = getLastExerciseLogObj(exerciseName) || {};
@@ -673,10 +622,19 @@ function addSuggestedExerciseInput(exerciseName, detailStr = '', menuId = '', fo
 
     const block = document.createElement('div');
     block.className = 'extra-log-block';
+    block.draggable = true;
+
+    // 前回の実績テキスト整形
+    const lastFormatted = formatSingleLogObj(lastObj);
+    const lastBadgeHTML = lastFormatted 
+        ? `<div style="font-size:0.72rem; color:var(--primary-hover); font-weight:700; margin-bottom:4px; padding-left:22px;">前回: ${lastFormatted}</div>` 
+        : '<div style="font-size:0.72rem; color:var(--text-sub); margin-bottom:4px; padding-left:22px;">前回: なし</div>';
 
     if (isCardio) {
         block.innerHTML = `
-            <div class="extra-title-row" style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+            ${lastBadgeHTML}
+            <div class="extra-title-row" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px;">
+                <span class="drag-handle">⋮⋮</span>
                 <input type="text" class="form-input extra-name-input" value="${exerciseName}" readonly style="font-weight:700; background-color:var(--primary-soft); color:var(--text-main); margin-bottom:0; flex: 1;">
                 <button type="button" class="btn-remove-row" onclick="this.closest('.extra-log-block').remove()">&times;</button>
             </div>
@@ -687,7 +645,9 @@ function addSuggestedExerciseInput(exerciseName, detailStr = '', menuId = '', fo
         `;
     } else {
         block.innerHTML = `
-            <div class="extra-title-row" style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+            ${lastBadgeHTML}
+            <div class="extra-title-row" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px;">
+                <span class="drag-handle">⋮⋮</span>
                 <input type="text" class="form-input extra-name-input" value="${exerciseName}" readonly style="font-weight:700; background-color:var(--primary-soft); color:var(--text-main); margin-bottom:0; flex: 1;">
                 <button type="button" class="btn-remove-row" onclick="this.closest('.extra-log-block').remove()">&times;</button>
             </div>
@@ -705,6 +665,7 @@ function addSuggestedExerciseInput(exerciseName, detailStr = '', menuId = '', fo
     }
 
     container.appendChild(block);
+    makeSortable(container);
 }
 
 function addSetRowToBlock(blockEl, initWeight = null, initReps = null) {
@@ -746,11 +707,13 @@ function addExtraExerciseInput() {
 
     const block = document.createElement('div');
     block.className = 'extra-log-block';
+    block.draggable = true;
 
     const labelOptionsHTML = state.exerciseLabels.map(label => `<option value="${label}">${label}</option>`).join('');
 
     block.innerHTML = `
         <div style="display: flex; gap: 8px; align-items: flex-end; margin-bottom: 8px;">
+            <span class="drag-handle" style="margin-bottom: 6px;">⋮⋮</span>
             <div style="flex: 1;">
                 <label class="extra-label-select-label">部位（ラベル）</label>
                 <select class="form-input extra-label-select" style="margin-bottom: 0;" onchange="renderExerciseChipsForBlock(this.closest('.extra-log-block'))">
@@ -766,9 +729,56 @@ function addExtraExerciseInput() {
 
     container.appendChild(block);
     renderExerciseChipsForBlock(block);
+    makeSortable(container);
     block.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
+/* ★ ドラッグ＆ドロップ実装 */
+function makeSortable(containerEl) {
+    if (!containerEl) return;
+    let draggingItem = null;
+
+    containerEl.querySelectorAll('.extra-log-block, .exercise-row').forEach(item => {
+        item.draggable = true;
+
+        item.ondragstart = (e) => {
+            draggingItem = item;
+            item.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        };
+
+        item.ondragend = () => {
+            draggingItem = null;
+            item.classList.remove('dragging');
+        };
+
+        item.ondragover = (e) => {
+            e.preventDefault();
+            const afterElement = getDragAfterElement(containerEl, e.clientY);
+            if (afterElement == null) {
+                containerEl.appendChild(draggingItem);
+            } else {
+                containerEl.insertBefore(draggingItem, afterElement);
+            }
+        };
+    });
+}
+
+function getDragAfterElement(container, y) {
+    const draggableElements = [...container.querySelectorAll('.extra-log-block:not(.dragging), .exercise-row:not(.dragging)')];
+
+    return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+        } else {
+            return closest;
+        }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+// 自由入力での種目選択時：種目名選択の上に前回の記録を表示する版
 function renderExerciseChipsForBlock(block) {
     const label = block.querySelector('.extra-label-select').value;
     const chipList = block.querySelector('.extra-chip-list');
@@ -794,10 +804,7 @@ function renderExerciseChipsForBlock(block) {
             <div class="sets-container"></div>
             <button type="button" class="btn-add-set-row" onclick="addSetRowToBlock(this.closest('.extra-log-block'))">＋ セットを追加</button>
         `;
-        
-        for (let s = 1; s <= 3; s++) {
-            addSetRowToBlock(block);
-        }
+        for (let s = 1; s <= 3; s++) addSetRowToBlock(block);
     }
 
     const names = state.exerciseLibrary[label] || [];
@@ -814,10 +821,8 @@ function renderExerciseChipsForBlock(block) {
 
     chipList.innerHTML = `
         <div style="margin-bottom: 8px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                <label class="extra-label-select-label" style="margin-bottom: 0;">種目名</label>
-                <div class="last-btn-holder"></div>
-            </div>
+            <div class="last-btn-holder"></div>
+            <label class="extra-label-select-label" style="margin-bottom: 4px; display: block;">種目名</label>
             <select class="form-input extra-name-select" style="margin-bottom: 0; font-weight: 700;">
                 ${optionsHTML}
             </select>
@@ -833,12 +838,11 @@ function renderExerciseChipsForBlock(block) {
         if (selectedName) {
             const lastObj = getLastExerciseLogObj(selectedName);
             if (lastObj) {
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'btn-copy-last';
-                btn.textContent = '前回と同じ';
-                btn.onclick = () => prefillLastLogValues(block, selectedName);
-                holder.appendChild(btn);
+                const formatted = formatSingleLogObj(lastObj);
+                const badge = document.createElement('div');
+                badge.style.cssText = 'font-size:0.72rem; color:var(--primary-hover); font-weight:700; margin-bottom:4px;';
+                badge.textContent = `前回: ${formatted}`;
+                holder.appendChild(badge);
             }
             prefillLastLogValues(block, selectedName);
         }
@@ -855,9 +859,7 @@ function prefillLastLogValues(block, name) {
     if (minInput && lastObj.minutes !== undefined && lastObj.minutes !== null) minInput.value = lastObj.minutes;
     if (calInput && lastObj.calories !== undefined && lastObj.calories !== null) calInput.value = lastObj.calories;
 
-    if (!minInput) {
-        fillSetsContainerFromItem(block, lastObj);
-    }
+    if (!minInput) fillSetsContainerFromItem(block, lastObj);
 }
 
 function closeWorkoutLogModal() {
@@ -874,7 +876,6 @@ function submitWorkoutLog() {
         state.logs = state.logs.filter(l => l.date !== selectedISO);
         state.logs.push({ date: selectedISO, menuId: 'OFF', exerciseLogs: {} });
         state.logs.sort((a, b) => a.date.localeCompare(b.date));
-        recalculateLastCompleted();
         saveState();
         renderRecommendation();
         renderCalendar();
@@ -927,9 +928,7 @@ function submitWorkoutLog() {
                     }
                 });
 
-                if (setsArray.length > 0) {
-                    appendExerciseLog(name, { setsArray: setsArray });
-                }
+                if (setsArray.length > 0) appendExerciseLog(name, { setsArray: setsArray });
             }
         }
     });
@@ -949,7 +948,6 @@ function submitWorkoutLog() {
 
     state.logs.sort((a, b) => a.date.localeCompare(b.date));
 
-    recalculateLastCompleted();
     saveState();
     renderRecommendation();
     renderCalendar();
@@ -1029,7 +1027,6 @@ function deleteLogByIndex(logIndex) {
     if (logIndex < 0 || logIndex >= state.logs.length) return;
 
     state.logs.splice(logIndex, 1);
-    recalculateLastCompleted();
     saveState();
     renderRecommendation();
     renderCalendar();
@@ -1051,6 +1048,7 @@ function openEditModal(menuId) {
         addExerciseInput(e.name, e.detail);
     });
 
+    makeSortable(container);
     document.getElementById('edit-modal').classList.add('active');
 }
 
@@ -1063,12 +1061,15 @@ function addExerciseInput(name = '', detail = '') {
     const container = document.getElementById('exercise-inputs-container');
     const row = document.createElement('div');
     row.className = 'exercise-row';
+    row.draggable = true;
     row.innerHTML = `
-        <input type="text" class="form-input input-name" placeholder="種目名" value="${name}">
-        <input type="text" class="form-input input-detail" placeholder="目安セット・回数" value="${detail}">
+        <span class="drag-handle">⋮⋮</span>
+        <input type="text" class="form-input input-name" placeholder="種目名" value="${name}" style="margin-bottom:0; flex:1;">
+        <input type="text" class="form-input input-detail" placeholder="目安セット・回数" value="${detail}" style="margin-bottom:0; flex:1;">
         <button type="button" class="btn-remove-row" onclick="this.parentElement.remove()">&times;</button>
     `;
     container.appendChild(row);
+    makeSortable(container);
     row.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
@@ -1089,9 +1090,7 @@ function saveMenuEdit() {
     rows.forEach(row => {
         const name = row.querySelector('.input-name').value.trim();
         const detail = row.querySelector('.input-detail').value.trim();
-        if (name) {
-            newExercises.push({ name, detail });
-        }
+        if (name) newExercises.push({ name, detail });
     });
 
     const targetMenu = state.menus.find(m => m.id === state.editingMenuId);
@@ -1178,7 +1177,7 @@ function renderCalendar() {
             cell.classList.add('clickable');
             cell.title = 'クリックしてこの日の記録を追加';
             cell.onclick = () => {
-                openWorkoutLogModal(getRecommendedMenuId() === 'OFF' ? state.sequenceOrder[0] : getRecommendedMenuId(), dateStr);
+                openWorkoutLogModal('ALL', dateStr);
             };
         }
 
@@ -1209,39 +1208,16 @@ function getTodayISO() {
 function resetData() {
     if (confirm('履歴、完了データ、カスタムメニューをすべて初期化しますか？')) {
         localStorage.removeItem('workout_tracker_state');
-        state.lastCompletedId = null;
-        state.lastCompletedDate = null;
+        state.theme = 'blue';
         state.menus = JSON.parse(JSON.stringify(initialDefaultMenus));
         state.logs = [];
-        state.rotationMode = 'sequence';
-        state.weekdayMenus = { 0: 'F', 1: 'A', 2: 'B', 3: 'C', 4: 'D', 5: 'E', 6: 'OFF' };
-        state.sequenceOrder = ['A', 'B', 'F', 'C', 'D', 'E'];
         state.exerciseLabels = ['胸', '背中', '脚', '肩', '腕', 'お尻', '腹筋', '全身', '有酸素運動', 'その他'];
         state.exerciseLibrary = buildDefaultExerciseLibrary();
         init();
     }
 }
 
-const WEEKDAY_LABELS = ['日', '月', '火', '水', '木', '金', '土'];
-let tempSequenceOrder = [];
-
-function openRotationSettingsModal() {
-    if (!state.sequenceOrder) state.sequenceOrder = ['A', 'B', 'F', 'C', 'D', 'E'];
-    if (!state.weekdayMenus) state.weekdayMenus = { 0: 'F', 1: 'A', 2: 'B', 3: 'C', 4: 'D', 5: 'E', 6: 'OFF' };
-
-    const seqRadio = document.getElementById('rotation-mode-sequence');
-    const weekRadio = document.getElementById('rotation-mode-weekday');
-    if (seqRadio) seqRadio.checked = state.rotationMode === 'sequence';
-    if (weekRadio) weekRadio.checked = state.rotationMode === 'weekday';
-
-    tempSequenceOrder = [...state.sequenceOrder];
-    renderSequenceOrderInputs();
-    renderWeekdayAssignmentInputs();
-    toggleWeekdaySection();
-
-    const modal = document.getElementById('rotation-settings-modal');
-    if (modal) modal.classList.add('active');
-}
+let currentLibraryLabel = null;
 
 function openExerciseLibraryModal() {
     if (!state.exerciseLabels || state.exerciseLabels.length === 0) {
@@ -1258,99 +1234,6 @@ function openExerciseLibraryModal() {
     const modal = document.getElementById('exercise-library-modal');
     if (modal) modal.classList.add('active');
 }
-
-function closeRotationSettingsModal() {
-    document.getElementById('rotation-settings-modal').classList.remove('active');
-}
-
-function toggleWeekdaySection() {
-    const isWeekday = document.getElementById('rotation-mode-weekday').checked;
-    document.getElementById('weekday-assignment-section').style.display = isWeekday ? 'block' : 'none';
-    document.getElementById('sequence-order-section').style.display = isWeekday ? 'none' : 'block';
-}
-
-function renderSequenceOrderInputs() {
-    const container = document.getElementById('sequence-order-container');
-    container.innerHTML = '';
-
-    tempSequenceOrder.forEach((menuId, idx) => {
-        const menu = state.menus.find(m => m.id === menuId);
-        const row = document.createElement('div');
-        row.className = 'sequence-row';
-        row.innerHTML = `
-            <span class="sequence-row-num">${idx + 1}</span>
-            <div class="sequence-row-info">
-                <span class="sequence-row-title">${menu ? menu.title : menuId}</span>
-            </div>
-            <div class="sequence-row-actions">
-                <button type="button" class="btn-seq-move" data-idx="${idx}" data-dir="-1" ${idx === 0 ? 'disabled' : ''}>↑</button>
-                <button type="button" class="btn-seq-move" data-idx="${idx}" data-dir="1" ${idx === tempSequenceOrder.length - 1 ? 'disabled' : ''}>↓</button>
-            </div>
-        `;
-        container.appendChild(row);
-    });
-
-    container.querySelectorAll('.btn-seq-move').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const idx = parseInt(btn.getAttribute('data-idx'), 10);
-            const dir = parseInt(btn.getAttribute('data-dir'), 10);
-            const targetIdx = idx + dir;
-            if (targetIdx < 0 || targetIdx >= tempSequenceOrder.length) return;
-
-            [tempSequenceOrder[idx], tempSequenceOrder[targetIdx]] = [tempSequenceOrder[targetIdx], tempSequenceOrder[idx]];
-            renderSequenceOrderInputs();
-        });
-    });
-}
-
-function renderWeekdayAssignmentInputs() {
-    const container = document.getElementById('weekday-assignment-container');
-    container.innerHTML = '';
-
-    for (let day = 0; day <= 6; day++) {
-        const row = document.createElement('div');
-        row.className = 'weekday-row';
-
-        const currentVal = state.weekdayMenus[day] || 'OFF';
-
-        let optionsHTML = '<option value="OFF">☕ オフ（休養日）</option>';
-        state.menus.forEach(menu => {
-            const selected = currentVal === menu.id ? 'selected' : '';
-            optionsHTML += `<option value="${menu.id}" ${selected}>${menu.title}</option>`;
-        });
-        if (currentVal === 'OFF') {
-            optionsHTML = optionsHTML.replace('value="OFF"', 'value="OFF" selected');
-        }
-
-        row.innerHTML = `
-            <span class="weekday-row-label">${WEEKDAY_LABELS[day]}曜日</span>
-            <select class="form-input weekday-select" data-day="${day}">${optionsHTML}</select>
-        `;
-        container.appendChild(row);
-    }
-}
-
-function saveRotationSettings() {
-    const isWeekday = document.getElementById('rotation-mode-weekday').checked;
-    state.rotationMode = isWeekday ? 'weekday' : 'sequence';
-    state.sequenceOrder = [...tempSequenceOrder];
-
-    if (isWeekday) {
-        const selects = document.querySelectorAll('.weekday-select');
-        const newWeekdayMenus = {};
-        selects.forEach(sel => {
-            const day = parseInt(sel.getAttribute('data-day'), 10);
-            newWeekdayMenus[day] = sel.value;
-        });
-        state.weekdayMenus = newWeekdayMenus;
-    }
-
-    saveState();
-    renderRecommendation();
-    closeRotationSettingsModal();
-}
-
-let currentLibraryLabel = null;
 
 function closeExerciseLibraryModal() {
     document.getElementById('exercise-library-modal').classList.remove('active');
@@ -1590,7 +1473,6 @@ function importPastLogs() {
                 state.logs.push(newLog);
             });
             state.logs.sort((a, b) => a.date.localeCompare(b.date));
-            recalculateLastCompleted();
             saveState();
             renderRecommendation();
             renderCalendar();

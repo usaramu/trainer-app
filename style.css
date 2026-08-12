@@ -1,4 +1,4 @@
-/* ▼ テーマ：Ice Blue & Milk Cream（清涼感あふれる淡色アイスブルー） */
+/* ▼ テーマ定義（デフォルト：アイスブルー） */
 :root {
     --primary-color: #82A0C2;       /* メイン：やわらかいサックスブルー */
     --primary-hover: #6B8CB3;       /* ディープアイスブルー */
@@ -10,8 +10,60 @@
     --text-main: #3E4852;           /* やさしく引き締めるネイビーグレー */
     --text-sub: #929FA8;            /* ニュアンスライトグレー */
     --border-color: #E8EEF3;        /* 限りなく淡いアイスライン */
-    --accent-color: #88C4C2;        /* ミントグリーン */
-    --offday-color: #C2CBD3;        /* ニュアンスグレー */
+    --banner-grad-1: #E2ECF5;
+    --banner-grad-2: #D4E2EE;
+    --banner-grad-3: #C4D6E5;
+}
+
+/* テーマ：パステルピンク */
+body.theme-pink {
+    --primary-color: #EAA4B2;
+    --primary-hover: #D98E9D;
+    --primary-soft: #FAF2F4;
+    --lavender: #EADCD3;
+    --lavender-soft: #F9F5F0;
+    --bg-color: #FAF7F4;
+    --card-bg: #FFFFFF;
+    --text-main: #4A423D;
+    --text-sub: #AAA09A;
+    --border-color: #F4EFEA;
+    --banner-grad-1: #F5ECE5;
+    --banner-grad-2: #EFE4DC;
+    --banner-grad-3: #E8DBD2;
+}
+
+/* テーマ：セージグリーン */
+body.theme-green {
+    --primary-color: #88C4B8;
+    --primary-hover: #6FA89C;
+    --primary-soft: #F0F7F5;
+    --lavender: #D0E3DF;
+    --lavender-soft: #F4F9F8;
+    --bg-color: #F4F8F7;
+    --card-bg: #FFFFFF;
+    --text-main: #3A4B47;
+    --text-sub: #96A8A4;
+    --border-color: #E6F0EE;
+    --banner-grad-1: #E2F0ED;
+    --banner-grad-2: #D2E6E2;
+    --banner-grad-3: #C2DCD7;
+}
+
+/* テーマ：ラベンダー */
+body.theme-lavender {
+    --primary-color: #A49BCE;
+    --primary-hover: #897FC0;
+    --primary-soft: #F4F2F9;
+    --lavender: #DDD9EE;
+    --lavender-soft: #F7F6FC;
+    --bg-color: #F7F6FA;
+    --card-bg: #FFFFFF;
+    --text-main: #423E52;
+    --text-sub: #9A95A8;
+    --border-color: #ECEAF4;
+    --banner-grad-1: #EAE6F5;
+    --banner-grad-2: #DDD7EE;
+    --banner-grad-3: #D0C8E6;
 }
 
 * {
@@ -41,18 +93,6 @@ header {
     padding-top: 4px;
 }
 
-.header-top-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-}
-
-.header-spacer {
-    width: 38px;
-    flex-shrink: 0;
-}
-
 h1 {
     font-family: "Zen Maru Gothic", sans-serif;
     font-weight: 900;
@@ -70,33 +110,11 @@ h1 {
     letter-spacing: 0.1em;
 }
 
-/* ギア設定ボタン */
-.btn-settings-gear {
-    width: 38px;
-    height: 38px;
-    flex-shrink: 0;
-    background-color: var(--card-bg);
-    border: 1.5px solid var(--border-color);
-    border-radius: 16px;
-    font-size: 1.0625rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.15s ease;
-    color: var(--text-main);
-}
-
-.btn-settings-gear:hover {
-    background-color: var(--primary-soft);
-    color: var(--primary-hover);
-}
-
-/* トップバナー：ふんわり極淡いサックスブルーグラデーション */
+/* トップバナー */
 .recommendation-card {
     position: relative;
     overflow: hidden;
-    background: linear-gradient(135deg, #E2ECF5 0%, #D4E2EE 50%, #C4D6E5 100%);
+    background: linear-gradient(135deg, var(--banner-grad-1) 0%, var(--banner-grad-2) 50%, var(--banner-grad-3) 100%);
     color: var(--text-main);
     padding: 22px 20px 20px;
     border-radius: 22px;
@@ -126,64 +144,7 @@ h1 {
     margin-bottom: 10px;
 }
 
-.recommendation-main {
-    display: flex;
-    align-items: baseline;
-    flex-wrap: wrap;
-    gap: 8px 12px;
-    margin-bottom: 16px;
-    position: relative;
-}
-
-.target-menu {
-    font-family: "Zen Maru Gothic", sans-serif;
-    font-size: 1.75rem;
-    font-weight: 900;
-    color: var(--text-main);
-}
-
-.target-title {
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--text-main);
-}
-
-.last-completed {
-    font-size: 0.8125rem;
-    color: var(--text-sub);
-    margin-bottom: 16px;
-    padding-top: 10px;
-    border-top: 1.5px dashed rgba(62, 72, 82, 0.12);
-    position: relative;
-}
-
-.banner-actions {
-    display: flex;
-    gap: 8px;
-    position: relative;
-}
-
-.btn-complete {
-    flex: 2;
-    background-color: var(--primary-color);
-    color: #FFFFFF;
-    border: none;
-    padding: 12px 8px;
-    border-radius: 16px;
-    font-size: 0.9375rem;
-    font-weight: 900;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    box-shadow: 0 4px 10px rgba(130, 160, 194, 0.3);
-}
-
-.btn-complete:hover {
-    background-color: var(--primary-hover);
-    transform: translateY(-1px);
-}
-
 .btn-offday {
-    flex: 1;
     background-color: rgba(255, 255, 255, 0.7);
     color: var(--text-main);
     border: 1.5px solid #FFFFFF;
@@ -198,29 +159,6 @@ h1 {
 .btn-offday:hover {
     background-color: rgba(255, 255, 255, 0.95);
 }
-
-/* メニューバッジ (A, B, C...) */
-.menu-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 30px;
-    height: 30px;
-    background-color: var(--lavender-soft);
-    color: var(--text-main);
-    font-weight: 900;
-    font-family: "Zen Maru Gothic", sans-serif;
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 0.875rem;
-}
-
-.menu-badge-A { background-color: #EEF4F9; color: #82A0C2; }
-.menu-badge-B { background-color: #F1EEF9; color: #8F82C2; }
-.menu-badge-C { background-color: #EBF8F9; color: #62B3B0; }
-.menu-badge-D { background-color: #EEF8F1; color: #62B37A; }
-.menu-badge-E { background-color: #FAF4EE; color: #C29682; }
-.menu-badge-F { background-color: #EEF4FB; color: #5B92D6; }
 
 /* 部位選択ガイドバナー */
 .category-select-grid {
@@ -252,7 +190,7 @@ h1 {
 .btn-category-select .cat-label {
     font-size: 0.75rem;
     font-weight: 900;
-    color: var(--text-main) !important; /* 文字色を濃いグレー/ネイビーで統一 */
+    color: var(--text-main) !important;
     font-family: "Zen Maru Gothic", sans-serif;
     margin-bottom: 1px;
     white-space: nowrap;
@@ -261,7 +199,7 @@ h1 {
 .btn-category-select .cat-days {
     font-size: 0.625rem;
     font-weight: 700;
-    color: var(--primary-color) !important; /* 「前回: ○日前」の文字色を統一 */
+    color: var(--primary-color) !important;
     white-space: nowrap;
 }
 
@@ -310,15 +248,6 @@ h1 {
 .log-section {
     margin-top: 24px;
     margin-bottom: 24px;
-}
-
-.log-section h2, .table-section h2 {
-    font-family: "Zen Maru Gothic", sans-serif;
-    font-size: 1rem;
-    font-weight: 900;
-    margin-bottom: 10px;
-    color: var(--text-main);
-    padding-left: 2px;
 }
 
 .calendar-card {
@@ -403,7 +332,7 @@ h1 {
     transform: scale(1.04);
 }
 
-/* カレンダータグ：爽やかなアイスカラーバッジ */
+/* カレンダータグ：視認性を高めたマイルドカラーバッジ */
 .cal-tag {
     font-size: 0.6875rem;
     font-weight: 900;
@@ -422,27 +351,28 @@ h1 {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
 }
 
-/* カレンダータグ：さらにふんわりマイルドな極淡パステルブルー */
 .cal-tag.A, .cal-tag.D { 
-    background-color: #A3B8D7; 
-} /* 上半身 (極淡サックスブルー) */
+    background-color: var(--primary-color); 
+} /* 上半身 (メインテーマ色) */
 
 .cal-tag.B, .cal-tag.C, .cal-tag.E { 
-    background-color: #92A9C9; 
-} /* 下半身 (優しく落ち着いたペールブルー) */
+    background-color: var(--primary-hover); 
+} /* 下半身 (ディープテーマ色) */
 
 .cal-tag.F { 
     background-color: #FFFFFF; 
     color: var(--text-main) !important;
-} /* 有酸素 (ホワイトベース) */
+} /* 有酸素 (ホワイトベース×濃い文字) */
 
+/* ★ 「全」バッジの修正：全テーマでくっきり読めるミント・セージ風カラー×濃い文字 */
 .cal-tag.ALL { 
-    background-color: #A1CFCB; 
-} /* 全身 (ペールミント) */
+    background-color: var(--accent-color) !important; 
+    color: var(--text-main) !important;
+} 
 
 .cal-tag.OFF { 
-    background-color: #C2CBD3; 
-} /* OFF (ライトアッシュグレー) */
+    background-color: var(--offday-color); 
+} /* OFF (ライトアッシュ) */
 
 .cal-tag:hover {
     transform: scale(1.08);
@@ -470,10 +400,6 @@ h1 {
     justify-content: space-between;
     align-items: center;
     transition: background-color 0.2s ease;
-}
-
-.history-month-summary:hover {
-    background-color: #E6EFF6;
 }
 
 .history-month-summary .arrow-icon {
@@ -779,17 +705,6 @@ h1 {
     background-color: #ffffff;
 }
 
-input[type="date"].form-input {
-    appearance: none;
-    -webkit-appearance: none;
-    color: var(--text-main);
-}
-
-.form-textarea {
-    resize: vertical;
-    min-height: 60px;
-}
-
 /* モーダル内タイプ選択ボタン */
 #workout-log-modal .rotation-mode-options {
     display: flex;
@@ -803,13 +718,11 @@ input[type="date"].form-input {
     padding: 9px 6px;
     font-size: 0.8125rem;
     font-weight: 900;
-    
     display: flex !important;
-    align-items: center !important;     /* 上下中央 */
-    justify-content: center !important;  /* 左右中央 */
+    align-items: center !important;
+    justify-content: center !important;
     text-align: center !important;
     line-height: 1 !important;
-    
     border-radius: 14px;
     border: 1.5px solid var(--border-color);
     background-color: var(--card-bg);
@@ -830,14 +743,36 @@ input[type="date"].form-input {
     display: none !important;
 }
 
-/* モーダル内セット入力行 */
-#workout-log-modal .extra-log-block {
+/* ★ ドラッグ＆ドロップ用スタイル */
+.extra-log-block, .exercise-row {
     padding: 8px 10px !important;
     margin-bottom: 8px !important;
     border-radius: 14px !important;
     background-color: var(--card-bg) !important;
     border: 1.5px solid var(--border-color) !important;
     border-left: 4px solid var(--primary-color) !important;
+    cursor: grab;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.extra-log-block:active, .exercise-row:active {
+    cursor: grabbing;
+}
+
+.extra-log-block.dragging, .exercise-row.dragging {
+    opacity: 0.4;
+    transform: scale(0.98);
+}
+
+.drag-handle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-sub);
+    font-size: 1rem;
+    margin-right: 6px;
+    cursor: grab;
+    user-select: none;
 }
 
 #workout-log-modal .sets-container {
@@ -892,25 +827,41 @@ input[type="date"].form-input {
     width: 100% !important;
 }
 
-/* 前回と同じ入力ボタン */
-.btn-copy-last {
-    background-color: var(--primary-soft);
-    border: 1.5px solid var(--primary-color);
-    color: var(--primary-color);
-    padding: 3px 8px;
-    border-radius: 10px;
+/* ★ テーマ切り替えボタンのスタイル */
+.theme-select-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.btn-theme-option {
+    border: 2px solid var(--border-color);
+    border-radius: 14px;
+    padding: 10px 4px;
+    background: var(--card-bg);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
     font-size: 0.72rem;
     font-weight: 900;
-    cursor: pointer;
+    color: var(--text-main);
     transition: all 0.15s ease;
 }
 
-.btn-copy-last:hover {
-    background-color: var(--primary-color);
-    color: #ffffff;
+.btn-theme-option.active {
+    border-color: var(--primary-color);
+    background-color: var(--primary-soft);
 }
 
-/* フッター＆モーダルボタン群 */
+.theme-color-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+}
+
 .modal-footer {
     padding: 12px 18px;
     border-top: 1.5px solid var(--border-color);
@@ -940,10 +891,6 @@ input[type="date"].form-input {
     font-weight: 900;
     cursor: pointer;
     box-shadow: 0 3px 8px rgba(130, 160, 194, 0.25);
-}
-
-.btn-save:hover {
-    background-color: var(--primary-hover);
 }
 
 footer {
@@ -992,7 +939,6 @@ footer {
     font-weight: 700;
 }
 
-/* 種目候補チップ＆種目追加ボタン */
 .exercise-chip-list button.exercise-chip {
     background-color: #FFFFFF !important;
     border: 1.5px solid var(--border-color) !important;
@@ -1006,13 +952,6 @@ footer {
     transition: all 0.15s ease !important;
     outline: none !important;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02) !important;
-}
-
-.exercise-chip-list button.exercise-chip:hover {
-    background-color: var(--primary-soft) !important;
-    border-color: var(--primary-color) !important;
-    color: var(--primary-color) !important;
-    transform: translateY(-1px);
 }
 
 .btn-add-extra {
@@ -1029,14 +968,6 @@ footer {
     outline: none !important;
 }
 
-.btn-add-extra:hover {
-    background-color: var(--primary-soft) !important;
-    transform: scale(1.02);
-}
-
-/* ▼ 自由入力・一括登録カード内の細部デザイン修正 */
-
-/* 1. 右上の削除ボタン（✕）を可愛いくすみアイスブルーの丸ボタンに */
 .btn-remove-row {
     background-color: var(--primary-soft) !important;
     border: 1.5px solid var(--border-color) !important;
@@ -1051,17 +982,8 @@ footer {
     align-items: center !important;
     justify-content: center !important;
     transition: all 0.15s ease !important;
-    outline: none !important;
-    box-shadow: none !important;
 }
 
-.btn-remove-row:hover {
-    background-color: var(--primary-color) !important;
-    color: #ffffff !important;
-    border-color: var(--primary-color) !important;
-}
-
-/* 2. 有酸素の数値入力枠（時間・カロリー）をセット入力欄と同じ丸み＆デザインに統一 */
 .direct-input-group[data-cardio="true"] input.extra-minutes,
 .direct-input-group[data-cardio="true"] input.extra-calories {
     width: 68px !important;
@@ -1075,16 +997,8 @@ footer {
     background-color: var(--bg-color) !important;
     color: var(--text-main) !important;
     text-align: center !important;
-    outline: none !important;
-    transition: all 0.15s ease !important;
 }
 
-.direct-input-group[data-cardio="true"] input:focus {
-    border-color: var(--primary-color) !important;
-    background-color: #ffffff !important;
-}
-
-/* 有酸素入力欄の横並び配置とラベル調整 */
 .direct-input-group[data-cardio="true"] {
     display: flex !important;
     gap: 12px !important;
@@ -1105,7 +1019,6 @@ footer {
     margin-bottom: 0 !important;
 }
 
-/* 3. カード内の項目ラベル（部位（ラベル）、種目名）の文字色調整 */
 .extra-label-select-label {
     font-size: 0.75rem !important;
     font-weight: 900 !important;
