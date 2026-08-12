@@ -213,15 +213,22 @@ function getRecommendedMenuId() {
     return getNextMenuId(state.lastCompletedId);
 }
 
-// 部位ごとの前回からの経過日数を計算して更新する
+// 部位ごとの前回からの経過日数を計算して更新する（「全身」の反映修正版）
 function renderRecommendation() {
     const calcDaysAgo = (category) => {
         const catLogs = state.logs.filter(l => {
             if (l.menuId === 'OFF') return false;
+            
+            // 「全身」の記録（ALL、またはタイトルに「全身」が含まれるもの）
+            const isFullBody = l.menuId === 'ALL' || (state.menus.find(m => m.id === l.menuId)?.title.includes('全身'));
+
             const menu = state.menus.find(m => m.id === l.menuId);
             const title = menu ? menu.title : '';
-            if (category === '上半身') return title.includes('上半身');
-            if (category === '下半身') return title.includes('下半身');
+
+            // カテゴリごとの判定（全身のトレーニングは「上半身」「下半身」「全身」すべてにカウント）
+            if (category === '上半身') return title.includes('上半身') || isFullBody;
+            if (category === '下半身') return title.includes('下半身') || isFullBody;
+            if (category === '全身') return isFullBody;
             if (category === '有酸素') return title.includes('有酸素') || title.includes('リカバリー') || l.menuId === 'F';
             return false;
         });
@@ -231,6 +238,8 @@ function renderRecommendation() {
         const latestLog = catLogs[catLogs.length - 1];
         const [y, m, d] = latestLog.date.split('-');
         const lastDate = new Date(parseInt(y, 10), parseInt(m, 10) - 1, parseInt(d, 10));
+        
+        // 本日の日付（時刻を00:00:00にリセットして日付差分を正確に計算）
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
@@ -244,10 +253,12 @@ function renderRecommendation() {
 
     const upperEl = document.getElementById('days-upper');
     const lowerEl = document.getElementById('days-lower');
+    const fullEl = document.getElementById('days-full');
     const cardioEl = document.getElementById('days-cardio');
 
     if (upperEl) upperEl.textContent = `前回: ${calcDaysAgo('上半身')}`;
     if (lowerEl) lowerEl.textContent = `前回: ${calcDaysAgo('下半身')}`;
+    if (fullEl) fullEl.textContent = `前回: ${calcDaysAgo('全身')}`;
     if (cardioEl) cardioEl.textContent = `前回: ${calcDaysAgo('有酸素')}`;
 }
 
