@@ -119,22 +119,14 @@ function init() {
     }
 }
 
-const CURRENT_VERSION = 12; 
-
 function loadState() {
     const savedState = localStorage.getItem('workout_tracker_state');
     if (savedState) {
         const parsed = JSON.parse(savedState);
         
-        if (!parsed.version || parsed.version < CURRENT_VERSION) {
-            state.menus = JSON.parse(JSON.stringify(initialDefaultMenus));
-            state.sequenceOrder = ['A', 'B', 'F', 'C', 'D', 'E'];
-            state.logs = parsed.logs || [];
-        } else {
-            if (parsed.menus) state.menus = parsed.menus;
-            if (parsed.logs) state.logs = parsed.logs;
-            if (parsed.sequenceOrder) state.sequenceOrder = parsed.sequenceOrder;
-        }
+        if (parsed.menus) state.menus = parsed.menus;
+        if (parsed.logs) state.logs = parsed.logs;
+        if (parsed.sequenceOrder) state.sequenceOrder = parsed.sequenceOrder;
         state.lastCompletedId = parsed.lastCompletedId || null;
         state.lastCompletedDate = parsed.lastCompletedDate || null;
         state.rotationMode = parsed.rotationMode || 'sequence';
@@ -151,6 +143,21 @@ function loadState() {
     }
 }
 
+function saveState() {
+    localStorage.setItem('workout_tracker_state', JSON.stringify({
+        lastCompletedId: state.lastCompletedId,
+        lastCompletedDate: state.lastCompletedDate,
+        menus: state.menus,
+        logs: state.logs,
+        rotationMode: state.rotationMode,
+        weekdayMenus: state.weekdayMenus,
+        sequenceOrder: state.sequenceOrder,
+        exerciseLabels: state.exerciseLabels,
+        exerciseLibrarySchema: 'label-v3',
+        exerciseLibrary: state.exerciseLibrary
+    }));
+}
+
 function buildDefaultExerciseLibrary() {
     return {
         '胸': ['インクラインプレス', 'ベンチプレス', 'ペックフライ', 'チェストプレス', 'スミスマシン・インクラインベンチプレス', 'ケーブルクロス', 'ディップス', 'ダンベルフライ', 'ダンベルプレス', 'インクラインダンベルプレス'],
@@ -164,22 +171,6 @@ function buildDefaultExerciseLibrary() {
         '有酸素運動': ['トレッドミル', '傾斜ウォーキング'],
         'その他': []
     };
-}
-
-function saveState() {
-    localStorage.setItem('workout_tracker_state', JSON.stringify({
-        version: CURRENT_VERSION,
-        lastCompletedId: state.lastCompletedId,
-        lastCompletedDate: state.lastCompletedDate,
-        menus: state.menus,
-        logs: state.logs,
-        rotationMode: state.rotationMode,
-        weekdayMenus: state.weekdayMenus,
-        sequenceOrder: state.sequenceOrder,
-        exerciseLabels: state.exerciseLabels,
-        exerciseLibrarySchema: 'label-v3',
-        exerciseLibrary: state.exerciseLibrary
-    }));
 }
 
 function recalculateLastCompleted() {
@@ -213,22 +204,20 @@ function getRecommendedMenuId() {
     return getNextMenuId(state.lastCompletedId);
 }
 
-// 部位ごとの前回からの経過日数を計算して更新する（「全身」の反映修正版）
+// 部位ごとの前回からの経過日数を計算して更新する（完全分離版）
 function renderRecommendation() {
     const calcDaysAgo = (category) => {
         const catLogs = state.logs.filter(l => {
             if (l.menuId === 'OFF') return false;
             
-            // 「全身」の記録（ALL、またはタイトルに「全身」が含まれるもの）
-            const isFullBody = l.menuId === 'ALL' || (state.menus.find(m => m.id === l.menuId)?.title.includes('全身'));
-
             const menu = state.menus.find(m => m.id === l.menuId);
             const title = menu ? menu.title : '';
+            const isAll = l.menuId === 'ALL' || title.includes('全身');
 
-            // カテゴリごとの判定（全身のトレーニングは「上半身」「下半身」「全身」すべてにカウント）
-            if (category === '上半身') return title.includes('上半身') || isFullBody;
-            if (category === '下半身') return title.includes('下半身') || isFullBody;
-            if (category === '全身') return isFullBody;
+            // 各部位の記録を完全分離して判定
+            if (category === '上半身') return title.includes('上半身');
+            if (category === '下半身') return title.includes('下半身');
+            if (category === '全身') return isAll;
             if (category === '有酸素') return title.includes('有酸素') || title.includes('リカバリー') || l.menuId === 'F';
             return false;
         });
@@ -239,7 +228,7 @@ function renderRecommendation() {
         const [y, m, d] = latestLog.date.split('-');
         const lastDate = new Date(parseInt(y, 10), parseInt(m, 10) - 1, parseInt(d, 10));
         
-        // 本日の日付（時刻を00:00:00にリセットして日付差分を正確に計算）
+        // 本日の日付（時刻を00:00:00にリセット）
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
@@ -277,17 +266,15 @@ function getLastExerciseLogObj(exerciseName) {
     return null;
 }
 
-// 保存済みデータ（新形式: setsArray、旧形式: weight/reps単体どちらも対応）から
-// カード内の .sets-container を正しいセット数・数値で復元する共通ヘルパー
 function fillSetsContainerFromItem(block, item) {
     const setsContainer = block.querySelector('.sets-container');
     if (!setsContainer || !item) return;
 
-    setsContainer.innerHTML = ''; // 自動生成された空のセット行を一旦クリア
+    setsContainer.innerHTML = '';
 
     const setsToRestore = (Array.isArray(item.setsArray) && item.setsArray.length > 0)
         ? item.setsArray
-        : [{ weight: item.weight, reps: item.reps }]; // 古い形式のデータ用フォールバック
+        : [{ weight: item.weight, reps: item.reps }];
 
     setsToRestore.forEach(s => {
         addSetRowToBlock(
@@ -312,7 +299,6 @@ function formatLogObj(logObj) {
 function formatSingleLogObj(logObj) {
     if (!logObj) return '';
 
-    // 有酸素運動の表示
     if (logObj.isCardio || logObj.minutes !== undefined || logObj.calories !== undefined) {
         const parts = [];
         if (logObj.minutes) parts.push(`${logObj.minutes}分`);
@@ -320,9 +306,7 @@ function formatSingleLogObj(logObj) {
         return parts.join(' ');
     }
 
-    // セット配列（setsArray）が存在する場合のスマート統合表示
     if (logObj.setsArray && Array.isArray(logObj.setsArray) && logObj.setsArray.length > 0) {
-        // 連続する同じ重量・回数のセットをグループ化
         const groupedSets = [];
         let currentGroup = null;
 
@@ -344,7 +328,6 @@ function formatSingleLogObj(logObj) {
             groupedSets.push(currentGroup);
         }
 
-        // グループ化した結果を「5kg×12回 × 2set」形式で整形してカンマで結合
         return groupedSets.map(g => {
             if (g.count > 1) {
                 return `${g.weight}kg×${g.reps}回 × ${g.count}set`;
@@ -353,7 +336,6 @@ function formatSingleLogObj(logObj) {
         }).join(', ');
     }
 
-    // 旧フォーマットの表示
     const parts = [];
     if (logObj.weight !== null && logObj.weight !== undefined && logObj.weight !== '') {
         parts.push(`${logObj.weight}kg`);
@@ -363,14 +345,12 @@ function formatSingleLogObj(logObj) {
     return parts.join(' × ');
 }
 
-// ページ最下部：テーブル表示描画（上半身 → 下半身 → 有酸素 の順にソート）
 function renderMenuTable() {
     const tbody = document.getElementById('menu-table-body');
     if (!tbody) return;
 
     tbody.innerHTML = '';
 
-    // 表示用の優先順位グループ（1: 上半身, 2: 下半身, 3: 有酸素, 9: その他）
     const getMenuGroupOrder = (menu) => {
         if (menu.title.includes('上半身')) return 1;
         if (menu.title.includes('下半身')) return 2;
@@ -378,14 +358,13 @@ function renderMenuTable() {
         return 9;
     };
 
-    // 元の配列を崩さず、コピーを作ってグループ順に並び替え
     const sortedMenus = [...state.menus].sort((a, b) => {
         const orderA = getMenuGroupOrder(a);
         const orderB = getMenuGroupOrder(b);
         if (orderA !== orderB) {
             return orderA - orderB;
         }
-        return a.id.localeCompare(b.id); // 同じグループ内（上半身AとDなど）はID順
+        return a.id.localeCompare(b.id);
     });
 
     sortedMenus.forEach(menu => {
@@ -496,17 +475,14 @@ function openWorkoutLogModal(defaultMenuId, presetDateISO, isEdit = false) {
 
     const activeMenuId = (selectEl.value === 'OFF' || selectEl.value === 'ALL' || !selectEl.value) ? 'A' : selectEl.value;
     
-    // 1. 入力エリア全体の初期化
     renderWorkoutLogInputs(activeMenuId);
 
-    // 2. 既存の入力コンテナを一旦クリア
     const suggestedContainer = document.getElementById('suggested-fields-container');
     if (suggestedContainer) suggestedContainer.innerHTML = '';
     
     const extraContainer = document.getElementById('extra-exercise-container');
     if (extraContainer) extraContainer.innerHTML = '';
 
-    // ★ 3. 編集モード時：一括登録・過去ログの復元処理（修正版）
     if (isEdit && existingLog && existingLog.exerciseLogs && existingLog.menuId !== 'OFF') {
         const isFree = existingLog.recordType === 'free' || existingLog.menuId === 'ALL';
         
@@ -531,13 +507,11 @@ function openWorkoutLogModal(defaultMenuId, presetDateISO, isEdit = false) {
                         }
                     }
                 } else {
-                    // 自由入力・一括登録データの復元
                     addExtraExerciseInput();
                     const container = document.getElementById('extra-exercise-container');
                     const currentBlock = container ? container.lastElementChild : null;
                     
                     if (currentBlock) {
-                        // ラベル判定（無ければ種目名から検索）
                         let foundLabel = item.label;
                         if (!foundLabel) {
                             for (const [lbl, names] of Object.entries(state.exerciseLibrary)) {
@@ -558,7 +532,6 @@ function openWorkoutLogModal(defaultMenuId, presetDateISO, isEdit = false) {
 
                         const nameSelect = currentBlock.querySelector('.extra-name-select');
                         if (nameSelect) {
-                            // リストに無い種目名なら動的に選択肢を追加
                             let hasOption = Array.from(nameSelect.options).some(opt => opt.value === exName);
                             if (!hasOption) {
                                 const newOpt = document.createElement('option');
@@ -603,7 +576,6 @@ function toggleRecordType() {
         logInputs.style.display = 'none';
         freeSection.style.display = 'none';
     } else if (isFree) {
-        // 自由入力モード
         selectMenuLabel.style.display = 'block';
         selectMenu.style.display = 'block';
         logInputs.style.display = 'none';
@@ -618,14 +590,12 @@ function toggleRecordType() {
             addExtraExerciseInput();
         }
     } else {
-        // メニューからモード（枠自体は表示しておき、追加カードを挿入可能にする）
         selectMenuLabel.style.display = 'block';
         selectMenu.style.display = 'block';
         logInputs.style.display = 'block';
         freeSection.style.display = 'block';
 
         selectMenuLabel.textContent = 'メニュー選択';
-        // 下部の見出しと重複ボタンだけを非表示
         if (extraLabel) extraLabel.textContent = '';
         if (addExtraBtn) addExtraBtn.style.display = 'none';
     }
@@ -635,13 +605,11 @@ function onLogMenuSelectChange(selectedMenuId) {
     renderWorkoutLogInputs(selectedMenuId);
 }
 
-// メニュー選択時の表示（メニューを変えても入力済みのカードを保持する仕様）
 function renderWorkoutLogInputs(menuId) {
     const menu = state.menus.find(m => m.id === menuId);
     const container = document.getElementById('workout-log-inputs');
     if (!container) return;
 
-    // ★ 変更前に入力されていたカード群を一時退避・保持する
     const existingFieldsContainer = document.getElementById('suggested-fields-container');
     const existingCards = existingFieldsContainer ? Array.from(existingFieldsContainer.children) : [];
 
@@ -649,7 +617,6 @@ function renderWorkoutLogInputs(menuId) {
 
     if (!menu || !menu.exercises || menu.exercises.length === 0) return;
 
-    // ヘッダー（右上「+ 種目を追加」ボタン）
     const headerRow = document.createElement('div');
     headerRow.style.cssText = 'display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;';
     headerRow.innerHTML = `
@@ -658,7 +625,6 @@ function renderWorkoutLogInputs(menuId) {
     `;
     container.appendChild(headerRow);
 
-    // 新しく選んだメニューの種目候補トグル
     const detailsEl = document.createElement('details');
     detailsEl.className = 'menu-suggest-toggle';
     detailsEl.open = true;
@@ -687,7 +653,6 @@ function renderWorkoutLogInputs(menuId) {
     detailsEl.appendChild(chipList);
     container.appendChild(detailsEl);
 
-    // ★ カード入力枠を再作成し、退避しておいた入力済みカードをそのまま復元！
     const fieldsContainer = document.createElement('div');
     fieldsContainer.id = 'suggested-fields-container';
     existingCards.forEach(card => fieldsContainer.appendChild(card));
@@ -730,7 +695,6 @@ function addSuggestedExerciseInput(exerciseName, detailStr = '', menuId = '', fo
             <button type="button" class="btn-add-set-row" onclick="addSetRowToBlock(this.closest('.extra-log-block'))">＋ セットを追加</button>
         `;
         
-        // 前回記録があればその内容を、なければ空欄3セット分を初期表示
         if (lastObj && (Array.isArray(lastObj.setsArray) || lastObj.weight !== undefined)) {
             fillSetsContainerFromItem(block, lastObj);
         } else {
@@ -743,14 +707,12 @@ function addSuggestedExerciseInput(exerciseName, detailStr = '', menuId = '', fo
     container.appendChild(block);
 }
 
-// セット行を追加するヘルパー関数（調整ボタン非表示版）
 function addSetRowToBlock(blockEl, initWeight = null, initReps = null) {
     const setsContainer = blockEl.querySelector('.sets-container');
     if (!setsContainer) return;
 
     const setNum = setsContainer.children.length + 1;
     
-    // 前のセットの数値を引き継ぐ
     let w = initWeight;
     let r = initReps;
     if (w === null || r === null) {
@@ -774,22 +736,9 @@ function addSetRowToBlock(blockEl, initWeight = null, initReps = null) {
     setsContainer.appendChild(setRow);
 }
 
-// クイック調整ボタンの動作関数
-function adjustInputValue(btnEl, targetSelector, delta) {
-    const row = btnEl.closest('.set-input-row');
-    const input = row.querySelector(targetSelector);
-    if (input) {
-        let val = parseFloat(input.value) || 0;
-        val = Math.max(0, val + delta);
-        input.value = val;
-    }
-}
-
-// 追加・自由入力行の追加処理
 function addExtraExerciseInput() {
     const isFree = document.getElementById('record-type-free') ? document.getElementById('record-type-free').checked : false;
     
-    // ターゲットコンテナの判定（メニューモード時と自由入力モード時）
     let container = isFree ? document.getElementById('extra-exercise-container') : document.getElementById('suggested-fields-container');
     if (!container) {
         container = document.getElementById('extra-exercise-container') || document.getElementById('workout-log-inputs');
@@ -811,20 +760,12 @@ function addExtraExerciseInput() {
             <button type="button" class="btn-remove-row" onclick="this.closest('.extra-log-block').remove()">&times;</button>
         </div>
         
-        <div class="extra-chip-list">
-            <!-- ここに種目選択ドロップダウンが入ります -->
-        </div>
-
-        <div class="extra-fields-container">
-            <!-- ここに重量・回数・セット数が入ります -->
-        </div>
+        <div class="extra-chip-list"></div>
+        <div class="extra-fields-container"></div>
     `;
 
-    // 下に順番にカードを挿入
     container.appendChild(block);
     renderExerciseChipsForBlock(block);
-
-    // スクロールしなくても新しいカードがすぐ見えるように、追加した位置までスクロールする
     block.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
@@ -849,13 +790,11 @@ function renderExerciseChipsForBlock(block) {
             </div>
         `;
     } else {
-        // ★ セット別入力（sets-container）を生成するように修正！
         fieldsContainer.innerHTML = `
             <div class="sets-container"></div>
             <button type="button" class="btn-add-set-row" onclick="addSetRowToBlock(this.closest('.extra-log-block'))">＋ セットを追加</button>
         `;
         
-        // 初期状態で3セット分自動作成
         for (let s = 1; s <= 3; s++) {
             addSetRowToBlock(block);
         }
@@ -906,7 +845,6 @@ function renderExerciseChipsForBlock(block) {
     });
 }
 
-// 前回の数値（重量・回数・セット数・時間・カロリー）を入力欄に反映する関数
 function prefillLastLogValues(block, name) {
     const lastObj = getLastExerciseLogObj(name);
     if (!lastObj) return;
@@ -957,7 +895,6 @@ function submitWorkoutLog() {
         finalExerciseLogs[key].push(dataObj);
     };
 
-    // 現在のモードに応じて読み込むコンテナを選択
     const containerId = isFree ? 'extra-exercise-container' : 'suggested-fields-container';
     const blocks = document.querySelectorAll(`#${containerId} .extra-log-block`);
 
@@ -1132,8 +1069,6 @@ function addExerciseInput(name = '', detail = '') {
         <button type="button" class="btn-remove-row" onclick="this.parentElement.remove()">&times;</button>
     `;
     container.appendChild(row);
-
-    // スクロールしなくても新しい入力欄がすぐ見えるように、追加した位置までスクロールする
     row.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
@@ -1212,13 +1147,12 @@ function renderCalendar() {
 
         let hasLog = false;
 
-state.logs.forEach((log, index) => {
+        state.logs.forEach((log, index) => {
             if (log.date === dateStr) {
                 hasLog = true;
                 const tag = document.createElement('div');
                 tag.className = `cal-tag ${log.menuId}`;
                 
-                // ★ 1文字・絵文字化の表示判定
                 let shortLabel = MENU_LABELS[log.menuId] || log.menuId;
                 
                 if (log.menuId !== 'ALL' && log.menuId !== 'OFF') {
@@ -1272,14 +1206,6 @@ function getTodayISO() {
     return `${y}-${m}-${d}`;
 }
 
-function getTodayFormatted() {
-    return new Date().toLocaleDateString('ja-JP', {
-        year: 'numeric',
-        month: 'numeric',
-        day: 'numeric'
-    });
-}
-
 function resetData() {
     if (confirm('履歴、完了データ、カスタムメニューをすべて初期化しますか？')) {
         localStorage.removeItem('workout_tracker_state');
@@ -1297,10 +1223,8 @@ function resetData() {
 }
 
 const WEEKDAY_LABELS = ['日', '月', '火', '水', '木', '金', '土'];
-
 let tempSequenceOrder = [];
 
-// ローテーション設定モーダルを開く
 function openRotationSettingsModal() {
     if (!state.sequenceOrder) state.sequenceOrder = ['A', 'B', 'F', 'C', 'D', 'E'];
     if (!state.weekdayMenus) state.weekdayMenus = { 0: 'F', 1: 'A', 2: 'B', 3: 'C', 4: 'D', 5: 'E', 6: 'OFF' };
@@ -1319,7 +1243,6 @@ function openRotationSettingsModal() {
     if (modal) modal.classList.add('active');
 }
 
-// 種目リスト管理モーダルを開く
 function openExerciseLibraryModal() {
     if (!state.exerciseLabels || state.exerciseLabels.length === 0) {
         state.exerciseLabels = ['胸', '背中', '脚', '肩', '腕', 'お尻', '腹筋', '全身', '有酸素運動', 'その他'];
@@ -1429,13 +1352,6 @@ function saveRotationSettings() {
 
 let currentLibraryLabel = null;
 
-function openExerciseLibraryModal() {
-    currentLibraryLabel = state.exerciseLabels[0];
-    renderLibraryLabelTabs();
-    renderLibraryExerciseChips();
-    document.getElementById('exercise-library-modal').classList.add('active');
-}
-
 function closeExerciseLibraryModal() {
     document.getElementById('exercise-library-modal').classList.remove('active');
 }
@@ -1510,7 +1426,6 @@ if (document.readyState === 'loading') {
     init();
 }
 
-// メインタブ切り替え処理（並び順変更対応版）
 function switchMainTab(tabName) {
     const buttons = document.querySelectorAll('.main-tab-btn');
     buttons.forEach(btn => btn.classList.remove('active'));
@@ -1527,11 +1442,10 @@ function switchMainTab(tabName) {
     } else if (tabName === 'history') {
         buttons[2].classList.add('active');
         document.getElementById('tab-content-history').classList.add('active');
-        renderHistoryLogs(); // 記録一覧タブを開いた時に最新ログを描画
+        renderHistoryLogs();
     }
 }
 
-// HISTORYタブの描画処理（滑らかなスライドアニメーション対応）
 function renderHistoryLogs() {
     const container = document.getElementById('history-log-container');
     if (!container) return;
@@ -1543,10 +1457,8 @@ function renderHistoryLogs() {
         return;
     }
 
-    // 古い順（昇順）にソート
     const sortedLogs = [...state.logs].sort((a, b) => a.date.localeCompare(b.date));
 
-    // 月ごとにグループ化
     const groupedByMonth = {};
     sortedLogs.forEach(log => {
         const [y, m] = log.date.split('-');
@@ -1630,7 +1542,6 @@ function renderHistoryLogs() {
         groupEl.appendChild(summaryEl);
         groupEl.appendChild(bodyEl);
 
-        // クリック時の滑らかなスライドアニメーション処理
         summaryEl.onclick = () => {
             const isActive = groupEl.classList.contains('active');
             if (isActive) {
@@ -1644,7 +1555,6 @@ function renderHistoryLogs() {
 
         container.appendChild(groupEl);
 
-        // 最新月は初期状態から開いておく
         if (monthKey === latestMonthKey) {
             setTimeout(() => {
                 groupEl.classList.add('active');
@@ -1654,9 +1564,7 @@ function renderHistoryLogs() {
     });
 }
 
-// 部位ボタンを押したときに該当するメニューを開く
 function openCategoryWorkout(category) {
-    // 該当する部位のメニューを取得
     const matchedMenus = state.menus.filter(m => {
         if (category === '上半身') return m.title.includes('上半身');
         if (category === '下半身') return m.title.includes('下半身');
@@ -1665,21 +1573,18 @@ function openCategoryWorkout(category) {
     });
 
     if (matchedMenus.length > 0) {
-        // 該当する最初のメニューを選択して記録モーダルを開く
         openWorkoutLogModal(matchedMenus[0].id);
     } else {
         openWorkoutLogModal('ALL');
     }
 }
 
-// 過去ログの一括読み込み関数
 function importPastLogs() {
     const rawData = prompt("チャットで出力されたデータをここに貼り付けてください:");
     if (!rawData) return;
     try {
         const logsToImport = JSON.parse(rawData);
         if (Array.isArray(logsToImport)) {
-            // 既存の日付と重複しないようにマージ
             logsToImport.forEach(newLog => {
                 state.logs = state.logs.filter(l => l.date !== newLog.date);
                 state.logs.push(newLog);

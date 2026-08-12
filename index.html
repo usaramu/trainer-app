@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>うさトレ</title>
-    <!-- ▼ 洗練されたモダンブロック体フォント（Montserrat & Noto Sans JP） -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <!-- ▼ まる文字フォント（Zen Maru Gothic） -->
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -14,7 +15,8 @@
         <h1>Workout Tracker</h1>
         <div class="subtitle">うさトレ</div>
     </header>
-<!-- ▼ タブ切り替えボタン（3つに拡張） -->
+
+    <!-- ▼ タブ切り替えボタン -->
     <div class="main-tabs">
         <button type="button" class="main-tab-btn active" onclick="switchMainTab('record')">LOG</button>
         <button type="button" class="main-tab-btn" onclick="switchMainTab('menu-list')">MENU</button>
@@ -23,12 +25,11 @@
 
     <!-- ▼ 1. 記録タブ用コンテンツ -->
     <div id="tab-content-record" class="main-tab-content active">
-<!-- メイン：部位選択ガイドバナー -->
+        <!-- メイン：部位選択ガイドバナー -->
         <div class="recommendation-card">
             <div class="recommendation-header">SELECT WORKOUT</div>
-
             
-            <!-- 部位選択ボタン群（4つのグリッド表示） -->
+            <!-- 部位選択ボタン群 -->
             <div class="category-select-grid">
                 <button type="button" class="btn-category-select" onclick="openCategoryWorkout('上半身')">
                     <span class="cat-label">上半身</span>
@@ -77,7 +78,6 @@
 
     <!-- ▼ 3. メニュー一覧タブ用コンテンツ -->
     <div id="tab-content-menu-list" class="main-tab-content">
-        <!-- 全メニュー比較表セクション -->
         <section class="table-section">
             <div class="table-wrapper">
                 <table class="menu-table">
@@ -97,9 +97,6 @@
             </div>
         </section>
     </div>
-
-
-    <!-- ▼▼【ここから下を追加】消えていたモーダルウィンドウ群 ▼▼ -->
 
     <!-- メニュー編集用モーダルウィンドウ -->
     <div class="modal-overlay" id="edit-modal">
@@ -271,8 +268,6 @@
         </div>
     </div>
 
-    <!-- ▲▲【ここまで追加】▲▲ -->
-
     <footer>
         <div class="footer-tools">
             <button type="button" class="btn-footer-tool" id="btn-open-exercise-library" onclick="openExerciseLibraryModal()">📋 種目リスト管理</button>
@@ -283,16 +278,5 @@
     </footer>
 
     <script src="script.js"></script>
-    <script>
-        // 過去にService Workerが登録されていた場合に備え、念のため解除してキャッシュも削除する
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.getRegistrations().then(regs => {
-                regs.forEach(reg => reg.unregister());
-            });
-        }
-        if (window.caches) {
-            caches.keys().then(keys => keys.forEach(key => caches.delete(key)));
-        }
-    </script>
 </body>
 </html>
