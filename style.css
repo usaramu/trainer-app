@@ -1293,3 +1293,33 @@ input[type="date"].form-input,
     -webkit-appearance: none;
     appearance: none;
 }
+
+/* ==================================================
+   スマホ入力時の「ぐわん（自動ズーム・位置ブレ）」完全防止
+   ================================================== */
+
+/* 1. フォーカス時の自動ズームを防止（文字サイズ16px化） */
+#workout-log-modal input,
+#workout-log-modal select,
+.form-input {
+    font-size: 16px !important; /* 16px以上にするとiOSの自動ズームがピタッと止まります */
+}
+
+/* 入力ボックス内の数字の見た目サイズ・高さをコンパクトに維持 */
+#workout-log-modal .set-field-group input.form-input {
+    height: 32px !important;
+    padding: 0 2px !important;
+}
+
+/* 2. キーボード出現時にモーダルが上下に跳ねるのを防止（上詰め配置） */
+@media (max-width: 600px) {
+    .modal-overlay {
+        align-items: flex-start !important; /* 中央ではなく画面上部に配置 */
+        padding-top: 16px !important;
+        padding-bottom: 16px !important;
+    }
+
+    .modal-content {
+        max-height: 82vh !important; /* キーボードが出ても隠れにくい高さ */
+    }
+}
