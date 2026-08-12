@@ -1,6 +1,6 @@
 let isEditingLogMode = false;
 
-// 初期メニュー構成データ
+// 初期メニュー構成データ（ヒップアブダクションの分類反映版）
 const initialDefaultMenus = [
     {
         id: 'A',
@@ -20,7 +20,7 @@ const initialDefaultMenus = [
         exercises: [
             { name: 'バーベル/ダンベル・ルーマニアンデッドリフト', detail: '15~20回 × 3セット' },
             { name: 'ブルガリアンスクワット', detail: '左右各12~15回 × 3セット' },
-            { name: 'ヒップアブダクション（骨盤後傾）', detail: '20回 × 3セット ' },
+            { name: 'ヒップアブダクション（骨盤後傾）', detail: '20回 × 3セット' },
         ]
     },
     {
@@ -186,7 +186,7 @@ function buildDefaultExerciseLibrary() {
     };
 }
 
-// 部位ごとの前回からの経過日数を計算して更新する
+// 部位ごとの前回からの経過日数を計算して更新する（修正版）
 function renderRecommendation() {
     const calcDaysAgo = (category) => {
         const catLogs = state.logs.filter(l => {
@@ -217,7 +217,7 @@ function renderRecommendation() {
 
         if (diffDays === 0) return '今日';
         if (diffDays === 1) return '昨日';
-        return `${diffDays}年前` ? `${diffDays}日前` : '未記録';
+        return `${diffDays}日前`;
     };
 
     const upperEl = document.getElementById('days-upper');
@@ -966,8 +966,8 @@ function openDetailLogModal(logIndex) {
     const bodyEl = document.getElementById('detail-log-body');
 
     if (log.menuId === 'OFF') {
-        titleEl.textContent = '休養日 (OFF)';
-        bodyEl.innerHTML = '<p style="color:var(--text-sub);">この日は休養日として記録されています。</p>';
+        titleEl.textContent = 'OFF';
+        bodyEl.innerHTML = '<p style="color:var(--text-sub);">この日はオフとして記録されています。</p>';
     } else if (log.menuId === 'ALL') {
         titleEl.textContent = '全身トレーニング';
     } else {
@@ -1463,7 +1463,7 @@ function openCategoryWorkout(category) {
 }
 
 function importPastLogs() {
-    const rawData = prompt("チャットで出力されたデータをここに貼り付けてください:");
+    const rawData = prompt("JSONデータを貼り付け");
     if (!rawData) return;
     try {
         const logsToImport = JSON.parse(rawData);

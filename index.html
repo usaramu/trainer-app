@@ -203,27 +203,22 @@
     <div class="modal-overlay" id="theme-settings-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>🎨 カラーテーマ切り替え</h2>
+                <h2>🎨 カラーテーマを選択</h2>
                 <button class="btn-close" onclick="closeThemeSettingsModal()">&times;</button>
             </div>
             <div class="modal-body">
-                <label class="form-label">お好みのカラーテーマを選んでください</label>
                 <div class="theme-select-grid">
                     <button type="button" class="btn-theme-option" onclick="changeTheme('blue')">
                         <span class="theme-color-dot" style="background:#82A0C2;"></span>
-                        アイスブルー
                     </button>
                     <button type="button" class="btn-theme-option" onclick="changeTheme('pink')">
                         <span class="theme-color-dot" style="background:#EAA4B2;"></span>
-                        パステルピンク
                     </button>
                     <button type="button" class="btn-theme-option" onclick="changeTheme('green')">
                         <span class="theme-color-dot" style="background:#88C4B8;"></span>
-                        セージグリーン
                     </button>
                     <button type="button" class="btn-theme-option" onclick="changeTheme('lavender')">
                         <span class="theme-color-dot" style="background:#A49BCE;"></span>
-                        ラベンダー
                     </button>
                 </div>
             </div>
@@ -263,9 +258,9 @@
 
     <footer>
         <div class="footer-tools">
-            <button type="button" class="btn-footer-tool" id="btn-open-exercise-library" onclick="openExerciseLibraryModal()">📋 種目リスト管理</button>
-            <button type="button" class="btn-footer-tool" onclick="openThemeSettingsModal()">🎨 テーマ切り替え</button>
-            <button type="button" class="btn-footer-tool" onclick="importPastLogs()">📥 過去データ一括登録</button>
+            <button type="button" class="btn-footer-tool" id="btn-open-exercise-library" onclick="openExerciseLibraryModal()">📋</button>
+            <button type="button" class="btn-footer-tool" onclick="openThemeSettingsModal()">🎨</button>
+            <button type="button" class="btn-footer-tool" onclick="importPastLogs()">📥</button>
         </div>
         <button type="button" class="btn-reset" onclick="resetData()">履歴・メニュー設定を初期化</button>
     </footer>

@@ -1,18 +1,20 @@
 /* ▼ テーマ定義（デフォルト：アイスブルー） */
 :root {
-    --primary-color: #82A0C2;       /* メイン：やわらかいサックスブルー */
-    --primary-hover: #6B8CB3;       /* ディープアイスブルー */
-    --primary-soft: #EEF4F9;        /* ほんのりソーダミルク */
-    --lavender: #D3E0EA;            /* ペールスモーキーブルー */
-    --lavender-soft: #F4F8FC;       /* ホイップソーダ */
-    --bg-color: #F4F7FA;            /* 全体：透明感あふれるアイスグレーホワイト */
-    --card-bg: #FFFFFF;             /* クリアホワイト */
-    --text-main: #3E4852;           /* やさしく引き締めるネイビーグレー */
-    --text-sub: #929FA8;            /* ニュアンスライトグレー */
-    --border-color: #E8EEF3;        /* 限りなく淡いアイスライン */
+    --primary-color: #82A0C2;
+    --primary-hover: #6B8CB3;
+    --primary-soft: #EEF4F9;
+    --lavender: #D3E0EA;
+    --lavender-soft: #F4F8FC;
+    --bg-color: #F4F7FA;
+    --card-bg: #FFFFFF;
+    --text-main: #3E4852;
+    --text-sub: #929FA8;
+    --border-color: #E8EEF3;
     --banner-grad-1: #E2ECF5;
     --banner-grad-2: #D4E2EE;
     --banner-grad-3: #C4D6E5;
+    --accent-color: #88C4C2;
+    --offday-color: #A7B3BF;       /* アイスブルー用の落ち着いたアッシュグレー */
 }
 
 /* テーマ：パステルピンク */
@@ -30,6 +32,8 @@ body.theme-pink {
     --banner-grad-1: #F5ECE5;
     --banner-grad-2: #EFE4DC;
     --banner-grad-3: #E8DBD2;
+    --accent-color: #E0B899;
+    --offday-color: #C2B4AE;       /* ピンクに馴染む温かみのあるウォームグレージュ */
 }
 
 /* テーマ：セージグリーン */
@@ -47,6 +51,8 @@ body.theme-green {
     --banner-grad-1: #E2F0ED;
     --banner-grad-2: #D2E6E2;
     --banner-grad-3: #C2DCD7;
+    --accent-color: #9EC288;
+    --offday-color: #A2B5B0;       /* グリーンに馴染む渋みのあるセージグレー */
 }
 
 /* テーマ：ラベンダー */
@@ -64,6 +70,8 @@ body.theme-lavender {
     --banner-grad-1: #EAE6F5;
     --banner-grad-2: #DDD7EE;
     --banner-grad-3: #D0C8E6;
+    --accent-color: #CE9BB4;
+    --offday-color: #B2AEC4;       /* ラベンダーに馴染むスモーキーパープルグレー */
 }
 
 * {
@@ -367,12 +375,12 @@ h1 {
 /* ★ 「全」バッジの修正：全テーマでくっきり読めるミント・セージ風カラー×濃い文字 */
 .cal-tag.ALL { 
     background-color: var(--accent-color) !important; 
-    color: var(--text-main) !important;
 } 
 
 .cal-tag.OFF { 
-    background-color: var(--offday-color); 
-} /* OFF (ライトアッシュ) */
+    background-color: var(--offday-color) !important; 
+    color: #FFFFFF !important;
+}
 
 .cal-tag:hover {
     transform: scale(1.08);
@@ -1024,4 +1032,111 @@ footer {
     font-weight: 900 !important;
     color: var(--primary-color) !important;
     margin-bottom: 4px !important;
+}
+
+/* ラベル切り替えタブ（胸、背中、脚...） */
+.label-tab-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+.label-tab {
+    background-color: var(--bg-color);
+    border: 1.5px solid var(--border-color);
+    color: var(--text-sub);
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.label-tab:hover {
+    background-color: var(--primary-soft);
+    color: var(--primary-color);
+}
+
+.label-tab.active {
+    background-color: var(--primary-color);
+    color: #ffffff;
+    border-color: var(--primary-color);
+    box-shadow: 0 2px 6px rgba(130, 160, 194, 0.2);
+}
+
+/* 登録済み種目チップ一覧エリア */
+.exercise-chip-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-height: 80px;
+    align-content: flex-start;
+    padding: 12px;
+    background-color: var(--bg-color);
+    border: 1.5px solid var(--border-color);
+    border-radius: 16px;
+    margin-bottom: 14px;
+}
+
+.exercise-chip.removable {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: var(--card-bg);
+    border: 1.5px solid var(--border-color);
+    color: var(--text-main);
+    padding: 5px 10px;
+    border-radius: 16px;
+    font-size: 0.8125rem;
+    font-weight: 700;
+}
+
+.chip-remove-btn {
+    background: none;
+    border: none;
+    color: var(--text-sub);
+    font-size: 1rem;
+    cursor: pointer;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.chip-remove-btn:hover {
+    color: #ef4444;
+}
+
+.exercise-chip-empty {
+    font-size: 0.78rem;
+    color: var(--text-sub);
+    padding: 8px 0;
+}
+
+/* 新しい種目の追加入力エリア */
+.library-add-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.btn-library-add {
+    background-color: var(--primary-color);
+    color: #ffffff;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 14px;
+    font-size: 0.8125rem;
+    font-weight: 900;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 2px 6px rgba(130, 160, 194, 0.2);
+    transition: background-color 0.15s ease;
+}
+
+.btn-library-add:hover {
+    background-color: var(--primary-hover);
 }
