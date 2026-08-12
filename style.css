@@ -1323,3 +1323,7 @@ input[type="date"].form-input,
         max-height: 82vh !important; /* キーボードが出ても隠れにくい高さ */
     }
 }
+
+html, body, input, select, textarea, button {
+    touch-action: manipulation;
+}
