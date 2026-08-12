@@ -119,7 +119,7 @@ function init() {
     }
 }
 
-const CURRENT_VERSION = 9; 
+const CURRENT_VERSION = 10; 
 
 function loadState() {
     const savedState = localStorage.getItem('workout_tracker_state');
@@ -1638,5 +1638,30 @@ function openCategoryWorkout(category) {
         openWorkoutLogModal(matchedMenus[0].id);
     } else {
         openWorkoutLogModal('ALL');
+    }
+}
+
+// 過去ログの一括読み込み関数
+function importPastLogs() {
+    const rawData = prompt("チャットで出力されたデータをここに貼り付けてください:");
+    if (!rawData) return;
+    try {
+        const logsToImport = JSON.parse(rawData);
+        if (Array.isArray(logsToImport)) {
+            // 既存の日付と重複しないようにマージ
+            logsToImport.forEach(newLog => {
+                state.logs = state.logs.filter(l => l.date !== newLog.date);
+                state.logs.push(newLog);
+            });
+            state.logs.sort((a, b) => a.date.localeCompare(b.date));
+            recalculateLastCompleted();
+            saveState();
+            renderRecommendation();
+            renderCalendar();
+            if (typeof renderHistoryLogs === 'function') renderHistoryLogs();
+            alert("過去データを正常に一括登録しました！");
+        }
+    } catch (e) {
+        alert("データの形式が正しくありません。");
     }
 }
