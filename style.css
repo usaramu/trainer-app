@@ -1,30 +1,32 @@
+/* ▼ テーマ：Ice Blue & Milk Cream（清涼感あふれる淡色アイスブルー） */
 :root {
-    --primary-color: #8B7FD9;
-    --primary-hover: #7566C4;
-    --primary-soft: #ECE9FB;
-    --lavender: #E091AE;
-    --lavender-soft: #FBE9F0;
-    --bg-color: #F8F6FC;
-    --card-bg: #ffffff;
-    --text-main: #352E4A;
-    --text-sub: #766D89;
-    --border-color: #EAE5F5;
-    --accent-color: #4ECDA1;
-    --offday-color: #B9AEC4;
+    --primary-color: #82A0C2;       /* メイン：やわらかいサックスブルー */
+    --primary-hover: #6B8CB3;       /* ディープアイスブルー */
+    --primary-soft: #EEF4F9;        /* ほんのりソーダミルク */
+    --lavender: #D3E0EA;            /* ペールスモーキーブルー */
+    --lavender-soft: #F4F8FC;       /* ホイップソーダ */
+    --bg-color: #F4F7FA;            /* 全体：透明感あふれるアイスグレーホワイト */
+    --card-bg: #FFFFFF;             /* クリアホワイト */
+    --text-main: #3E4852;           /* やさしく引き締めるネイビーグレー */
+    --text-sub: #929FA8;            /* ニュアンスライトグレー */
+    --border-color: #E8EEF3;        /* 限りなく淡いアイスライン */
+    --accent-color: #88C4C2;        /* ミントグリーン */
+    --offday-color: #C2CBD3;        /* ニュアンスグレー */
 }
 
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: "Zen Kaku Gothic New", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: "Zen Maru Gothic", -apple-system, sans-serif;
+    letter-spacing: 0.02em;
 }
 
 body {
     background-color: var(--bg-color);
     background-image:
-        radial-gradient(circle at 8% 8%, rgba(139, 127, 217, 0.14) 0%, transparent 40%),
-        radial-gradient(circle at 92% 18%, rgba(224, 145, 174, 0.10) 0%, transparent 42%);
+        radial-gradient(circle at 12% 12%, rgba(130, 160, 194, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 88% 18%, rgba(211, 224, 234, 0.10) 0%, transparent 45%);
     background-attachment: fixed;
     color: var(--text-main);
     padding: 16px 14px 12px;
@@ -35,7 +37,7 @@ body {
 
 header {
     text-align: center;
-    margin-bottom: 22px;
+    margin-bottom: 20px;
     padding-top: 4px;
 }
 
@@ -51,196 +53,76 @@ header {
     flex-shrink: 0;
 }
 
+h1 {
+    font-family: "Zen Maru Gothic", sans-serif;
+    font-weight: 900;
+    font-size: 1.55rem;
+    color: var(--text-main);
+    margin-bottom: 2px;
+    letter-spacing: 0.05em;
+}
+
+.subtitle {
+    font-family: "Zen Maru Gothic", sans-serif;
+    font-size: 0.75rem;
+    color: var(--primary-color);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+}
+
+/* ギア設定ボタン */
 .btn-settings-gear {
     width: 38px;
     height: 38px;
     flex-shrink: 0;
-    background-color: var(--primary-soft);
-    border: none;
-    border-radius: 12px;
+    background-color: var(--card-bg);
+    border: 1.5px solid var(--border-color);
+    border-radius: 16px;
     font-size: 1.0625rem;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background-color 0.15s;
+    transition: all 0.15s ease;
+    color: var(--text-main);
 }
 
 .btn-settings-gear:hover {
-    background-color: var(--primary-color);
-}
-
-.rotation-mode-options {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 18px;
-}
-
-.rotation-mode-option {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 14px;
-    border: 1.5px solid var(--border-color);
-    border-radius: 14px;
-    cursor: pointer;
-    font-size: 0.9375rem;
-    font-weight: 600;
-    color: var(--text-main);
-    transition: border-color 0.15s, background-color 0.15s;
-}
-
-.rotation-mode-option:has(input:checked) {
-    border-color: var(--primary-color);
     background-color: var(--primary-soft);
+    color: var(--primary-hover);
 }
 
-.rotation-mode-option input {
-    width: 18px;
-    height: 18px;
-    accent-color: var(--primary-color);
-    flex-shrink: 0;
-}
-
-.weekday-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 8px;
-}
-
-.weekday-row-label {
-    width: 52px;
-    flex-shrink: 0;
-    font-weight: 700;
-    font-size: 0.875rem;
-    color: var(--text-main);
-}
-
-.weekday-select {
-    margin-bottom: 0 !important;
-    font-size: 0.875rem !important;
-}
-
-.sequence-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background-color: #FBF7F9;
-    border-radius: 14px;
-    padding: 8px 10px;
-    margin-bottom: 8px;
-}
-
-.sequence-row-num {
-    width: 22px;
-    height: 22px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: var(--primary-soft);
-    color: #5B4CBF;
-    border-radius: 50%;
-    font-size: 0.75rem;
-    font-weight: 700;
-}
-
-.sequence-row-info {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-width: 0;
-}
-
-.sequence-row-title {
-    font-size: 0.8125rem;
-    font-weight: 600;
-    color: var(--text-main);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.sequence-row-actions {
-    display: flex;
-    gap: 4px;
-    flex-shrink: 0;
-}
-
-.btn-seq-move {
-    width: 30px;
-    height: 30px;
-    border: none;
-    border-radius: 9px;
-    background-color: var(--primary-soft);
-    color: #5B4CBF;
-    font-weight: 700;
-    cursor: pointer;
-    font-size: 0.875rem;
-}
-
-.btn-seq-move:disabled {
-    opacity: 0.35;
-    cursor: default;
-}
-
-.btn-seq-move:not(:disabled):hover {
-    background-color: var(--primary-color);
-    color: #fff;
-}
-
-h1 {
-    font-family: "Zen Maru Gothic", sans-serif;
-    font-weight: 900;
-    font-size: 1.55rem;
-    background: linear-gradient(120deg, var(--primary-color), var(--primary-hover));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    margin-bottom: 4px;
-    letter-spacing: 0.01em;
-}
-
-.subtitle {
-    font-size: 0.8125rem;
-    color: var(--text-sub);
-    font-weight: 500;
-}
-
-/* Banner Card */
+/* トップバナー：ふんわり極淡いサックスブルーグラデーション */
 .recommendation-card {
     position: relative;
     overflow: hidden;
-    background: linear-gradient(150deg, #A99BEA 0%, #8B7FD9 45%, #6E5FC4 130%);
-    color: #ffffff;
+    background: linear-gradient(135deg, #E2ECF5 0%, #D4E2EE 50%, #C4D6E5 100%);
+    color: var(--text-main);
     padding: 22px 20px 20px;
-    border-radius: 26px;
+    border-radius: 22px;
     margin-bottom: 22px;
-    box-shadow: 0 16px 32px -12px rgba(139, 127, 217, 0.45);
+    box-shadow: 0 8px 20px -8px rgba(62, 72, 82, 0.06);
+    border: 2px solid #FFFFFF;
 }
 
 .recommendation-card::after {
     content: "";
     position: absolute;
-    width: 180px;
-    height: 180px;
-    background: rgba(255, 255, 255, 0.14);
+    width: 200px;
+    height: 200px;
+    background: rgba(255, 255, 255, 0.35);
     border-radius: 50%;
-    top: -90px;
+    top: -100px;
     right: -60px;
     pointer-events: none;
 }
 
 .recommendation-header {
     font-family: "Zen Maru Gothic", sans-serif;
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.8125rem;
+    font-weight: 900;
+    letter-spacing: 0.15em;
+    color: var(--text-sub);
     margin-bottom: 10px;
 }
 
@@ -255,25 +137,23 @@ h1 {
 
 .target-menu {
     font-family: "Zen Maru Gothic", sans-serif;
-    font-size: 1.875rem;
+    font-size: 1.75rem;
     font-weight: 900;
-    color: #ffffff;
-    -webkit-text-stroke: 0;
-    text-shadow: 0 3px 10px rgba(0,0,0,0.12);
+    color: var(--text-main);
 }
 
 .target-title {
-    font-size: 1.0625rem;
+    font-size: 1rem;
     font-weight: 700;
-    color: rgba(255, 255, 255, 0.95);
+    color: var(--text-main);
 }
 
 .last-completed {
     font-size: 0.8125rem;
-    color: rgba(255, 255, 255, 0.85);
+    color: var(--text-sub);
     margin-bottom: 16px;
     padding-top: 10px;
-    border-top: 1px solid rgba(255, 255, 255, 0.25);
+    border-top: 1.5px dashed rgba(62, 72, 82, 0.12);
     position: relative;
 }
 
@@ -285,86 +165,168 @@ h1 {
 
 .btn-complete {
     flex: 2;
-    background-color: #ffffff;
-    color: var(--primary-hover);
+    background-color: var(--primary-color);
+    color: #FFFFFF;
     border: none;
-    padding: 14px 8px;
+    padding: 12px 8px;
     border-radius: 16px;
     font-size: 0.9375rem;
-    font-weight: 700;
+    font-weight: 900;
     cursor: pointer;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-    box-shadow: 0 6px 14px -4px rgba(0,0,0,0.25);
+    transition: all 0.15s ease;
+    box-shadow: 0 4px 10px rgba(130, 160, 194, 0.3);
 }
 
 .btn-complete:hover {
+    background-color: var(--primary-hover);
     transform: translateY(-1px);
-}
-
-.btn-complete:active {
-    transform: translateY(0);
 }
 
 .btn-offday {
     flex: 1;
-    background-color: rgba(255, 255, 255, 0.2);
-    color: #ffffff;
-    border: 1.5px solid rgba(255, 255, 255, 0.5);
-    padding: 14px 8px;
+    background-color: rgba(255, 255, 255, 0.7);
+    color: var(--text-main);
+    border: 1.5px solid #FFFFFF;
+    padding: 12px 8px;
     border-radius: 16px;
     font-size: 0.8125rem;
-    font-weight: 700;
+    font-weight: 900;
     cursor: pointer;
     transition: background-color 0.2s;
 }
 
 .btn-offday:hover {
-    background-color: rgba(255, 255, 255, 0.32);
+    background-color: rgba(255, 255, 255, 0.95);
 }
 
+/* メニューバッジ (A, B, C...) */
 .menu-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     min-width: 30px;
     height: 30px;
-    background-color: var(--primary-soft);
-    color: var(--primary-hover);
-    font-weight: 800;
+    background-color: var(--lavender-soft);
+    color: var(--text-main);
+    font-weight: 900;
     font-family: "Zen Maru Gothic", sans-serif;
     padding: 4px 10px;
-    border-radius: 10px;
-    font-size: 0.9375rem;
+    border-radius: 12px;
+    font-size: 0.875rem;
 }
 
-.menu-badge-A { background-color: #FBE9F0; color: #C9628B; }
-.menu-badge-B { background-color: #F0E7FA; color: #8862C4; }
-.menu-badge-C { background-color: #F5E7F8; color: #A15FC0; }
-.menu-badge-D { background-color: #D9F5E6; color: #2CA86E; }
-.menu-badge-E { background-color: #D9EEFB; color: #2C8FC9; }
-.menu-badge-F { background-color: #ECE9FB; color: #6E5FC4; }
+.menu-badge-A { background-color: #EEF4F9; color: #82A0C2; }
+.menu-badge-B { background-color: #F1EEF9; color: #8F82C2; }
+.menu-badge-C { background-color: #EBF8F9; color: #62B3B0; }
+.menu-badge-D { background-color: #EEF8F1; color: #62B37A; }
+.menu-badge-E { background-color: #FAF4EE; color: #C29682; }
+.menu-badge-F { background-color: #EEF4FB; color: #5B92D6; }
 
-/* Calendar Section */
+/* 部位選択ガイドバナー */
+.category-select-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.btn-category-select {
+    background: rgba(255, 255, 255, 0.92);
+    border: 1.5px solid #FFFFFF;
+    border-radius: 16px;
+    padding: 8px 2px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+    transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.btn-category-select:hover {
+    transform: translateY(-1px);
+    background-color: #ffffff;
+}
+
+.btn-category-select .cat-label {
+    font-size: 0.75rem;
+    font-weight: 900;
+    color: var(--text-main) !important; /* 文字色を濃いグレー/ネイビーで統一 */
+    font-family: "Zen Maru Gothic", sans-serif;
+    margin-bottom: 1px;
+    white-space: nowrap;
+}
+
+.btn-category-select .cat-days {
+    font-size: 0.625rem;
+    font-weight: 700;
+    color: var(--primary-color) !important; /* 「前回: ○日前」の文字色を統一 */
+    white-space: nowrap;
+}
+
+/* メインタブのスタイリング */
+.main-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 18px;
+    background-color: var(--card-bg);
+    padding: 4px;
+    border-radius: 18px;
+    box-shadow: 0 2px 8px rgba(62, 72, 82, 0.03);
+    border: 1.5px solid var(--border-color);
+}
+
+.main-tab-btn {
+    flex: 1;
+    max-width: 200px;
+    padding: 9px 16px;
+    border: none;
+    border-radius: 14px;
+    background-color: transparent;
+    color: var(--text-sub);
+    font-size: 0.8125rem;
+    font-weight: 900;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.main-tab-btn.active {
+    background-color: var(--primary-color);
+    color: #ffffff;
+    box-shadow: 0 3px 8px rgba(130, 160, 194, 0.25);
+}
+
+.main-tab-content {
+    display: none;
+}
+
+.main-tab-content.active {
+    display: block;
+}
+
+/* カレンダーセクション */
 .log-section {
-    margin-top: 28px;
-    margin-bottom: 26px;
+    margin-top: 24px;
+    margin-bottom: 24px;
 }
 
 .log-section h2, .table-section h2 {
     font-family: "Zen Maru Gothic", sans-serif;
-    font-size: 1.0625rem;
-    font-weight: 700;
-    margin-bottom: 12px;
+    font-size: 1rem;
+    font-weight: 900;
+    margin-bottom: 10px;
     color: var(--text-main);
     padding-left: 2px;
 }
 
 .calendar-card {
     background-color: var(--card-bg);
-    border: none;
-    border-radius: 22px;
-    padding: 16px 14px;
-    box-shadow: 0 8px 24px -12px rgba(139, 127, 217, 0.25);
+    border: 1.5px solid var(--border-color);
+    border-radius: 20px;
+    padding: 16px 12px;
+    box-shadow: 0 4px 14px rgba(62, 72, 82, 0.03);
 }
 
 .calendar-header {
@@ -372,27 +334,27 @@ h1 {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 12px;
-    font-weight: 700;
+    font-weight: 900;
     font-family: "Zen Maru Gothic", sans-serif;
     color: var(--text-main);
 }
 
 .calendar-header button {
-    background: var(--primary-soft);
+    background: var(--bg-color);
     border: none;
-    color: var(--primary-color);
-    width: 34px;
-    height: 34px;
+    color: var(--text-main);
+    width: 32px;
+    height: 32px;
     border-radius: 12px;
     cursor: pointer;
-    font-weight: bold;
+    font-weight: 900;
     font-size: 1rem;
     transition: background-color 0.15s;
 }
 
 .calendar-header button:hover {
-    background: var(--primary-color);
-    color: #fff;
+    background: var(--primary-soft);
+    color: var(--primary-color);
 }
 
 .calendar-grid {
@@ -404,50 +366,31 @@ h1 {
 
 .cal-day-head {
     font-size: 0.75rem;
-    font-weight: 700;
+    font-weight: 900;
     color: var(--text-sub);
-    padding: 4px 0 8px;
+    padding: 4px 0 6px;
 }
 
-/* カレンダーの1日分のセル */
 .cal-cell {
-    height: 52px; /* ★高さを少しだけ広げて収まりを確保 */
+    height: 52px;
     padding: 3px 2px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    border-radius: 10px;
+    border-radius: 12px;
     font-size: 0.75rem;
-    font-weight: 500;
+    font-weight: 700;
     position: relative;
-    background-color: #FBF7F9;
+    background-color: var(--bg-color);
     color: var(--text-main);
-    overflow: hidden; /* 万が一の溢れを防止 */
-}
-
-
-/* カレンダー内のバッジ（1文字・絵文字に合わせたスタイリング） */
-.cal-tag {
-    font-size: 0.6875rem;
-    font-weight: 800;
-    font-family: "Zen Maru Gothic", sans-serif;
-    padding: 2px 5px;
-    border-radius: 6px;
-    margin-top: 2px;
-    color: #fff;
-    cursor: pointer;
-    transition: transform 0.1s, opacity 0.1s;
-    white-space: nowrap;
-    display: inline-block;
-    text-align: center;
-    min-width: 18px;
+    overflow: hidden;
 }
 
 .cal-cell.today {
     background-color: var(--primary-soft);
     box-shadow: inset 0 0 0 2px var(--primary-color);
-    font-weight: 700;
+    font-weight: 900;
 }
 
 .cal-cell.clickable {
@@ -460,965 +403,57 @@ h1 {
     transform: scale(1.04);
 }
 
-.cal-tag:hover {
-    opacity: 0.85;
-    transform: scale(1.08);
-}
-
-/* カレンダーのバッジカラーを部位グループごとに整理 */
-.cal-tag.A { background-color: #E091AE; } /* 上半身 (ピンク) */
-.cal-tag.D { background-color: #E091AE; } /* 上半身 (ピンク) */
-
-.cal-tag.B { background-color: #A08CE0; } /* 下半身 (パープル) */
-.cal-tag.C { background-color: #A08CE0; } /* 下半身 (パープル) */
-.cal-tag.E { background-color: #A08CE0; } /* 下半身 (パープル) */
-
-.cal-tag.F { background-color: #8B7FD9; } /* 有酸素 (ブルーラベンダー) */
-.cal-tag.ALL { background-color: #F59E0B; } /* 全身 (オレンジ) */
-.cal-tag.OFF { background-color: var(--offday-color); } /* OFF (グレー) */
-
-/* 全メニュー一覧：スマホはカード形式、PCは表形式 */
-.table-section {
-    margin-top: 26px;
-    margin-bottom: 26px;
-}
-
-.table-wrapper {
-    background-color: transparent;
-    border: none;
-    border-radius: 0;
-    overflow-x: visible;
-}
-
-.menu-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 16px;
-    text-align: left;
-    font-size: 0.8125rem;
-}
-
-.menu-table thead {
-    display: none;
-}
-
-.menu-table tbody tr {
-    display: block;
-    background-color: var(--card-bg);
-    border-radius: 20px;
-    box-shadow: 0 6px 18px -10px rgba(61, 44, 58, 0.18);
-    padding: 16px 16px 14px;
-    position: relative;
-    margin-bottom: 16px;
-}
-
-.menu-table td {
-    display: block;
-    padding: 0;
-    border-bottom: none;
-}
-
-.menu-table td[data-label="メニュー"] {
-    position: absolute;
-    top: 14px;
-    right: 14px;
-}
-
-.menu-table td[data-label="対象部位"] {
-    font-size: 1.0625rem;
-    font-weight: 700;
-    padding-right: 46px;
-    margin-bottom: 10px;
-    font-family: "Zen Maru Gothic", sans-serif;
-}
-
-.menu-table td[data-label="種目と設定"] {
-    margin-bottom: 10px;
-}
-
-.menu-table td[data-label="メモ"] {
-    background-color: #FBF7F9;
-    border-radius: 12px;
-    padding: 8px 10px !important;
-    margin-bottom: 12px;
-    line-height: 1.5;
-}
-
-.menu-table td[data-label=""] {
-    display: flex;
-    justify-content: flex-end;
-}
-
-.table-ex-item {
-    margin-bottom: 6px;
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-}
-
-.table-ex-item:last-child {
-    margin-bottom: 0;
-}
-
-.table-ex-name {
-    font-weight: 700;
-    color: var(--text-main);
-}
-
-.table-ex-meta {
-    font-size: 0.75rem;
-    color: var(--text-sub);
-}
-
-.btn-table-edit {
-    background-color: var(--primary-soft);
-    border: none;
-    color: #5B4CBF;
-    padding: 8px 16px;
-    border-radius: 12px;
-    font-size: 0.8125rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background-color 0.15s, color 0.15s;
-}
-
-.btn-table-edit:hover {
-    background-color: var(--primary-color);
-    color: #fff;
-}
-
-/* PC幅ではきれいな表として表示 */
-@media (min-width: 760px) {
-    .table-wrapper {
-        background-color: var(--card-bg);
-        border-radius: 22px;
-        box-shadow: 0 8px 24px -12px rgba(139, 127, 217, 0.25);
-        overflow: hidden;
-        padding: 4px;
-    }
-
-    .menu-table {
-        border-spacing: 0;
-        min-width: 640px;
-    }
-
-    .menu-table thead {
-        display: table-header-group;
-    }
-
-    .menu-table th {
-        background-color: var(--primary-soft);
-        color: var(--primary-color);
-        font-weight: 700;
-        padding: 12px 14px;
-        border: none;
-    }
-
-    .menu-table th:first-child { border-radius: 14px 0 0 0; }
-    .menu-table th:last-child { border-radius: 0 14px 0 0; }
-
-    .menu-table tbody tr {
-        display: table-row;
-        border-radius: 0;
-        box-shadow: none;
-        padding: 0;
-    }
-
-    .menu-table tbody tr:hover {
-        background-color: #FFFAFB;
-    }
-
-    .menu-table td {
-        display: table-cell;
-        padding: 12px 14px;
-        border-bottom: 1px solid var(--border-color);
-        vertical-align: middle;
-    }
-
-    .menu-table td[data-label="メニュー"] {
-        position: static;
-    }
-
-    .menu-table td[data-label="対象部位"] {
-        padding-right: 14px;
-        margin-bottom: 0;
-    }
-
-    .menu-table td[data-label="種目と設定"] {
-        margin-bottom: 0;
-    }
-
-    .menu-table td[data-label="メモ"] {
-        background-color: transparent;
-        border-radius: 0;
-        margin-bottom: 0;
-        color: var(--text-sub);
-    }
-
-    .menu-table td[data-label=""] {
-        display: table-cell;
-    }
-
-    .menu-table tbody tr:last-child td {
-        border-bottom: none;
-    }
-}
-
-/* Modal Styles */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(61, 44, 58, 0.45);
-    backdrop-filter: blur(2px);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    padding: 12px;
-    z-index: 100;
-}
-
-.modal-overlay.active {
-    display: flex;
-}
-
-.modal-content {
-    background-color: #ffffff;
-    border-radius: 26px;
-    width: 100%;
-    max-width: 500px;
-    max-height: 85vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    box-shadow: 0 24px 48px -12px rgba(61, 44, 58, 0.35);
-}
-
-.modal-header {
-    padding: 18px 20px;
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.modal-header h2 {
-    font-family: "Zen Maru Gothic", sans-serif;
-    font-size: 1.0625rem;
-    font-weight: 700;
-    color: var(--text-main);
-}
-
-.btn-close {
-    background: var(--primary-soft);
-    border: none;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    font-size: 1.25rem;
-    color: var(--primary-hover);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
-}
-
-.modal-body {
-    padding: 18px 20px;
-    overflow-y: auto;
-    flex-grow: 1;
-    -webkit-overflow-scrolling: touch;
-}
-
-.form-label {
-    display: block;
-    font-size: 0.8125rem;
-    font-weight: 700;
-    margin-bottom: 7px;
-    color: var(--text-main);
-}
-
-.form-input {
-    width: 100%;
-    padding: 12px 14px;
-    border: 1.5px solid var(--border-color);
-    border-radius: 14px;
-    font-size: 1rem;
-    margin-bottom: 16px;
-    background-color: #FBF7F9;
-    transition: border-color 0.15s, background-color 0.15s;
-}
-
-.form-input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    background-color: #ffffff;
-}
-
-input[type="date"].form-input {
-    appearance: none;
-    -webkit-appearance: none;
-    color: var(--text-main);
-    font-weight: 600;
-}
-
-input[type="date"].form-input::-webkit-calendar-picker-indicator {
-    filter: invert(45%) sepia(40%) saturate(1000%) hue-rotate(210deg);
-    cursor: pointer;
-}
-
-.form-textarea {
-    resize: vertical;
-    min-height: 64px;
-}
-
-.exercise-row {
-    display: flex;
-    gap: 6px;
-    margin-bottom: 8px;
-    align-items: center;
-}
-
-.exercise-row .input-name { flex: 2; margin-bottom: 0; }
-.exercise-row .input-detail { flex: 1.5; margin-bottom: 0; }
-
-.btn-remove-row {
-    background-color: var(--primary-soft);
-    color: var(--primary-hover);
-    border: none;
-    border-radius: 12px;
-    width: 38px;
-    height: 42px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 1.25rem;
-    flex-shrink: 0;
-}
-
-.btn-add-exercise {
-    background: var(--primary-soft);
-    border: none;
-    color: #5B4CBF;
-    width: 100%;
-    padding: 12px;
-    border-radius: 14px;
-    font-size: 0.875rem;
-    font-weight: 700;
-    cursor: pointer;
-    margin-top: 6px;
-}
-
-/* 数値ダイレクト入力スタイリング */
-.log-exercise-block {
-    margin-bottom: 16px;
-    padding-bottom: 14px;
-    border-bottom: 1px dashed var(--border-color);
-}
-
-.log-exercise-title {
-    font-weight: 700;
-    font-size: 0.9375rem;
-    margin-bottom: 8px;
-    color: var(--text-main);
-}
-
-.direct-input-group {
-    display: flex;
-    gap: 8px;
-}
-
-.direct-field {
-    flex: 1;
-}
-
-.direct-field label {
-    display: block;
-    font-size: 0.75rem;
-    color: var(--text-sub);
-    margin-bottom: 4px;
-    font-weight: 600;
-}
-
-.direct-field input {
-    width: 100%;
-    padding: 11px 6px;
-    font-size: 1rem;
-    font-weight: 700;
-    text-align: center;
-    border: 1.5px solid var(--border-color);
-    border-radius: 12px;
-    background-color: #FBF7F9;
-    outline: none;
-    color: var(--text-main);
-}
-
-.direct-field input:focus {
-    border-color: var(--primary-color);
-    background-color: #ffffff;
-}
-
-/* 追加種目エリアのスタイリング */
-.extra-exercise-section {
-    margin-top: 20px;
-    padding-top: 16px;
-    border-top: 2px dashed var(--border-color);
-}
-
-.extra-log-block {
-    background-color: var(--primary-soft);
-    border: none;
-    padding: 12px;
-    border-radius: 14px;
-    margin-bottom: 10px;
-}
-
-.extra-label-select-label {
-    display: block;
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: var(--text-sub);
-    margin-bottom: 4px;
-}
-
-.extra-log-block select.extra-label-select {
-    margin-bottom: 10px;
-    background-color: #ffffff;
-    font-size: 0.875rem;
-    font-weight: 600;
-}
-
-.extra-title-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 8px;
-}
-
-.extra-title-row input {
-    margin-bottom: 0;
-    background-color: #ffffff;
-}
-
-/* 種目チップ（かわいいピル型ボタン） */
-.exercise-chip-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-bottom: 10px;
-}
-
-.exercise-chip-empty {
-    font-size: 0.75rem;
-    color: var(--text-sub);
-    padding: 6px 2px;
-}
-
-button.exercise-chip {
-    background-color: #ffffff;
-    border: 1.5px solid var(--border-color);
-    color: var(--text-main);
-    padding: 7px 14px;
-    border-radius: 20px;
-    font-size: 0.8125rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.15s;
-}
-
-button.exercise-chip:hover {
-    border-color: var(--primary-color);
-    background-color: var(--primary-soft);
-}
-
-button.exercise-chip.selected {
-    background: linear-gradient(120deg, var(--primary-color), var(--primary-hover));
-    border-color: transparent;
-    color: #ffffff;
-    box-shadow: 0 4px 10px -4px rgba(139, 127, 217, 0.6);
-}
-
-/* 種目リスト管理モーダル内のチップ（削除ボタン付き） */
-span.exercise-chip.removable {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background-color: var(--primary-soft);
-    color: #5B4CBF;
-    padding: 7px 8px 7px 14px;
-    border-radius: 20px;
-    font-size: 0.8125rem;
-    font-weight: 600;
-}
-
-.chip-remove-btn {
-    background-color: rgba(255,255,255,0.7);
-    border: none;
-    color: #5B4CBF;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    font-size: 0.9375rem;
-    line-height: 1;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.chip-remove-btn:hover {
-    background-color: #ffffff;
-}
-
-/* ラベルタブ（種目リスト管理モーダル用） */
-.label-tab-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-bottom: 16px;
-}
-
-.label-tab {
-    background-color: #FBF7F9;
-    border: 1.5px solid var(--border-color);
-    color: var(--text-sub);
-    padding: 8px 14px;
-    border-radius: 20px;
-    font-size: 0.8125rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.15s;
-}
-
-.label-tab.active {
-    background: linear-gradient(120deg, var(--primary-color), var(--primary-hover));
-    border-color: transparent;
-    color: #ffffff;
-}
-
-.library-add-row {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-}
-
-.btn-library-add {
-    background-color: var(--primary-color);
-    color: #ffffff;
-    border: none;
-    padding: 11px 18px;
-    border-radius: 14px;
-    font-weight: 700;
-    font-size: 0.875rem;
-    cursor: pointer;
-    flex-shrink: 0;
-}
-
-.btn-add-extra {
-    background-color: #ffffff;
-    border: 1.5px dashed var(--primary-color);
-    color: var(--primary-color);
-    width: 100%;
-    padding: 12px;
-    border-radius: 14px;
-    font-size: 0.875rem;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-.modal-footer {
-    padding: 14px 20px;
-    border-top: 1px solid var(--border-color);
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-}
-
-.btn-cancel {
-    background-color: #EFE4EA;
-    color: #6B5766;
-    border: none;
-    padding: 11px 18px;
-    border-radius: 14px;
-    font-weight: 700;
-    font-size: 0.875rem;
-    cursor: pointer;
-}
-
-.btn-save {
-    background: linear-gradient(120deg, var(--primary-color), var(--primary-hover));
-    color: #ffffff;
-    border: none;
-    padding: 11px 20px;
-    border-radius: 14px;
-    font-size: 0.875rem;
-    font-weight: 700;
-    cursor: pointer;
-    box-shadow: 0 6px 14px -6px rgba(139, 127, 217, 0.6);
-}
-
-/* Footer & Reset */
-footer {
-    margin-top: 36px;
-    margin-bottom: 20px;
-    text-align: center;
-    font-size: 0.8125rem;
-    color: var(--text-sub);
-}
-
-.btn-reset {
-    background: none;
-    border: none;
-    color: #E37B93;
-    text-decoration: underline;
-    cursor: pointer;
-    font-size: 0.8125rem;
-    margin-top: 8px;
-    font-weight: 500;
-}
-
-/* フッター領域の調整 */
-footer {
-    margin-top: 36px;
-    margin-bottom: 24px;
-    text-align: center;
-    font-size: 0.8125rem;
-    color: var(--text-sub);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-}
-
-/* フッター内の設定ボタン配置 */
-.footer-tools {
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-}
-
-/* 控えめなボタンデザイン */
-.btn-footer-tool {
-    background-color: var(--card-bg);
-    border: 1px solid var(--border-color);
-    color: var(--text-sub);
-    padding: 6px 12px;
-    border-radius: 10px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.15s ease;
-}
-
-.btn-footer-tool:hover {
-    background-color: var(--primary-soft);
-    color: var(--primary-hover);
-    border-color: transparent;
-}
-
-.cal-tag.ALL { background-color: #F59E0B; } /* 全身用バッジ */
-
-/* 記録モーダル内のコンパクト化 */
-#workout-log-modal .modal-body {
-    padding: 12px 16px;
-}
-
-/* タイプ選択ラジオボタンを横1行に */
-#workout-log-modal .rotation-mode-options {
-    display: flex;
-    flex-direction: row;
-    gap: 6px;
-    margin-bottom: 12px;
-}
-
-#workout-log-modal .rotation-mode-option {
-    flex: 1;
-    padding: 8px 6px;
-    font-size: 0.8125rem;
-    justify-content: center;
-    border-radius: 10px;
-}
-
-/* フォームラベルの余白削減 */
-#workout-log-modal .form-label {
-    margin-bottom: 4px;
-    font-size: 0.75rem;
-}
-
-#workout-log-modal .form-input {
-    padding: 8px 12px;
-    margin-bottom: 10px;
-    font-size: 0.9375rem;
-}
-
-/* 入力ブロック全体のコンパクト化 */
-.log-exercise-block, .extra-log-block {
-    padding: 8px 10px !important;
-    margin-bottom: 8px !important;
-    border-radius: 12px !important;
-}
-
-.log-exercise-title {
-    font-size: 0.875rem;
-    margin-bottom: 4px;
-}
-
-/* 数値入力フィールドを小さく */
-.direct-field label {
+/* カレンダータグ：爽やかなアイスカラーバッジ */
+.cal-tag {
     font-size: 0.6875rem;
-    margin-bottom: 2px;
-}
-
-.direct-field input {
-    padding: 6px 4px !important;
-    font-size: 0.9375rem !important;
-    border-radius: 8px !important;
-}
-
-/* 追加種目セクションの余白削減 */
-.extra-exercise-section {
-    margin-top: 10px;
-    padding-top: 10px;
-}
-
-/* サジェストエリアのコンパクト化 */
-.menu-suggest-wrapper {
-    padding: 8px 10px !important;
-    margin-bottom: 10px !important;
-    border-radius: 12px !important;
-}
-
-.menu-suggest-wrapper .exercise-chip {
-    padding: 4px 10px !important;
-    font-size: 0.75rem !important;
-}
-/* 種目候補トグルのスタイリング */
-.menu-suggest-toggle summary::-webkit-details-marker {
-    display: none; /* デフォルトの三角矢印を非表示 */
-}
-
-.menu-suggest-toggle summary {
-    list-style: none; /* Firefox用の矢印消去 */
-}
-
-.menu-suggest-toggle[open] summary {
-    border-bottom: 1px dashed var(--border-color);
-}
-
-/* 前回と同じ入力ボタン */
-.btn-copy-last {
-    background-color: var(--primary-soft);
-    border: 1px solid var(--primary-color);
-    color: var(--primary-hover);
-    padding: 3px 8px;
+    font-weight: 900;
+    font-family: "Zen Maru Gothic", sans-serif;
+    padding: 2px 7px;
     border-radius: 8px;
-    font-size: 0.75rem;
-    font-weight: 700;
+    margin-top: 2px;
+    color: #FFFFFF !important;
     cursor: pointer;
+    transition: transform 0.15s ease, opacity 0.15s ease;
     white-space: nowrap;
-    transition: all 0.15s ease;
+    display: inline-block;
+    text-align: center;
+    min-width: 20px;
+    border: none !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
 }
 
-.btn-copy-last:hover {
-    background-color: var(--primary-color);
-    color: #ffffff;
+/* カレンダータグ：さらにふんわりマイルドな極淡パステルブルー */
+.cal-tag.A, .cal-tag.D { 
+    background-color: #A3B8D7; 
+} /* 上半身 (極淡サックスブルー) */
+
+.cal-tag.B, .cal-tag.C, .cal-tag.E { 
+    background-color: #92A9C9; 
+} /* 下半身 (優しく落ち着いたペールブルー) */
+
+.cal-tag.F { 
+    background-color: #FFFFFF; 
+    color: var(--text-main) !important;
+} /* 有酸素 (ホワイトベース) */
+
+.cal-tag.ALL { 
+    background-color: #A1CFCB; 
+} /* 全身 (ペールミント) */
+
+.cal-tag.OFF { 
+    background-color: #C2CBD3; 
+} /* OFF (ライトアッシュグレー) */
+
+.cal-tag:hover {
+    transform: scale(1.08);
+    opacity: 0.9;
 }
 
-/* 自由入力カードのデザインをメリハリ化 */
-.extra-log-block {
-    background-color: #ffffff !important; /* 背景を白にしてクッキリ */
-    border: 1px solid var(--border-color) !important;
-    border-left: 4px solid var(--primary-color) !important; /* 左側にアクセントライン */
-    padding: 10px 12px !important;
-    border-radius: 12px !important;
-    margin-bottom: 10px !important;
-    box-shadow: 0 3px 10px rgba(139, 127, 217, 0.08); /* 控えめな影で浮き出させる */
-}
-
-/* カード内のラベル・項目見出しの視認性アップ */
-.extra-label-select-label {
-    color: var(--primary-hover) !important;
-    font-size: 0.72rem !important;
-    font-weight: 700 !important;
-}
-
-/* カード内のドロップダウンや入力欄の背景 */
-.extra-log-block .form-input {
-    background-color: #FBF7F9 !important;
-}
-
-.extra-log-block .form-input:focus {
-    background-color: #ffffff !important;
-}
-
-/* メインタブのスタイリング */
-.main-tabs {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin-bottom: 18px;
-    background-color: var(--card-bg);
-    padding: 4px;
-    border-radius: 16px;
-    box-shadow: 0 4px 12px -6px rgba(139, 127, 217, 0.2);
-}
-
-.main-tab-btn {
-    flex: 1;
-    max-width: 200px;
-    padding: 10px 16px;
-    border: none;
-    border-radius: 12px;
-    background-color: transparent;
-    color: var(--text-sub);
-    font-size: 0.875rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    letter-spacing: 0.05em; /* 文字間隔を少し広げてスタイリッシュに */
-    font-size: 0.8125rem;
-}
-
-.main-tab-btn.active {
-    background: linear-gradient(120deg, var(--primary-color), var(--primary-hover));
-    color: #ffffff;
-    box-shadow: 0 4px 10px -4px rgba(139, 127, 217, 0.5);
-}
-
-/* タブコンテンツの表示制御 */
-.main-tab-content {
-    display: none;
-}
-
-.main-tab-content.active {
-    display: block;
-}
-
-/* 記録一覧（タイムライン）の超コンパクトデザイン */
-.history-card {
-    background-color: var(--card-bg);
-    border-radius: 12px;
-    padding: 10px 12px;
-    margin-bottom: 8px;
-    box-shadow: 0 2px 8px -4px rgba(139, 127, 217, 0.12);
-    border: 1px solid var(--border-color);
-}
-
-.history-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 4px;
-}
-
-.history-date {
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: var(--text-sub);
-}
-
-.history-title {
-    font-size: 0.875rem;
-    font-weight: 700;
-    color: var(--text-main);
-    margin-bottom: 6px;
-    font-family: "Zen Maru Gothic", sans-serif;
-}
-
-.history-ex-list {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    background-color: #FBF7F9;
-    padding: 8px 10px;
-    border-radius: 10px;
-}
-
-.history-ex-item {
-    display: flex;
-    flex-direction: column; /* 縦並びにして長文の崩れを防止 */
-    gap: 2px;
-    padding-bottom: 4px;
-    border-bottom: 1px dashed var(--border-color);
-}
-
-.history-ex-item:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
-}
-
-.history-ex-name {
-    font-weight: 500;
-    color: var(--text-main);
-}
-
-.history-ex-val {
-    color: var(--primary-hover);
-    font-weight: 600;
-    font-size: 0.72rem;
-    padding-left: 8px; /* 少しインデントを入れて読みやすく */
-    word-break: break-all;
-}
-
-.history-ex-empty {
-    font-size: 0.72rem;
-    color: var(--text-sub);
-    padding: 2px 0;
-}
-
-/* 部位選択ガイドバナー用スタイリング（1行4並び・コンパクト版） */
-.category-select-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr); /* 1行に4つ並べる */
-    gap: 6px;
-    margin-bottom: 8px;
-}
-
-.btn-category-select {
-    background: rgba(255, 255, 255, 0.95);
-    border: none;
-    border-radius: 12px;
-    padding: 8px 2px; /* 上下余白をスリム化 */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 2px 8px -4px rgba(0, 0, 0, 0.15);
-    transition: transform 0.15s ease, background-color 0.15s ease;
-}
-
-.btn-category-select:hover {
-    transform: translateY(-1px);
-    background-color: #ffffff;
-}
-
-.btn-category-select:active {
-    transform: translateY(0);
-}
-
-.btn-category-select .cat-label {
-    font-size: 0.75rem; /* 小さめフォントで収まり良く */
-    font-weight: 800;
-    color: var(--text-main);
-    font-family: "Zen Maru Gothic", sans-serif;
-    margin-bottom: 1px;
-    white-space: nowrap;
-}
-
-.btn-category-select .cat-days {
-    font-size: 0.625rem; /* 日付表示も控えめに */
-    font-weight: 700;
-    color: var(--primary-hover);
-    white-space: nowrap;
-}
-
-/* 滑らかな開閉アニメーション用のアコーディオン */
+/* 記録一覧（タイムライン）デザイン */
 .history-month-group {
     margin-bottom: 10px;
-    border: 1px solid var(--border-color);
-    border-radius: 14px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 16px;
     overflow: hidden;
     background-color: var(--card-bg);
 }
@@ -1426,9 +461,9 @@ footer {
 .history-month-summary {
     padding: 10px 14px;
     font-size: 0.8125rem;
-    font-weight: 700;
-    color: var(--primary-hover);
-    background-color: var(--primary-soft);
+    font-weight: 900;
+    color: var(--text-main);
+    background-color: var(--lavender-soft);
     cursor: pointer;
     user-select: none;
     display: flex;
@@ -1438,7 +473,7 @@ footer {
 }
 
 .history-month-summary:hover {
-    background-color: #e2ddf8;
+    background-color: #E6EFF6;
 }
 
 .history-month-summary .arrow-icon {
@@ -1462,204 +497,539 @@ footer {
     padding: 8px 10px 2px;
 }
 
-/* ▼ セット別横並び入力用の追加スタイル（崩れ防止・強力適用） */
-#workout-log-modal .sets-container {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    margin-bottom: 8px;
-}
-
-#workout-log-modal .set-input-row {
-    display: flex !important;
-    align-items: center !important;
-    flex-wrap: nowrap !important;
-    gap: 6px !important;
-    background-color: #ffffff !important;
-    padding: 6px 8px !important;
-    border-radius: 10px !important;
-    border: 1px solid var(--border-color) !important;
-}
-
-#workout-log-modal .set-label {
-    font-size: 0.75rem !important;
-    font-weight: 800 !important;
-    color: var(--primary-hover) !important;
-    min-width: 34px !important;
-    flex-shrink: 0 !important;
-}
-
-#workout-log-modal .set-field-group {
-    display: flex !important;
-    align-items: center !important;
-    gap: 3px !important;
-}
-
-/* 巨大化していた入力枠をキュッとコンパクト化 */
-#workout-log-modal .set-field-group input.form-input {
-    width: 52px !important;
-    height: 32px !important;
-    padding: 2px 4px !important;
-    margin-bottom: 0 !important; /* 縦余白を消去 */
-    text-align: center !important;
-    font-size: 0.875rem !important;
-    font-weight: 700 !important;
-    border-radius: 8px !important;
-    background-color: #FBF7F9 !important;
-}
-
-#workout-log-modal .set-unit {
-    font-size: 0.72rem !important;
-    color: var(--text-sub) !important;
-    font-weight: 700 !important;
-    margin-right: 4px !important;
-}
-
-#workout-log-modal .set-quick-btns {
-    display: flex !important;
-    gap: 3px !important;
-    margin-left: auto !important; /* 右側に寄せる */
-}
-
-/* クイック調整ボタンのかわいいスタイリング */
-#workout-log-modal .btn-quick-adjust {
-    background-color: var(--primary-soft) !important;
-    border: 1px solid var(--border-color) !important;
-    color: var(--primary-hover) !important;
-    padding: 4px 6px !important;
-    border-radius: 6px !important;
-    font-size: 0.6875rem !important;
-    font-weight: 700 !important;
-    cursor: pointer !important;
-    white-space: nowrap !important;
-    line-height: 1 !important;
-}
-
-#workout-log-modal .btn-quick-adjust:hover {
-    background-color: var(--primary-color) !important;
-    color: #ffffff !important;
-}
-
-/* 「＋セットを追加」ボタンのスタイリング */
-#workout-log-modal .btn-add-set-row {
-    background: #ffffff !important;
-    border: 1.5px dashed var(--primary-color) !important;
-    color: var(--primary-color) !important;
-    width: 100% !important;
-    padding: 6px !important;
-    border-radius: 10px !important;
-    font-size: 0.75rem !important;
-    font-weight: 700 !important;
-    cursor: pointer !important;
-    margin-top: 4px !important;
-}
-
-/* ▼ セット別横並び入力用のスタイル（スッキリシンプル版） */
-#workout-log-modal .sets-container {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    margin-bottom: 8px;
-}
-
-#workout-log-modal .set-input-row {
-    display: flex !important;
-    align-items: center !important;
-    gap: 8px !important;
-    background-color: #ffffff !important;
-    padding: 6px 10px !important;
-    border-radius: 10px !important;
-    border: 1px solid var(--border-color) !important;
-}
-
-#workout-log-modal .set-label {
-    font-size: 0.78rem !important;
-    font-weight: 800 !important;
-    color: var(--primary-hover) !important;
-    min-width: 36px !important;
-    flex-shrink: 0 !important;
-}
-
-#workout-log-modal .set-field-group {
-    display: flex !important;
-    align-items: center !important;
-    gap: 4px !important;
-}
-
-#workout-log-modal .set-field-group input.form-input {
-    width: 60px !important;
-    height: 32px !important;
-    padding: 2px 4px !important;
-    margin-bottom: 0 !important;
-    text-align: center !important;
-    font-size: 0.875rem !important;
-    font-weight: 700 !important;
-    border-radius: 8px !important;
-    background-color: #FBF7F9 !important;
-}
-
-#workout-log-modal .set-unit {
-    font-size: 0.75rem !important;
-    color: var(--text-sub) !important;
-    font-weight: 700 !important;
-    margin-right: 8px !important;
-}
-
-#workout-log-modal .btn-add-set-row {
-    background: #ffffff !important;
-    border: 1.5px dashed var(--primary-color) !important;
-    color: var(--primary-color) !important;
-    width: 100% !important;
-    padding: 6px !important;
-    border-radius: 10px !important;
-    font-size: 0.75rem !important;
-    font-weight: 700 !important;
-    cursor: pointer !important;
-    margin-top: 4px !important;
-}
-
-/* ▼ 編集モーダル内の超省スペース＆スリム化スタイル */
-#workout-log-modal .extra-log-block {
-    padding: 6px 8px !important;
+.history-card {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    padding: 8px 10px !important;
     margin-bottom: 6px !important;
-    border-radius: 8px !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+    border: 1.5px solid var(--border-color);
+}
+
+.history-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3px;
+}
+
+.history-date {
+    font-size: 0.68rem !important;
+    font-weight: 900;
+    color: var(--text-sub);
+}
+
+.history-title {
+    font-size: 0.8125rem !important;
+    font-weight: 900;
+    color: var(--text-main);
+    margin-bottom: 4px !important;
+    font-family: "Zen Maru Gothic", sans-serif;
+}
+
+.history-ex-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px !important;
+    background-color: var(--bg-color);
+    padding: 6px 8px !important;
+    border-radius: 10px;
+}
+
+.history-ex-item {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding-bottom: 3px;
+    border-bottom: 1px dashed var(--border-color);
+}
+
+.history-ex-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.history-ex-name {
+    font-weight: 700;
+    color: var(--text-main);
+    font-size: 0.72rem !important;
+}
+
+.history-ex-val {
+    color: var(--primary-color);
+    font-weight: 900;
+    font-size: 0.68rem !important;
+    padding-left: 6px !important;
+    word-break: break-all;
+}
+
+.history-ex-empty {
+    font-size: 0.72rem;
+    color: var(--text-sub);
+    padding: 2px 0;
+}
+
+/* 全メニューテーブル */
+.table-section {
+    margin-top: 24px;
+    margin-bottom: 24px;
+}
+
+.table-wrapper {
+    background-color: transparent;
+    border: none;
+    border-radius: 0;
+    overflow-x: visible;
+}
+
+.menu-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 12px;
+    text-align: left;
+    font-size: 0.8125rem;
+}
+
+.menu-table thead {
+    display: none;
+}
+
+.menu-table tbody tr {
+    display: block;
+    background-color: var(--card-bg);
+    border-radius: 16px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.02);
+    border: 1.5px solid var(--border-color);
+    padding: 14px 14px 12px;
+    position: relative;
+    margin-bottom: 12px;
+}
+
+.menu-table td {
+    display: block;
+    padding: 0;
+    border-bottom: none;
+}
+
+.menu-table td[data-label="メニュー"] {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+}
+
+.menu-table td[data-label="対象部位"] {
+    font-size: 1rem;
+    font-weight: 900;
+    padding-right: 44px;
+    margin-bottom: 8px;
+    font-family: "Zen Maru Gothic", sans-serif;
+}
+
+.menu-table td[data-label="種目と設定"] {
+    margin-bottom: 8px;
+}
+
+.menu-table td[data-label="メモ"] {
+    background-color: var(--bg-color);
+    border-radius: 12px;
+    padding: 8px 10px !important;
+    margin-bottom: 10px;
+    line-height: 1.5;
+    font-size: 0.78rem;
+}
+
+.menu-table td[data-label=""] {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.table-ex-item {
+    margin-bottom: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.table-ex-name {
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.table-ex-meta {
+    font-size: 0.72rem;
+    color: var(--text-sub);
+}
+
+.btn-table-edit {
+    background-color: var(--bg-color);
+    border: 1.5px solid var(--border-color);
+    color: var(--text-main);
+    padding: 6px 14px;
+    border-radius: 12px;
+    font-size: 0.78rem;
+    font-weight: 900;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.btn-table-edit:hover {
+    background-color: var(--primary-soft);
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* モーダルウィンドウ */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(62, 72, 82, 0.25);
+    backdrop-filter: blur(2px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    padding: 12px;
+    z-index: 100;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-content {
+    background-color: var(--card-bg);
+    border-radius: 22px;
+    width: 100%;
+    max-width: 500px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+    border: 2px solid #FFFFFF;
+}
+
+.modal-header {
+    padding: 16px 18px;
+    border-bottom: 1.5px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    font-family: "Zen Maru Gothic", sans-serif;
+    font-size: 1rem;
+    font-weight: 900;
+    color: var(--text-main);
+}
+
+.btn-close {
+    background: var(--bg-color);
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 1.25rem;
+    color: var(--text-sub);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    font-weight: 900;
+}
+
+.btn-close:hover {
+    color: var(--primary-color);
+}
+
+.modal-body {
+    padding: 16px 18px;
+    overflow-y: auto;
+    flex-grow: 1;
+    -webkit-overflow-scrolling: touch;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 900;
+    margin-bottom: 6px;
+    color: var(--text-main);
+}
+
+.form-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 14px;
+    font-size: 0.9375rem;
+    margin-bottom: 12px;
+    background-color: var(--bg-color);
+    transition: all 0.15s;
+    font-weight: 700;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    background-color: #ffffff;
+}
+
+input[type="date"].form-input {
+    appearance: none;
+    -webkit-appearance: none;
+    color: var(--text-main);
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 60px;
+}
+
+/* モーダル内タイプ選択ボタン */
+#workout-log-modal .rotation-mode-options {
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+#workout-log-modal .rotation-mode-option {
+    flex: 1;
+    padding: 9px 6px;
+    font-size: 0.8125rem;
+    font-weight: 900;
+    
+    display: flex !important;
+    align-items: center !important;     /* 上下中央 */
+    justify-content: center !important;  /* 左右中央 */
+    text-align: center !important;
+    line-height: 1 !important;
+    
+    border-radius: 14px;
+    border: 1.5px solid var(--border-color);
+    background-color: var(--card-bg);
+    color: var(--text-sub);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+}
+
+#workout-log-modal .rotation-mode-option:has(input:checked) {
+    border-color: var(--primary-color);
+    background-color: var(--primary-soft);
+    color: var(--primary-color);
+    box-shadow: 0 2px 6px rgba(130, 160, 194, 0.15);
+}
+
+#workout-log-modal .rotation-mode-option input[type="radio"] {
+    display: none !important;
+}
+
+/* モーダル内セット入力行 */
+#workout-log-modal .extra-log-block {
+    padding: 8px 10px !important;
+    margin-bottom: 8px !important;
+    border-radius: 14px !important;
+    background-color: var(--card-bg) !important;
+    border: 1.5px solid var(--border-color) !important;
+    border-left: 4px solid var(--primary-color) !important;
 }
 
 #workout-log-modal .sets-container {
-    gap: 3px !important; /* 行同士の隙間を詰める */
-    margin-bottom: 4px !important;
+    gap: 4px !important;
+    margin-bottom: 6px !important;
 }
 
 #workout-log-modal .set-input-row {
-    padding: 2px 6px !important; /* 行内の上下余白を最小化 */
-    border: none !important; /* 枠線を消してスッキリ */
+    padding: 3px 6px !important;
+    border: none !important;
     background-color: transparent !important;
     gap: 6px !important;
+    display: flex !important;
+    align-items: center !important;
 }
 
 #workout-log-modal .set-label {
-    font-size: 0.72rem !important;
-    min-width: 30px !important;
-    color: var(--text-sub) !important;
+    font-size: 0.75rem !important;
+    font-weight: 900 !important;
+    min-width: 32px !important;
+    color: var(--primary-color) !important;
 }
 
 #workout-log-modal .set-field-group input.form-input {
-    width: 50px !important;
-    height: 26px !important; /* 高さをスリムに */
+    width: 52px !important;
+    height: 28px !important;
     padding: 0 4px !important;
     font-size: 0.8125rem !important;
-    border-radius: 6px !important;
-    border: 1px solid var(--border-color) !important;
+    border-radius: 8px !important;
+    border: 1.5px solid var(--border-color) !important;
+    background-color: var(--bg-color) !important;
+    text-align: center !important;
+    margin-bottom: 0 !important;
 }
 
 #workout-log-modal .set-unit {
-    font-size: 0.7rem !important;
+    font-size: 0.72rem !important;
     margin-right: 6px !important;
+    font-weight: 700 !important;
 }
 
 #workout-log-modal .btn-add-set-row {
-    padding: 3px !important; /* 追加ボタンの高さもコンパクトに */
-    font-size: 0.7rem !important;
-    border-radius: 6px !important;
+    padding: 4px !important;
+    font-size: 0.72rem !important;
+    border-radius: 10px !important;
     margin-top: 2px !important;
+    background: var(--card-bg) !important;
+    border: 1.5px dashed var(--primary-color) !important;
+    color: var(--primary-color) !important;
+    font-weight: 900 !important;
+    cursor: pointer !important;
+    width: 100% !important;
+}
+
+/* 前回と同じ入力ボタン */
+.btn-copy-last {
+    background-color: var(--primary-soft);
+    border: 1.5px solid var(--primary-color);
+    color: var(--primary-color);
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 0.72rem;
+    font-weight: 900;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-copy-last:hover {
+    background-color: var(--primary-color);
+    color: #ffffff;
+}
+
+/* フッター＆モーダルボタン群 */
+.modal-footer {
+    padding: 12px 18px;
+    border-top: 1.5px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.btn-cancel {
+    background-color: var(--bg-color);
+    color: var(--text-sub);
+    border: none;
+    padding: 10px 16px;
+    border-radius: 14px;
+    font-weight: 900;
+    font-size: 0.8125rem;
+    cursor: pointer;
+}
+
+.btn-save {
+    background-color: var(--primary-color);
+    color: #ffffff;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 14px;
+    font-size: 0.8125rem;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 3px 8px rgba(130, 160, 194, 0.25);
+}
+
+.btn-save:hover {
+    background-color: var(--primary-hover);
+}
+
+footer {
+    margin-top: 32px;
+    margin-bottom: 24px;
+    text-align: center;
+    font-size: 0.8125rem;
+    color: var(--text-sub);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.footer-tools {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.btn-footer-tool {
+    background-color: var(--card-bg);
+    border: 1.5px solid var(--border-color);
+    color: var(--text-sub);
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-footer-tool:hover {
+    background-color: var(--primary-soft);
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-reset {
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+/* 種目候補チップ＆種目追加ボタン */
+.exercise-chip-list button.exercise-chip {
+    background-color: #FFFFFF !important;
+    border: 1.5px solid var(--border-color) !important;
+    color: var(--text-main) !important;
+    padding: 6px 12px !important;
+    border-radius: 20px !important;
+    font-size: 0.78rem !important;
+    font-weight: 700 !important;
+    font-family: "Zen Maru Gothic", sans-serif !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+    outline: none !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02) !important;
+}
+
+.exercise-chip-list button.exercise-chip:hover {
+    background-color: var(--primary-soft) !important;
+    border-color: var(--primary-color) !important;
+    color: var(--primary-color) !important;
+    transform: translateY(-1px);
+}
+
+.btn-add-extra {
+    background-color: #FFFFFF !important;
+    border: 1.5px dashed var(--primary-color) !important;
+    color: var(--primary-color) !important;
+    padding: 6px 14px !important;
+    border-radius: 14px !important;
+    font-size: 0.78rem !important;
+    font-weight: 900 !important;
+    font-family: "Zen Maru Gothic", sans-serif !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+    outline: none !important;
+}
+
+.btn-add-extra:hover {
+    background-color: var(--primary-soft) !important;
+    transform: scale(1.02);
 }

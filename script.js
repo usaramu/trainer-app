@@ -266,6 +266,27 @@ function getLastExerciseLogObj(exerciseName) {
     return null;
 }
 
+// 保存済みデータ（新形式: setsArray、旧形式: weight/reps単体どちらも対応）から
+// カード内の .sets-container を正しいセット数・数値で復元する共通ヘルパー
+function fillSetsContainerFromItem(block, item) {
+    const setsContainer = block.querySelector('.sets-container');
+    if (!setsContainer || !item) return;
+
+    setsContainer.innerHTML = ''; // 自動生成された空のセット行を一旦クリア
+
+    const setsToRestore = (Array.isArray(item.setsArray) && item.setsArray.length > 0)
+        ? item.setsArray
+        : [{ weight: item.weight, reps: item.reps }]; // 古い形式のデータ用フォールバック
+
+    setsToRestore.forEach(s => {
+        addSetRowToBlock(
+            block,
+            s.weight !== undefined && s.weight !== null ? s.weight : '',
+            s.reps !== undefined && s.reps !== null ? s.reps : ''
+        );
+    });
+}
+
 function formatLogObj(logObj) {
     if (!logObj) return '';
     if (typeof logObj === 'string') return logObj;
@@ -495,12 +516,7 @@ function openWorkoutLogModal(defaultMenuId, presetDateISO, isEdit = false) {
                             if (minInput) minInput.value = item.minutes !== undefined ? item.minutes : '';
                             if (calInput) calInput.value = item.calories !== undefined ? item.calories : '';
                         } else {
-                            const wInput = lastBlock.querySelector('.extra-weight');
-                            const rInput = lastBlock.querySelector('.extra-reps');
-                            const sInput = lastBlock.querySelector('.extra-sets');
-                            if (wInput) wInput.value = item.weight !== undefined ? item.weight : '';
-                            if (rInput) rInput.value = item.reps !== undefined ? item.reps : '';
-                            if (sInput) sInput.value = item.sets !== undefined ? item.sets : '';
+                            fillSetsContainerFromItem(lastBlock, item);
                         }
                     }
                 } else {
@@ -528,12 +544,7 @@ function openWorkoutLogModal(defaultMenuId, presetDateISO, isEdit = false) {
                             if (minInput) minInput.value = item.minutes !== undefined ? item.minutes : '';
                             if (calInput) calInput.value = item.calories !== undefined ? item.calories : '';
                         } else {
-                            const wInput = currentBlock.querySelector('.extra-weight');
-                            const rInput = currentBlock.querySelector('.extra-reps');
-                            const sInput = currentBlock.querySelector('.extra-sets');
-                            if (wInput) wInput.value = item.weight !== undefined ? item.weight : '';
-                            if (rInput) rInput.value = item.reps !== undefined ? item.reps : '';
-                            if (sInput) sInput.value = item.sets !== undefined ? item.sets : '';
+                            fillSetsContainerFromItem(currentBlock, item);
                         }
                     }
                 }
@@ -688,10 +699,13 @@ function addSuggestedExerciseInput(exerciseName, detailStr = '', menuId = '', fo
             <button type="button" class="btn-add-set-row" onclick="addSetRowToBlock(this.closest('.extra-log-block'))">＋ セットを追加</button>
         `;
         
-        // 初期状態で3セット分作成
-        const setsContainer = block.querySelector('.sets-container');
-        for (let s = 1; s <= 3; s++) {
-            addSetRowToBlock(block, s === 1 ? (lastObj.weight || 10) : null, s === 1 ? (lastObj.reps || 10) : null);
+        // 前回記録があればその内容を、なければ空欄3セット分を初期表示
+        if (lastObj && (Array.isArray(lastObj.setsArray) || lastObj.weight !== undefined)) {
+            fillSetsContainerFromItem(block, lastObj);
+        } else {
+            for (let s = 1; s <= 3; s++) {
+                addSetRowToBlock(block);
+            }
         }
     }
 
@@ -866,18 +880,15 @@ function prefillLastLogValues(block, name) {
     const lastObj = getLastExerciseLogObj(name);
     if (!lastObj) return;
 
-    const weightInput = block.querySelector('.extra-weight');
-    const repsInput = block.querySelector('.extra-reps');
-    const setsInput = block.querySelector('.extra-sets');
     const minInput = block.querySelector('.extra-minutes');
     const calInput = block.querySelector('.extra-calories');
 
-    if (weightInput && lastObj.weight !== undefined && lastObj.weight !== null) weightInput.value = lastObj.weight;
-    if (repsInput && lastObj.reps !== undefined && lastObj.reps !== null) repsInput.value = lastObj.reps;
-    if (setsInput && lastObj.sets !== undefined && lastObj.sets !== null) setsInput.value = lastObj.sets;
-
     if (minInput && lastObj.minutes !== undefined && lastObj.minutes !== null) minInput.value = lastObj.minutes;
     if (calInput && lastObj.calories !== undefined && lastObj.calories !== null) calInput.value = lastObj.calories;
+
+    if (!minInput) {
+        fillSetsContainerFromItem(block, lastObj);
+    }
 }
 
 function closeWorkoutLogModal() {
