@@ -566,7 +566,7 @@ function renderWorkoutLogInputs(menuId) {
     const headerRow = document.createElement('div');
     headerRow.style.cssText = 'display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;';
     headerRow.innerHTML = `
-        <label class="form-label" style="margin-bottom: 0;">メニュー種目（⋮⋮ ドラッグで並び替え）</label>
+        <label class="form-label" style="margin-bottom: 0;"></label>
         <button type="button" class="btn-add-extra" style="width: auto; padding: 6px 12px; font-size: 0.8125rem;" onclick="addExtraExerciseInput()">+ 種目を追加</button>
     `;
     container.appendChild(headerRow);
