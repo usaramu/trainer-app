@@ -1275,3 +1275,21 @@ html, body {
     max-width: 58px !important;
     min-width: 36px !important;
 }
+
+/* ==================================================
+   日付入力欄（input[type="date"]）の見切れ防止調整
+   ================================================== */
+input[type="date"].form-input,
+#select-log-date {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 8px 10px !important; /* 内側の余白を調整して文字収まりを改善 */
+    font-size: 0.875rem !important; /* スマホ画面に合わせたサイズ感 */
+    min-height: 40px !important;
+    background-color: var(--bg-color) !important;
+    color: var(--text-main) !important;
+    /* ブラウザ固有の無駄な余白・装飾をリセット */
+    -webkit-appearance: none;
+    appearance: none;
+}

@@ -528,7 +528,7 @@ function toggleRecordType() {
         freeSection.style.display = 'block';
 
         selectMenuLabel.textContent = '対象部位';
-        if (extraLabel) extraLabel.textContent = '実施した種目';
+        if (extraLabel) extraLabel.textContent = '実施した種目（⋮⋮ ドラッグで並び替え）';
         if (addExtraBtn) addExtraBtn.style.display = 'inline-block';
 
         const container = document.getElementById('extra-exercise-container');
