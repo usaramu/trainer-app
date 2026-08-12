@@ -462,7 +462,7 @@ function openWorkoutLogModal(defaultMenuId, presetDateISO, isEdit = false) {
     if (isEdit && existingLog) {
         if (existingLog.menuId === 'OFF') {
             document.getElementById('record-type-off').checked = true;
-        } else if (existingLog.recordType === 'free') {
+        } else if (existingLog.recordType === 'free' || existingLog.menuId === 'ALL') {
             document.getElementById('record-type-free').checked = true;
             currentMenuId = existingLog.menuId;
         } else {
@@ -485,19 +485,19 @@ function openWorkoutLogModal(defaultMenuId, presetDateISO, isEdit = false) {
 
     const activeMenuId = (selectEl.value === 'OFF' || selectEl.value === 'ALL' || !selectEl.value) ? 'A' : selectEl.value;
     
-    // ★ 1. まず入力エリア全体を描画・セットアップする
+    // 1. 入力エリア全体の初期化
     renderWorkoutLogInputs(activeMenuId);
 
-    // ★ 2. 前回のカードや退避データが残らないよう、コンテナ内を一度完全にクリアする！
+    // 2. 既存の入力コンテナを一旦クリア
     const suggestedContainer = document.getElementById('suggested-fields-container');
     if (suggestedContainer) suggestedContainer.innerHTML = '';
     
     const extraContainer = document.getElementById('extra-exercise-container');
     if (extraContainer) extraContainer.innerHTML = '';
 
-    // 編集モード時：過去の記録データを正しい形式で1回だけ復元する処理
+    // ★ 3. 編集モード時：一括登録・過去ログの復元処理（修正版）
     if (isEdit && existingLog && existingLog.exerciseLogs && existingLog.menuId !== 'OFF') {
-        const isFree = existingLog.recordType === 'free';
+        const isFree = existingLog.recordType === 'free' || existingLog.menuId === 'ALL';
         
         for (const [exName, logVal] of Object.entries(existingLog.exerciseLogs)) {
             const valArray = Array.isArray(logVal) ? logVal : [logVal];
@@ -520,21 +520,41 @@ function openWorkoutLogModal(defaultMenuId, presetDateISO, isEdit = false) {
                         }
                     }
                 } else {
+                    // 自由入力・一括登録データの復元
                     addExtraExerciseInput();
                     const container = document.getElementById('extra-exercise-container');
                     const currentBlock = container ? container.lastElementChild : null;
                     
                     if (currentBlock) {
-                        if (item.label) {
+                        // ラベル判定（無ければ種目名から検索）
+                        let foundLabel = item.label;
+                        if (!foundLabel) {
+                            for (const [lbl, names] of Object.entries(state.exerciseLibrary)) {
+                                if (names.includes(exName)) {
+                                    foundLabel = lbl;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (foundLabel) {
                             const labelSelect = currentBlock.querySelector('.extra-label-select');
                             if (labelSelect) {
-                                labelSelect.value = item.label;
+                                labelSelect.value = foundLabel;
                                 renderExerciseChipsForBlock(currentBlock);
                             }
                         }
 
                         const nameSelect = currentBlock.querySelector('.extra-name-select');
                         if (nameSelect) {
+                            // リストに無い種目名なら動的に選択肢を追加
+                            let hasOption = Array.from(nameSelect.options).some(opt => opt.value === exName);
+                            if (!hasOption) {
+                                const newOpt = document.createElement('option');
+                                newOpt.value = exName;
+                                newOpt.textContent = exName;
+                                nameSelect.appendChild(newOpt);
+                            }
                             nameSelect.value = exName;
                         }
 

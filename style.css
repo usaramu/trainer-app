@@ -1033,3 +1033,82 @@ footer {
     background-color: var(--primary-soft) !important;
     transform: scale(1.02);
 }
+
+/* ▼ 自由入力・一括登録カード内の細部デザイン修正 */
+
+/* 1. 右上の削除ボタン（✕）を可愛いくすみアイスブルーの丸ボタンに */
+.btn-remove-row {
+    background-color: var(--primary-soft) !important;
+    border: 1.5px solid var(--border-color) !important;
+    color: var(--primary-color) !important;
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 50% !important;
+    font-size: 1rem !important;
+    line-height: 1 !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.15s ease !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.btn-remove-row:hover {
+    background-color: var(--primary-color) !important;
+    color: #ffffff !important;
+    border-color: var(--primary-color) !important;
+}
+
+/* 2. 有酸素の数値入力枠（時間・カロリー）をセット入力欄と同じ丸み＆デザインに統一 */
+.direct-input-group[data-cardio="true"] input.extra-minutes,
+.direct-input-group[data-cardio="true"] input.extra-calories {
+    width: 68px !important;
+    height: 30px !important;
+    padding: 0 6px !important;
+    font-size: 0.875rem !important;
+    font-weight: 700 !important;
+    font-family: "Zen Maru Gothic", sans-serif !important;
+    border-radius: 10px !important;
+    border: 1.5px solid var(--border-color) !important;
+    background-color: var(--bg-color) !important;
+    color: var(--text-main) !important;
+    text-align: center !important;
+    outline: none !important;
+    transition: all 0.15s ease !important;
+}
+
+.direct-input-group[data-cardio="true"] input:focus {
+    border-color: var(--primary-color) !important;
+    background-color: #ffffff !important;
+}
+
+/* 有酸素入力欄の横並び配置とラベル調整 */
+.direct-input-group[data-cardio="true"] {
+    display: flex !important;
+    gap: 12px !important;
+    align-items: center !important;
+    padding: 4px 6px !important;
+}
+
+.direct-input-group[data-cardio="true"] .direct-field {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+
+.direct-input-group[data-cardio="true"] .direct-field label {
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+    color: var(--text-sub) !important;
+    margin-bottom: 0 !important;
+}
+
+/* 3. カード内の項目ラベル（部位（ラベル）、種目名）の文字色調整 */
+.extra-label-select-label {
+    font-size: 0.75rem !important;
+    font-weight: 900 !important;
+    color: var(--primary-color) !important;
+    margin-bottom: 4px !important;
+}
