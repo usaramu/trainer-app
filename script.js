@@ -668,6 +668,7 @@ function addSuggestedExerciseInput(exerciseName, detailStr = '', menuId = '', fo
     makeSortable(container);
 }
 
+// セット行を追加する関数（削除ボタン＆自動再番号振り対応）
 function addSetRowToBlock(blockEl, initWeight = null, initReps = null) {
     const setsContainer = blockEl.querySelector('.sets-container');
     if (!setsContainer) return;
@@ -691,10 +692,27 @@ function addSetRowToBlock(blockEl, initWeight = null, initReps = null) {
         <div class="set-field-group">
             <input type="number" class="form-input set-weight" step="0.5" value="${w !== null ? w : ''}" placeholder="0"><span class="set-unit">kg</span>
             <input type="number" class="form-input set-reps" value="${r !== null ? r : ''}" placeholder="0"><span class="set-unit">回</span>
+            <button type="button" class="btn-remove-set" onclick="removeSetRow(this)" title="このセットを削除">&times;</button>
         </div>
     `;
 
     setsContainer.appendChild(setRow);
+}
+
+// セット行を削除して番号（1set, 2set...）を振り直す関数
+function removeSetRow(btnEl) {
+    const row = btnEl.closest('.set-input-row');
+    const container = row ? row.parentElement : null;
+    if (row) row.remove();
+
+    // 削除後に1set, 2set...の番号を自動でキレイに振り直す
+    if (container) {
+        const rows = container.querySelectorAll('.set-input-row');
+        rows.forEach((r, idx) => {
+            const label = r.querySelector('.set-label');
+            if (label) label.textContent = `${idx + 1}set`;
+        });
+    }
 }
 
 function addExtraExerciseInput() {

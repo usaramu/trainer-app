@@ -1327,3 +1327,22 @@ input[type="date"].form-input,
 html, body, input, select, textarea, button {
     touch-action: manipulation;
 }
+
+/* ==================================================
+   セット行の削除ボタン（✕）のスタイル
+   ================================================== */
+#workout-log-modal .btn-remove-set {
+    background: none !important;
+    border: none !important;
+    color: var(--text-sub) !important;
+    font-size: 1.1rem !important;
+    padding: 0 4px !important;
+    cursor: pointer !important;
+    line-height: 1 !important;
+    flex-shrink: 0 !important;
+    transition: color 0.15s ease !important;
+}
+
+#workout-log-modal .btn-remove-set:hover {
+    color: #ef4444 !important; /* ホバー時に赤色 */
+}
