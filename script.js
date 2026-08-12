@@ -119,7 +119,7 @@ function init() {
     }
 }
 
-const CURRENT_VERSION = 8; 
+const CURRENT_VERSION = 9; 
 
 function loadState() {
     const savedState = localStorage.getItem('workout_tracker_state');
