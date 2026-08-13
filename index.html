@@ -2,12 +2,14 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- スマホでの倍率固定・自動ズーム防止設定 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>うさトレ</title>
     
     <!-- ▼ まる文字フォント（Zen Maru Gothic） -->
     <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20260812_10">
+    <!-- バージョン更新: v=20260813_14 -->
+    <link rel="stylesheet" href="style.css?v=20260813_14">
 </head>
 <body>
 
@@ -21,6 +23,7 @@
         <button type="button" class="main-tab-btn active" onclick="switchMainTab('record')">LOG</button>
         <button type="button" class="main-tab-btn" onclick="switchMainTab('menu-list')">MENU</button>
         <button type="button" class="main-tab-btn" onclick="switchMainTab('history')">HISTORY</button>
+        <button type="button" class="main-tab-btn" onclick="switchMainTab('inbody')">InBody</button>
     </div>
 
     <!-- ▼ 1. 記録タブ用コンテンツ -->
@@ -74,6 +77,52 @@
         <div id="history-log-container">
             <!-- JSでタイムラインカードを自動生成 -->
         </div>
+    </div>
+
+    <!-- ▼ 4. InBody（体組成）タブ用コンテンツ -->
+    <div id="tab-content-inbody" class="main-tab-content">
+        <div class="inbody-action-row">
+            <button class="btn-inbody-add" onclick="openInbodyModal()">＋ 測定結果を追加</button>
+            <button class="btn-inbody-json" onclick="openInbodyImportModal()">📥 JSON</button>
+        </div>
+
+        <section class="log-section" style="margin-top: 12px;">
+            <div id="inbody-latest-summary"></div>
+
+            <div class="inbody-chart-card" id="inbody-chart-card">
+                <div class="inbody-metric-tabs" id="inbody-metric-tabs">
+                    <button type="button" class="inbody-metric-tab active" data-metric="weight" onclick="switchInbodyMetric('weight')">体重</button>
+                    <button type="button" class="inbody-metric-tab" data-metric="muscle" onclick="switchInbodyMetric('muscle')">骨格筋量</button>
+                    <button type="button" class="inbody-metric-tab" data-metric="fatPercent" onclick="switchInbodyMetric('fatPercent')">体脂肪率</button>
+                    <button type="button" class="inbody-metric-tab" data-metric="fatMass" onclick="switchInbodyMetric('fatMass')">体脂肪量</button>
+                    <button type="button" class="inbody-metric-tab" data-metric="visceral" onclick="switchInbodyMetric('visceral')">内臓脂肪</button>
+                    <button type="button" class="inbody-metric-tab" data-metric="bmi" onclick="switchInbodyMetric('bmi')">BMI</button>
+                    <button type="button" class="inbody-metric-tab" data-metric="segmental" onclick="switchInbodyMetric('segmental')">部位別</button>
+                </div>
+                <div id="inbody-segmental-select-row" style="display:none; margin-bottom:10px;">
+                    <select id="inbody-segmental-select" class="form-input" style="margin-bottom:0;" onchange="onSegmentalSelectChange()">
+                        <optgroup label="筋肉量">
+                            <option value="muscleSegments.leftArm">左腕</option>
+                            <option value="muscleSegments.rightArm">右腕</option>
+                            <option value="muscleSegments.trunk">体幹</option>
+                            <option value="muscleSegments.leftLeg">左脚</option>
+                            <option value="muscleSegments.rightLeg">右脚</option>
+                        </optgroup>
+                        <optgroup label="体脂肪量">
+                            <option value="fatSegments.leftArm">左腕（脂肪）</option>
+                            <option value="fatSegments.rightArm">右腕（脂肪）</option>
+                            <option value="fatSegments.trunk">体幹（脂肪）</option>
+                            <option value="fatSegments.leftLeg">左脚（脂肪）</option>
+                            <option value="fatSegments.rightLeg">右脚（脂肪）</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <canvas id="inbody-chart-canvas" height="200"></canvas>
+                <div id="inbody-chart-empty" class="inbody-empty" style="display:none;">このグラフを表示するには2件以上のデータが必要です。</div>
+            </div>
+
+            <div id="inbody-list-container"></div>
+        </section>
     </div>
 
     <!-- ▼ 3. メニュー一覧タブ用コンテンツ -->
@@ -199,6 +248,93 @@
         </div>
     </div>
 
+    <!-- InBody測定結果 入力・編集モーダル -->
+    <div class="modal-overlay" id="inbody-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="inbody-modal-title">InBody 測定結果</h2>
+                <button class="btn-close" onclick="closeInbodyModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="inbody-editing-id">
+
+                <label class="form-label">測定日</label>
+                <input type="date" id="inbody-date" class="form-input">
+
+                <label class="form-label">体重 (kg)</label>
+                <input type="number" step="0.1" inputmode="decimal" id="inbody-weight" class="form-input" placeholder="例: 52.4">
+
+                <label class="form-label">骨格筋量 (kg)</label>
+                <input type="number" step="0.1" inputmode="decimal" id="inbody-muscle" class="form-input" placeholder="例: 21.3">
+
+                <label class="form-label">体脂肪率 (%)</label>
+                <input type="number" step="0.1" inputmode="decimal" id="inbody-fat-percent" class="form-input" placeholder="例: 24.5">
+
+                <label class="form-label">体脂肪量 (kg)</label>
+                <input type="number" step="0.1" inputmode="decimal" id="inbody-fat-mass" class="form-input" placeholder="任意">
+
+                <label class="form-label">部位別筋肉量 (%)（任意）</label>
+                <div class="segmental-input-grid">
+                    <div class="segmental-input-item">
+                        <span class="segmental-input-label">左腕</span>
+                        <input type="number" step="0.1" inputmode="decimal" id="inbody-muscle-leftarm" class="form-input">
+                    </div>
+                    <div class="segmental-input-item">
+                        <span class="segmental-input-label">右腕</span>
+                        <input type="number" step="0.1" inputmode="decimal" id="inbody-muscle-rightarm" class="form-input">
+                    </div>
+                    <div class="segmental-input-item">
+                        <span class="segmental-input-label">体幹</span>
+                        <input type="number" step="0.1" inputmode="decimal" id="inbody-muscle-trunk" class="form-input">
+                    </div>
+                    <div class="segmental-input-item">
+                        <span class="segmental-input-label">左脚</span>
+                        <input type="number" step="0.1" inputmode="decimal" id="inbody-muscle-leftleg" class="form-input">
+                    </div>
+                    <div class="segmental-input-item">
+                        <span class="segmental-input-label">右脚</span>
+                        <input type="number" step="0.1" inputmode="decimal" id="inbody-muscle-rightleg" class="form-input">
+                    </div>
+                </div>
+
+                <label class="form-label">部位別体脂肪量 (%)（任意）</label>
+                <div class="segmental-input-grid" style="margin-bottom: 12px;">
+                    <div class="segmental-input-item">
+                        <span class="segmental-input-label">左腕</span>
+                        <input type="number" step="0.1" inputmode="decimal" id="inbody-fat-leftarm" class="form-input">
+                    </div>
+                    <div class="segmental-input-item">
+                        <span class="segmental-input-label">右腕</span>
+                        <input type="number" step="0.1" inputmode="decimal" id="inbody-fat-rightarm" class="form-input">
+                    </div>
+                    <div class="segmental-input-item">
+                        <span class="segmental-input-label">体幹</span>
+                        <input type="number" step="0.1" inputmode="decimal" id="inbody-fat-trunk" class="form-input">
+                    </div>
+                    <div class="segmental-input-item">
+                        <span class="segmental-input-label">左脚</span>
+                        <input type="number" step="0.1" inputmode="decimal" id="inbody-fat-leftleg" class="form-input">
+                    </div>
+                    <div class="segmental-input-item">
+                        <span class="segmental-input-label">右脚</span>
+                        <input type="number" step="0.1" inputmode="decimal" id="inbody-fat-rightleg" class="form-input">
+                    </div>
+                </div>
+
+                <label class="form-label">内臓脂肪レベル</label>
+                <input type="number" step="1" inputmode="numeric" id="inbody-visceral" class="form-input" placeholder="任意">
+
+                <label class="form-label">BMI</label>
+                <input type="number" step="0.1" inputmode="decimal" id="inbody-bmi" class="form-input" placeholder="任意">
+            </div>
+            <div class="modal-footer">
+                <button class="btn-reset" id="inbody-delete-btn" style="margin-top:0; margin-right:auto; color:#ef4444; display:none;" onclick="deleteInbodyLog()">削除する</button>
+                <button class="btn-cancel" onclick="closeInbodyModal()">キャンセル</button>
+                <button class="btn-save" onclick="saveInbodyLog()">保存する</button>
+            </div>
+        </div>
+    </div>
+
     <!-- テーマ設定モーダル -->
     <div class="modal-overlay" id="theme-settings-modal">
         <div class="modal-content">
@@ -256,6 +392,52 @@
         </div>
     </div>
 
+    <!-- ▼ InBody JSONインポート用モーダル -->
+    <div class="modal-overlay" id="inbody-import-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📥 InBody JSONインポート</h2>
+                <button class="btn-close" onclick="closeInbodyImportModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <label class="form-label">JSONを貼り付け</label>
+                <textarea id="inbody-import-textarea" class="form-input form-textarea" style="margin-bottom:12px;" ></textarea>
+
+                <details style="font-size:0.75rem; color:var(--text-sub); background:var(--bg-color); border-radius:12px; padding:8px 10px; border:1px solid var(--border-color);">
+                    <summary style="font-weight:700; cursor:pointer; user-select:none;">💡 フォーマット例・注意事項を表示</summary>
+                    <p style="line-height:1.5; margin:8px 0 6px;">
+                        <code>date</code>（YYYY-MM-DD）は必須、他は任意です。同じ<code>date</code>が既にある場合は自動で上書きされます。
+                    </p>
+                    <pre style="font-size:0.68rem; background:var(--card-bg); border-radius:8px; padding:8px; overflow-x:auto; margin-bottom:0; line-height:1.4; border:1px solid var(--border-color);">[
+  {
+    "date": "2026-08-07",
+    "weight": 54.1,
+    "muscle": 21.3,
+    "fatPercent": 26.8,
+    "fatMass": 14.5,
+    "visceral": 5,
+    "bmi": 20.5,
+    "muscleLeftArm": 84.7,
+    "muscleRightArm": 89.7,
+    "muscleTrunk": 93.2,
+    "muscleLeftLeg": 100.2,
+    "muscleRightLeg": 100.8,
+    "fatLeftArm": 108.6,
+    "fatRightArm": 101.7,
+    "fatTrunk": 129.3,
+    "fatLeftLeg": 102.5,
+    "fatRightLeg": 102.8
+  }
+]</pre>
+                </details>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeInbodyImportModal()">キャンセル</button>
+                <button class="btn-save" onclick="submitInbodyImport()">インポートする</button>
+            </div>
+        </div>
+    </div>
+
     <footer>
         <div class="footer-tools">
             <button type="button" class="btn-footer-tool" id="btn-open-exercise-library" onclick="openExerciseLibraryModal()">📋</button>
@@ -265,6 +447,7 @@
         <button type="button" class="btn-reset" onclick="resetData()">履歴・メニュー設定を初期化</button>
     </footer>
 
-    <script src="script.js?v=20260812_10"></script>
+    <!-- バージョン更新: v=20260813_14 -->
+    <script src="script.js?v=20260813_14"></script>
 </body>
 </html>

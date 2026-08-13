@@ -612,6 +612,251 @@ h1 {
     border-color: var(--primary-color);
 }
 
+.inbody-chart-card {
+    background-color: var(--card-bg);
+    border: 1.5px solid var(--border-color);
+    border-radius: 20px;
+    padding: 14px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 14px rgba(62, 72, 82, 0.03);
+}
+
+.inbody-metric-tabs {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+    margin-bottom: 8px;
+    border-bottom: 1.5px solid var(--border-color);
+    -webkit-overflow-scrolling: touch;
+}
+
+.inbody-metric-tab {
+    flex: 0 0 auto;
+    background-color: var(--bg-color);
+    border: 1.5px solid var(--border-color);
+    color: var(--text-sub);
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 900;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+}
+
+.inbody-metric-tab.active {
+    background-color: var(--primary-color);
+    color: #ffffff;
+    border-color: var(--primary-color);
+}
+
+#inbody-chart-canvas {
+    width: 100%;
+    display: block;
+}
+
+/* ▼ InBody（体組成）タブ */
+.segmental-input-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.segmental-input-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.segmental-input-label {
+    font-size: 0.68rem;
+    font-weight: 900;
+    color: var(--text-sub);
+    margin-bottom: 4px;
+}
+
+.segmental-input-item .form-input {
+    padding: 8px 4px;
+    text-align: center;
+    font-size: 0.8125rem;
+    margin-bottom: 0;
+}
+
+.inbody-summary-card {
+    background: linear-gradient(135deg, var(--banner-grad-1), var(--banner-grad-3));
+    border-radius: 20px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 14px rgba(62, 72, 82, 0.05);
+}
+
+.inbody-summary-date {
+    font-size: 0.72rem;
+    font-weight: 900;
+    color: var(--text-sub);
+    margin-bottom: 10px;
+}
+
+.inbody-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.inbody-stat-box {
+    background-color: rgba(255, 255, 255, 0.6);
+    border-radius: 14px;
+    padding: 10px 6px;
+    text-align: center;
+}
+
+.inbody-stat-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--text-sub);
+    margin-bottom: 4px;
+}
+
+.inbody-stat-value {
+    font-size: 1.05rem;
+    font-weight: 900;
+    color: var(--text-main);
+    font-family: "Zen Maru Gothic", sans-serif;
+}
+
+.inbody-stat-diff {
+    font-size: 0.68rem;
+    font-weight: 900;
+    margin-top: 2px;
+}
+
+.inbody-stat-diff.up { color: #e0788a; }
+.inbody-stat-diff.down { color: #6bb3a0; }
+.inbody-stat-diff.flat { color: var(--text-sub); }
+
+.inbody-empty {
+    color: var(--text-sub);
+    text-align: center;
+    padding: 24px;
+    font-size: 0.8125rem;
+}
+
+.inbody-list-card {
+    background-color: var(--card-bg);
+    border: 1.5px solid var(--border-color);
+    border-radius: 16px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.02);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.inbody-list-card:hover {
+    border-color: var(--primary-color);
+}
+
+.inbody-list-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.inbody-list-date {
+    font-size: 0.8125rem;
+    font-weight: 900;
+    color: var(--text-main);
+    font-family: "Zen Maru Gothic", sans-serif;
+}
+
+.inbody-list-arrow {
+    color: var(--text-sub);
+    font-size: 0.8125rem;
+}
+
+.inbody-list-metrics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.inbody-metric-chip {
+    background-color: var(--bg-color);
+    border-radius: 10px;
+    padding: 4px 10px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.inbody-metric-chip span {
+    color: var(--primary-color);
+    font-weight: 900;
+    margin-left: 3px;
+}
+
+.inbody-list-memo {
+    margin-top: 8px;
+    font-size: 0.75rem;
+    color: var(--text-sub);
+    background-color: var(--bg-color);
+    border-radius: 10px;
+    padding: 6px 10px;
+    line-height: 1.5;
+}
+
+/* ▼ 日付アコーディオン共通スタイル（InBody / HISTORY） */
+.date-accordion-item {
+    background-color: var(--card-bg);
+    border: 1.5px solid var(--border-color);
+    border-radius: 16px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.02);
+}
+
+.date-accordion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 14px;
+    cursor: pointer;
+}
+
+.date-accordion-preview {
+    flex: 1;
+    text-align: right;
+    font-size: 0.78rem;
+    font-weight: 900;
+    color: var(--primary-color);
+}
+
+.date-accordion-header .arrow-icon {
+    color: var(--text-sub);
+    font-size: 0.8125rem;
+    transition: transform 0.25s ease;
+    flex-shrink: 0;
+}
+
+.date-accordion-item.active .arrow-icon {
+    transform: rotate(180deg);
+}
+
+.date-accordion-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 0 14px;
+}
+
+.date-accordion-item.active .date-accordion-body {
+    padding: 0 14px 14px;
+}
+
 /* モーダルウィンドウ */
 .modal-overlay {
     position: fixed;
@@ -1379,4 +1624,146 @@ html, body, input, select, textarea, button {
     background-color: var(--primary-color) !important;
     color: #ffffff !important;
     transform: scale(0.92);
+}
+
+/* InBodyタブ上部のアクションボタン行 */
+.inbody-action-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.btn-inbody-add {
+    flex: 2;
+    background-color: var(--card-bg);
+    color: var(--primary-color);
+    border: 1.5px solid var(--primary-color);
+    padding: 10px 12px;
+    border-radius: 14px;
+    font-size: 0.8125rem;
+    font-weight: 900;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+}
+
+.btn-inbody-add:hover {
+    background-color: var(--primary-soft);
+}
+
+.btn-inbody-json {
+    flex: 1;
+    background-color: var(--card-bg);
+    color: var(--text-sub);
+    border: 1.5px solid var(--border-color);
+    padding: 10px 8px;
+    border-radius: 14px;
+    font-size: 0.8125rem;
+    font-weight: 900;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-inbody-json:hover {
+    background-color: var(--bg-color);
+    color: var(--text-main);
+}
+
+/* 部位別測定結果の整理用テーブルスタイル */
+.inbody-seg-container {
+    background-color: var(--bg-color);
+    border: 1.5px solid var(--border-color);
+    border-radius: 14px;
+    margin-top: 10px;
+    padding: 6px 10px;
+    font-size: 0.78rem;
+}
+
+.inbody-seg-header,
+.inbody-seg-row {
+    display: flex;
+    align-items: center;
+    padding: 5px 4px;
+}
+
+.inbody-seg-header {
+    font-weight: 900;
+    color: var(--text-sub);
+    border-bottom: 1.5px solid var(--border-color);
+    font-size: 0.72rem;
+    padding-bottom: 6px;
+    margin-bottom: 2px;
+}
+
+.inbody-seg-row {
+    border-bottom: 1px dashed var(--border-color);
+}
+
+.inbody-seg-row:last-child {
+    border-bottom: none;
+}
+
+.inbody-seg-cell {
+    flex: 1;
+    text-align: center;
+}
+
+.inbody-seg-cell.label {
+    flex: 0 0 60px;
+    text-align: left;
+    font-weight: 900;
+    color: var(--text-main);
+}
+
+.inbody-seg-cell.val {
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.inbody-seg-cell.val.muscle {
+    color: var(--primary-color);
+}
+
+.inbody-seg-cell.val.fat {
+    color: var(--accent-color);
+}
+
+/* InBody JSON貼り付けエリアの可変高さ設定 */
+#inbody-import-textarea {
+    min-height: 42px !important;
+    height: 42px;
+    line-height: 1.4;
+    padding: 8px 10px;
+    resize: vertical;
+    transition: height 0.2s ease, border-color 0.15s ease;
+}
+
+/* フォーカス中、または文字が入力されている時は広げる */
+#inbody-import-textarea:focus,
+#inbody-import-textarea:not(:placeholder-shown) {
+    height: 140px;
+}
+
+/* スマホタップ時の自動ズーム完全防止設定 */
+input[type="text"],
+input[type="number"],
+input[type="date"],
+select,
+textarea,
+.form-input {
+    font-size: 16px !important; /* 16px以上にすることでiOS Safari等の自動ズームを停止 */
+    transform: scale(1);        /* ズーム固定の明示 */
+}
+
+/* 入力ボックス自体が大きくなりすぎないよう表示上の高さを維持 */
+#workout-log-modal .set-field-group input.form-input {
+    height: 30px !important;
+    padding: 0 2px !important;
+}
+
+/* モーダル表示時の余計なスクロールやブレを抑える設定 */
+body.modal-open {
+    position: fixed;
+    width: 100%;
+    overflow: hidden;
 }

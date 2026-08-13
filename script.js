@@ -79,7 +79,9 @@ let state = {
     calendarMonth: new Date().getMonth(),
     editingMenuId: null,
     exerciseLabels: ['胸', '背中', '脚', '肩', '腕', 'お尻', '腹筋', '全身', '有酸素運動', 'その他'],
-    exerciseLibrary: {}
+    exerciseLibrary: {},
+    inbodyLogs: [],
+    inbodyMetric: 'weight'
 };
 
 function init() {
@@ -95,7 +97,6 @@ function init() {
     }
 }
 
-// 既存データ内のヒップアブダクションを自動的に上書き分類する処理を追加
 function loadState() {
     const savedState = localStorage.getItem('workout_tracker_state');
     if (savedState) {
@@ -104,7 +105,6 @@ function loadState() {
         
         if (parsed.menus) {
             state.menus = parsed.menus;
-            // 既存のメニュー内の「ヒップアブダクション」を自動修正（マイグレーション）
             state.menus.forEach(menu => {
                 if (menu.id === 'B') {
                     menu.exercises.forEach(ex => { if (ex.name === 'ヒップアブダクション') ex.name = 'ヒップアブダクション（骨盤後傾）'; });
@@ -117,6 +117,7 @@ function loadState() {
         }
         
         if (parsed.logs) state.logs = parsed.logs;
+        state.inbodyLogs = parsed.inbodyLogs || [];
         state.exerciseLabels = parsed.exerciseLabels || ['胸', '背中', '脚', '肩', '腕', 'お尻', '腹筋', '全身', '有酸素運動', 'その他'];
         
         if (parsed.exerciseLibrarySchema === 'label-v3' && parsed.exerciseLibrary) {
@@ -136,11 +137,11 @@ function saveState() {
         logs: state.logs,
         exerciseLabels: state.exerciseLabels,
         exerciseLibrarySchema: 'label-v3',
-        exerciseLibrary: state.exerciseLibrary
+        exerciseLibrary: state.exerciseLibrary,
+        inbodyLogs: state.inbodyLogs
     }));
 }
 
-/* ★ テーマ変更機能 */
 function applyTheme(themeName) {
     document.body.classList.remove('theme-pink', 'theme-green', 'theme-lavender');
     if (themeName !== 'blue') {
@@ -186,7 +187,6 @@ function buildDefaultExerciseLibrary() {
     };
 }
 
-// 部位ごとの前回からの経過日数を計算して更新する（修正版）
 function renderRecommendation() {
     const calcDaysAgo = (category) => {
         const catLogs = state.logs.filter(l => {
@@ -605,7 +605,6 @@ function renderWorkoutLogInputs(menuId) {
     container.appendChild(fieldsContainer);
 }
 
-// メニュー種目追加時：前回の記録をメニュー名の上に小さく配置する版
 function addSuggestedExerciseInput(exerciseName, detailStr = '', menuId = '', forceCardio = null) {
     const container = document.getElementById('suggested-fields-container');
     const lastObj = getLastExerciseLogObj(exerciseName) || {};
@@ -670,7 +669,6 @@ function addSuggestedExerciseInput(exerciseName, detailStr = '', menuId = '', fo
     container.appendChild(block);
 }
 
-// セット行を追加する関数（削除ボタン＆自動再番号振り対応）
 function addSetRowToBlock(blockEl, initWeight = null, initReps = null) {
     const setsContainer = blockEl.querySelector('.sets-container');
     if (!setsContainer) return;
@@ -701,13 +699,11 @@ function addSetRowToBlock(blockEl, initWeight = null, initReps = null) {
     setsContainer.appendChild(setRow);
 }
 
-// セット行を削除して番号（1set, 2set...）を振り直す関数
 function removeSetRow(btnEl) {
     const row = btnEl.closest('.set-input-row');
     const container = row ? row.parentElement : null;
     if (row) row.remove();
 
-    // 削除後に1set, 2set...の番号を自動でキレイに振り直す
     if (container) {
         const rows = container.querySelectorAll('.set-input-row');
         rows.forEach((r, idx) => {
@@ -753,7 +749,7 @@ function addExtraExerciseInput() {
     renderExerciseChipsForBlock(block);
     block.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
-/* ★ ドラッグ＆ドロップ実装 */
+
 function makeSortable(containerEl) {
     if (!containerEl) return;
     let draggingItem = null;
@@ -798,7 +794,6 @@ function getDragAfterElement(container, y) {
     }, { offset: Number.NEGATIVE_INFINITY }).element;
 }
 
-// 自由入力での種目選択時：種目名選択の上に前回の記録を表示する版
 function renderExerciseChipsForBlock(block) {
     const label = block.querySelector('.extra-label-select').value;
     const chipList = block.querySelector('.extra-chip-list');
@@ -1330,6 +1325,13 @@ if (document.readyState === 'loading') {
     init();
 }
 
+window.addEventListener('resize', () => {
+    const inbodyTab = document.getElementById('tab-content-inbody');
+    if (inbodyTab && inbodyTab.classList.contains('active') && state.inbodyLogs && state.inbodyLogs.length >= 2) {
+        drawInbodyChart(state.inbodyMetric);
+    }
+});
+
 function switchMainTab(tabName) {
     const buttons = document.querySelectorAll('.main-tab-btn');
     buttons.forEach(btn => btn.classList.remove('active'));
@@ -1347,7 +1349,569 @@ function switchMainTab(tabName) {
         buttons[2].classList.add('active');
         document.getElementById('tab-content-history').classList.add('active');
         renderHistoryLogs();
+    } else if (tabName === 'inbody') {
+        buttons[3].classList.add('active');
+        document.getElementById('tab-content-inbody').classList.add('active');
+        renderInbodyTab();
     }
+}
+
+/* ================================
+   InBody（体組成）記録機能
+================================ */
+
+function renderInbodyTab() {
+    const summaryContainer = document.getElementById('inbody-latest-summary');
+    const listContainer = document.getElementById('inbody-list-container');
+    if (!summaryContainer || !listContainer) return;
+
+    summaryContainer.innerHTML = '';
+    listContainer.innerHTML = '';
+
+    if (!state.inbodyLogs || state.inbodyLogs.length === 0) {
+        listContainer.innerHTML = '<div class="inbody-empty">まだ測定記録がありません。「＋ 測定結果を追加」から記録しましょう。</div>';
+        const chartCard = document.getElementById('inbody-chart-card');
+        if (chartCard) chartCard.style.display = 'none';
+        return;
+    }
+
+    const chartCard = document.getElementById('inbody-chart-card');
+    if (chartCard) chartCard.style.display = 'block';
+    document.querySelectorAll('.inbody-metric-tab').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.metric === state.inbodyMetric);
+    });
+    const segRow = document.getElementById('inbody-segmental-select-row');
+    if (state.inbodyMetric === 'segmental') {
+        segRow.style.display = 'block';
+        onSegmentalSelectChange();
+    } else {
+        segRow.style.display = 'none';
+        drawInbodyChart(state.inbodyMetric);
+    }
+
+    const sorted = [...state.inbodyLogs].sort((a, b) => a.date.localeCompare(b.date));
+    const latest = sorted[sorted.length - 1];
+    const prev = sorted.length > 1 ? sorted[sorted.length - 2] : null;
+
+    const fmtDiff = (curr, prevVal, unit) => {
+        if (curr === null || curr === undefined || curr === '' || !prevVal && prevVal !== 0) return '';
+        const diff = Math.round((curr - prevVal) * 10) / 10;
+        if (diff === 0) return `<span class="inbody-stat-diff flat">±0${unit}</span>`;
+        const cls = diff > 0 ? 'up' : 'down';
+        const sign = diff > 0 ? '+' : '';
+        return `<span class="inbody-stat-diff ${cls}">${sign}${diff}${unit}</span>`;
+    };
+
+    const statBox = (label, value, unit, diffHtml) => `
+        <div class="inbody-stat-box">
+            <div class="inbody-stat-label">${label}</div>
+            <div class="inbody-stat-value">${(value === null || value === undefined || value === '') ? '-' : value + unit}</div>
+            ${diffHtml || ''}
+        </div>
+    `;
+
+    const [y, m, d] = latest.date.split('-');
+    const summaryEl = document.createElement('div');
+    summaryEl.className = 'inbody-summary-card';
+    summaryEl.innerHTML = `
+        <div class="inbody-summary-date">📊 最新測定: ${y}/${parseInt(m, 10)}/${parseInt(d, 10)}</div>
+        <div class="inbody-summary-grid">
+            ${statBox('体重', latest.weight, 'kg', prev ? fmtDiff(latest.weight, prev.weight, 'kg') : '')}
+            ${statBox('骨格筋量', latest.muscle, 'kg', prev ? fmtDiff(latest.muscle, prev.muscle, 'kg') : '')}
+            ${statBox('体脂肪率', latest.fatPercent, '%', prev ? fmtDiff(latest.fatPercent, prev.fatPercent, '%') : '')}
+        </div>
+    `;
+    summaryContainer.appendChild(summaryEl);
+
+    // 新しい記録から順に日付ごとのアコーディオン表示
+    const listSorted = [...sorted].reverse();
+    listSorted.forEach((log, index) => {
+        const [ly, lm, ld] = log.date.split('-');
+        const dateObj = new Date(parseInt(ly, 10), parseInt(lm, 10) - 1, parseInt(ld, 10));
+        const dayOfWeek = ['日', '月', '火', '水', '木', '金', '土'][dateObj.getDay()];
+        const formattedDate = `${ly}/${parseInt(lm, 10)}/${parseInt(ld, 10)} (${dayOfWeek})`;
+
+        // ▼ 基本指標のミニチップ群
+        const chips = [];
+        if (log.weight !== null && log.weight !== undefined && log.weight !== '') chips.push(`体重<span>${log.weight}kg</span>`);
+        if (log.muscle !== null && log.muscle !== undefined && log.muscle !== '') chips.push(`骨格筋量<span>${log.muscle}kg</span>`);
+        if (log.fatPercent !== null && log.fatPercent !== undefined && log.fatPercent !== '') chips.push(`体脂肪率<span>${log.fatPercent}%</span>`);
+        if (log.fatMass !== null && log.fatMass !== undefined && log.fatMass !== '') chips.push(`体脂肪量<span>${log.fatMass}kg</span>`);
+        if (log.visceral !== null && log.visceral !== undefined && log.visceral !== '') chips.push(`内臓脂肪<span>Lv.${log.visceral}</span>`);
+        if (log.bmi !== null && log.bmi !== undefined && log.bmi !== '') chips.push(`BMI<span>${log.bmi}</span>`);
+
+        // ▼ 部位別データの表形式構築（単位: %）
+        const ms = log.muscleSegments || {};
+        const fs = log.fatSegments || {};
+        const segKeys = [
+            { key: 'rightArm', label: '右腕' },
+            { key: 'leftArm',  label: '左腕' },
+            { key: 'trunk',    label: '体幹' },
+            { key: 'rightLeg', label: '右脚' },
+            { key: 'leftLeg',  label: '左脚' }
+        ];
+
+        const hasSegData = segKeys.some(s => ms[s.key] != null || fs[s.key] != null);
+
+        let segTableHTML = '';
+        if (hasSegData) {
+            const rowsHTML = segKeys.map(s => {
+                const mVal = ms[s.key] != null ? `${ms[s.key]}%` : '-';
+                const fVal = fs[s.key] != null ? `${fs[s.key]}%` : '-';
+                return `
+                    <div class="inbody-seg-row">
+                        <span class="inbody-seg-cell label">${s.label}</span>
+                        <span class="inbody-seg-cell val muscle">${mVal}</span>
+                        <span class="inbody-seg-cell val fat">${fVal}</span>
+                    </div>
+                `;
+            }).join('');
+
+            segTableHTML = `
+                <div class="inbody-seg-container">
+                    <div class="inbody-seg-header">
+                        <span class="inbody-seg-cell label">部位</span>
+                        <span class="inbody-seg-cell val muscle">筋肉量(%)</span>
+                        <span class="inbody-seg-cell val fat">脂肪量(%)</span>
+                    </div>
+                    ${rowsHTML}
+                </div>
+            `;
+        }
+
+        const item = document.createElement('div');
+        item.className = 'date-accordion-item';
+
+        const header = document.createElement('div');
+        header.className = 'date-accordion-header';
+        header.innerHTML = `
+            <span class="inbody-list-date">${formattedDate}</span>
+            <span class="date-accordion-preview">${log.weight !== null && log.weight !== undefined ? `${log.weight}kg` : ''}</span>
+            <span class="arrow-icon">▾</span>
+        `;
+
+        const body = document.createElement('div');
+        body.className = 'date-accordion-body';
+        body.innerHTML = `
+            <div class="inbody-list-metrics">
+                ${chips.map(c => `<span class="inbody-metric-chip">${c}</span>`).join('')}
+            </div>
+            ${segTableHTML}
+            <div style="display:flex; justify-content:flex-end; margin-top:10px;">
+                <button type="button" class="btn-table-edit">編集する</button>
+            </div>
+        `;
+
+        body.querySelector('.btn-table-edit').onclick = (e) => {
+            e.stopPropagation();
+            openInbodyModal(log.id);
+        };
+
+        item.appendChild(header);
+        item.appendChild(body);
+
+        header.onclick = () => {
+            const isActive = item.classList.contains('active');
+            if (isActive) {
+                body.style.maxHeight = '0px';
+                item.classList.remove('active');
+            } else {
+                item.classList.add('active');
+                body.style.maxHeight = body.scrollHeight + 20 + 'px';
+            }
+        };
+
+        listContainer.appendChild(item);
+
+        if (index === 0) {
+            setTimeout(() => {
+                item.classList.add('active');
+                body.style.maxHeight = body.scrollHeight + 20 + 'px';
+            }, 50);
+        }
+    });
+}
+
+function switchInbodyMetric(metric) {
+    state.inbodyMetric = metric;
+    document.querySelectorAll('.inbody-metric-tab').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.metric === metric);
+    });
+
+    const segRow = document.getElementById('inbody-segmental-select-row');
+    if (metric === 'segmental') {
+        segRow.style.display = 'block';
+        onSegmentalSelectChange();
+    } else {
+        segRow.style.display = 'none';
+        drawInbodyChart(metric);
+    }
+}
+
+function onSegmentalSelectChange() {
+    const select = document.getElementById('inbody-segmental-select');
+    drawInbodyChart(select.value);
+}
+
+const SEGMENT_LABELS = { leftArm: '左腕', rightArm: '右腕', trunk: '体幹', leftLeg: '左脚', rightLeg: '右脚' };
+
+const INBODY_METRIC_META = {
+    weight: { label: '体重', unit: 'kg', color: '#82A0C2' },
+    muscle: { label: '骨格筋量', unit: 'kg', color: '#88C4B8' },
+    fatPercent: { label: '体脂肪率', unit: '%', color: '#E0788A' },
+    fatMass: { label: '体脂肪量', unit: 'kg', color: '#E0B899' },
+    visceral: { label: '内臓脂肪レベル', unit: '', color: '#A49BCE' },
+    bmi: { label: 'BMI', unit: '', color: '#6B8CB3' },
+    'muscleSegments.leftArm': { label: '左腕筋肉量', unit: '%', color: '#88C4B8' },
+    'muscleSegments.rightArm': { label: '右腕筋肉量', unit: '%', color: '#88C4B8' },
+    'muscleSegments.trunk': { label: '体幹筋肉量', unit: '%', color: '#88C4B8' },
+    'muscleSegments.leftLeg': { label: '左脚筋肉量', unit: '%', color: '#88C4B8' },
+    'muscleSegments.rightLeg': { label: '右脚筋肉量', unit: '%', color: '#88C4B8' },
+    'fatSegments.leftArm': { label: '左腕脂肪量', unit: '%', color: '#E0B899' },
+    'fatSegments.rightArm': { label: '右腕脂肪量', unit: '%', color: '#E0B899' },
+    'fatSegments.trunk': { label: '体幹脂肪量', unit: '%', color: '#E0B899' },
+    'fatSegments.leftLeg': { label: '左脚脂肪量', unit: '%', color: '#E0B899' },
+    'fatSegments.rightLeg': { label: '右脚脂肪量', unit: '%', color: '#E0B899' }
+};
+
+function getMetricValue(log, metricPath) {
+    if (metricPath.includes('.')) {
+        const [group, key] = metricPath.split('.');
+        return log[group] ? log[group][key] : undefined;
+    }
+    return log[metricPath];
+}
+
+function drawInbodyChart(metric) {
+    const canvas = document.getElementById('inbody-chart-canvas');
+    const emptyEl = document.getElementById('inbody-chart-empty');
+    if (!canvas) return;
+
+    const meta = INBODY_METRIC_META[metric] || INBODY_METRIC_META.weight;
+
+    const sorted = [...state.inbodyLogs]
+        .filter(l => {
+            const v = getMetricValue(l, metric);
+            return v !== null && v !== undefined;
+        })
+        .sort((a, b) => a.date.localeCompare(b.date));
+
+    if (sorted.length < 2) {
+        canvas.style.display = 'none';
+        if (emptyEl) emptyEl.style.display = 'block';
+        return;
+    }
+    canvas.style.display = 'block';
+    if (emptyEl) emptyEl.style.display = 'none';
+
+    const dpr = window.devicePixelRatio || 1;
+    const cssWidth = canvas.parentElement.clientWidth - 28;
+    const cssHeight = 200;
+    canvas.width = cssWidth * dpr;
+    canvas.height = cssHeight * dpr;
+    canvas.style.height = cssHeight + 'px';
+
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, cssWidth, cssHeight);
+
+    const values = sorted.map(l => getMetricValue(l, metric));
+    let minVal = Math.min(...values);
+    let maxVal = Math.max(...values);
+    if (minVal === maxVal) {
+        minVal -= 1;
+        maxVal += 1;
+    }
+    const pad = (maxVal - minVal) * 0.15 || 1;
+    minVal -= pad;
+    maxVal += pad;
+
+    const leftPad = 34;
+    const rightPad = 10;
+    const topPad = 14;
+    const bottomPad = 26;
+    const plotW = cssWidth - leftPad - rightPad;
+    const plotH = cssHeight - topPad - bottomPad;
+
+    const xForIndex = (i) => leftPad + (sorted.length === 1 ? plotW / 2 : (plotW * i) / (sorted.length - 1));
+    const yForValue = (v) => topPad + plotH - ((v - minVal) / (maxVal - minVal)) * plotH;
+
+    const rootStyle = getComputedStyle(document.body);
+    const textSub = rootStyle.getPropertyValue('--text-sub').trim() || '#929FA8';
+    const borderColor = rootStyle.getPropertyValue('--border-color').trim() || '#E8EEF3';
+    const textMain = rootStyle.getPropertyValue('--text-main').trim() || '#3E4852';
+
+    ctx.strokeStyle = borderColor;
+    ctx.fillStyle = textSub;
+    ctx.font = '10px sans-serif';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    const gridCount = 3;
+    for (let g = 0; g <= gridCount; g++) {
+        const v = minVal + ((maxVal - minVal) * g) / gridCount;
+        const y = yForValue(v);
+        ctx.beginPath();
+        ctx.moveTo(leftPad, y);
+        ctx.lineTo(cssWidth - rightPad, y);
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.fillText(v.toFixed(1), leftPad - 6, y);
+    }
+
+    ctx.beginPath();
+    sorted.forEach((log, i) => {
+        const x = xForIndex(i);
+        const y = yForValue(getMetricValue(log, metric));
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+    });
+    ctx.strokeStyle = meta.color;
+    ctx.lineWidth = 2.5;
+    ctx.lineJoin = 'round';
+    ctx.stroke();
+
+    sorted.forEach((log, i) => {
+        const x = xForIndex(i);
+        const y = yForValue(getMetricValue(log, metric));
+        ctx.beginPath();
+        ctx.arc(x, y, 3.5, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = meta.color;
+        ctx.stroke();
+    });
+
+    ctx.fillStyle = textMain;
+    ctx.font = '10px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    const maxLabels = 5;
+    const step = Math.max(1, Math.ceil(sorted.length / maxLabels));
+    sorted.forEach((log, i) => {
+        if (i % step !== 0 && i !== sorted.length - 1) return;
+        const [y, m, d] = log.date.split('-');
+        const x = xForIndex(i);
+        ctx.fillText(`${parseInt(m, 10)}/${parseInt(d, 10)}`, x, cssHeight - bottomPad + 6);
+    });
+}
+
+function openInbodyModal(id) {
+    const modal = document.getElementById('inbody-modal');
+    const title = document.getElementById('inbody-modal-title');
+    const deleteBtn = document.getElementById('inbody-delete-btn');
+
+    document.getElementById('inbody-editing-id').value = '';
+    document.getElementById('inbody-date').value = '';
+    document.getElementById('inbody-weight').value = '';
+    document.getElementById('inbody-muscle').value = '';
+    document.getElementById('inbody-fat-percent').value = '';
+    document.getElementById('inbody-fat-mass').value = '';
+    document.getElementById('inbody-muscle-leftarm').value = '';
+    document.getElementById('inbody-muscle-rightarm').value = '';
+    document.getElementById('inbody-muscle-trunk').value = '';
+    document.getElementById('inbody-muscle-leftleg').value = '';
+    document.getElementById('inbody-muscle-rightleg').value = '';
+    document.getElementById('inbody-fat-leftarm').value = '';
+    document.getElementById('inbody-fat-rightarm').value = '';
+    document.getElementById('inbody-fat-trunk').value = '';
+    document.getElementById('inbody-fat-leftleg').value = '';
+    document.getElementById('inbody-fat-rightleg').value = '';
+    document.getElementById('inbody-visceral').value = '';
+    document.getElementById('inbody-bmi').value = '';
+
+    if (id) {
+        const log = state.inbodyLogs.find(l => l.id === id);
+        if (log) {
+            title.textContent = 'InBody 測定結果を編集';
+            document.getElementById('inbody-editing-id').value = log.id;
+            document.getElementById('inbody-date').value = log.date || '';
+            document.getElementById('inbody-weight').value = log.weight ?? '';
+            document.getElementById('inbody-muscle').value = log.muscle ?? '';
+            document.getElementById('inbody-fat-percent').value = log.fatPercent ?? '';
+            document.getElementById('inbody-fat-mass').value = log.fatMass ?? '';
+            const ms = log.muscleSegments || {};
+            const fs = log.fatSegments || {};
+            document.getElementById('inbody-muscle-leftarm').value = ms.leftArm ?? '';
+            document.getElementById('inbody-muscle-rightarm').value = ms.rightArm ?? '';
+            document.getElementById('inbody-muscle-trunk').value = ms.trunk ?? '';
+            document.getElementById('inbody-muscle-leftleg').value = ms.leftLeg ?? '';
+            document.getElementById('inbody-muscle-rightleg').value = ms.rightLeg ?? '';
+            document.getElementById('inbody-fat-leftarm').value = fs.leftArm ?? '';
+            document.getElementById('inbody-fat-rightarm').value = fs.rightArm ?? '';
+            document.getElementById('inbody-fat-trunk').value = fs.trunk ?? '';
+            document.getElementById('inbody-fat-leftleg').value = fs.leftLeg ?? '';
+            document.getElementById('inbody-fat-rightleg').value = fs.rightLeg ?? '';
+            document.getElementById('inbody-visceral').value = log.visceral ?? '';
+            document.getElementById('inbody-bmi').value = log.bmi ?? '';
+            deleteBtn.style.display = 'inline-block';
+        }
+    } else {
+        title.textContent = 'InBody 測定結果を追加';
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        document.getElementById('inbody-date').value = `${yyyy}-${mm}-${dd}`;
+        deleteBtn.style.display = 'none';
+    }
+
+    modal.classList.add('active');
+}
+
+function closeInbodyModal() {
+    document.getElementById('inbody-modal').classList.remove('active');
+}
+
+function saveInbodyLog() {
+    const date = document.getElementById('inbody-date').value;
+    if (!date) {
+        alert('測定日を入力してください。');
+        return;
+    }
+
+    const toNum = (val) => {
+        if (val === '' || val === null || val === undefined) return null;
+        const n = parseFloat(val);
+        return isNaN(n) ? null : n;
+    };
+
+    const editingId = document.getElementById('inbody-editing-id').value;
+    const entry = {
+        id: editingId || ('ib_' + Date.now()),
+        date: date,
+        weight: toNum(document.getElementById('inbody-weight').value),
+        muscle: toNum(document.getElementById('inbody-muscle').value),
+        fatPercent: toNum(document.getElementById('inbody-fat-percent').value),
+        fatMass: toNum(document.getElementById('inbody-fat-mass').value),
+        muscleSegments: {
+            leftArm: toNum(document.getElementById('inbody-muscle-leftarm').value),
+            rightArm: toNum(document.getElementById('inbody-muscle-rightarm').value),
+            trunk: toNum(document.getElementById('inbody-muscle-trunk').value),
+            leftLeg: toNum(document.getElementById('inbody-muscle-leftleg').value),
+            rightLeg: toNum(document.getElementById('inbody-muscle-rightleg').value)
+        },
+        fatSegments: {
+            leftArm: toNum(document.getElementById('inbody-fat-leftarm').value),
+            rightArm: toNum(document.getElementById('inbody-fat-rightarm').value),
+            trunk: toNum(document.getElementById('inbody-fat-trunk').value),
+            leftLeg: toNum(document.getElementById('inbody-fat-leftleg').value),
+            rightLeg: toNum(document.getElementById('inbody-fat-rightleg').value)
+        },
+        visceral: toNum(document.getElementById('inbody-visceral').value),
+        bmi: toNum(document.getElementById('inbody-bmi').value)
+    };
+
+    if (editingId) {
+        const idx = state.inbodyLogs.findIndex(l => l.id === editingId);
+        if (idx !== -1) state.inbodyLogs[idx] = entry;
+    } else {
+        state.inbodyLogs.push(entry);
+    }
+
+    saveState();
+    closeInbodyModal();
+    renderInbodyTab();
+}
+
+function deleteInbodyLog() {
+    const editingId = document.getElementById('inbody-editing-id').value;
+    if (!editingId) return;
+    if (!confirm('この測定記録を削除しますか？')) return;
+
+    state.inbodyLogs = state.inbodyLogs.filter(l => l.id !== editingId);
+    saveState();
+    closeInbodyModal();
+    renderInbodyTab();
+}
+
+function openInbodyImportModal() {
+    document.getElementById('inbody-import-textarea').value = '';
+    document.getElementById('inbody-import-modal').classList.add('active');
+}
+
+function closeInbodyImportModal() {
+    document.getElementById('inbody-import-modal').classList.remove('active');
+}
+
+function submitInbodyImport() {
+    const raw = document.getElementById('inbody-import-textarea').value.trim();
+    if (!raw) {
+        alert('JSONを貼り付けてください。');
+        return;
+    }
+
+    let parsed;
+    try {
+        parsed = JSON.parse(raw);
+    } catch (e) {
+        alert('JSONの形式が正しくありません。');
+        return;
+    }
+
+    const entries = Array.isArray(parsed) ? parsed : [parsed];
+    if (entries.length === 0) {
+        alert('データが空です。');
+        return;
+    }
+
+    const toNum = (val) => {
+        if (val === '' || val === null || val === undefined) return null;
+        const n = parseFloat(val);
+        return isNaN(n) ? null : n;
+    };
+
+    const toSegments = (obj, prefix) => {
+        const src = obj || {};
+        return {
+            leftArm: toNum(src[`${prefix}LeftArm`]),
+            rightArm: toNum(src[`${prefix}RightArm`]),
+            trunk: toNum(src[`${prefix}Trunk`]),
+            leftLeg: toNum(src[`${prefix}LeftLeg`]),
+            rightLeg: toNum(src[`${prefix}RightLeg`])
+        };
+    };
+
+    let importedCount = 0;
+    let skippedCount = 0;
+
+    entries.forEach(item => {
+        if (!item || !item.date || !/^\d{4}-\d{2}-\d{2}$/.test(item.date)) {
+            skippedCount++;
+            return;
+        }
+
+        const existingIdx = state.inbodyLogs.findIndex(l => l.date === item.date);
+        const entry = {
+            id: existingIdx !== -1 ? state.inbodyLogs[existingIdx].id : ('ib_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7)),
+            date: item.date,
+            weight: toNum(item.weight),
+            muscle: toNum(item.muscle),
+            fatPercent: toNum(item.fatPercent),
+            fatMass: toNum(item.fatMass),
+            visceral: toNum(item.visceral),
+            bmi: toNum(item.bmi),
+            muscleSegments: toSegments(item, 'muscle'),
+            fatSegments: toSegments(item, 'fat')
+        };
+
+        if (existingIdx !== -1) {
+            state.inbodyLogs[existingIdx] = entry;
+        } else {
+            state.inbodyLogs.push(entry);
+        }
+        importedCount++;
+    });
+
+    if (importedCount === 0) {
+        alert('有効なデータが見つかりませんでした。dateの形式(YYYY-MM-DD)を確認してください。');
+        return;
+    }
+
+    saveState();
+    closeInbodyImportModal();
+    renderInbodyTab();
+    alert(`${importedCount}件をインポートしました。${skippedCount > 0 ? `(${skippedCount}件はスキップ)` : ''}`);
 }
 
 function renderHistoryLogs() {
@@ -1384,15 +1948,13 @@ function renderHistoryLogs() {
 
         const summaryEl = document.createElement('div');
         summaryEl.className = 'history-month-summary';
-        summaryEl.innerHTML = `<span>📅 ${monthKey} (${monthLogs.length}回)</span><span class="arrow-icon">▾</span>`;
+        const countExOff = monthLogs.filter(l => l.menuId !== 'OFF').length;
+        summaryEl.innerHTML = `<span>📅 ${monthKey} (${countExOff}回)</span><span class="arrow-icon">▾</span>`;
 
         const bodyEl = document.createElement('div');
         bodyEl.className = 'history-month-body';
 
         monthLogs.forEach(log => {
-            const card = document.createElement('div');
-            card.className = 'history-card';
-
             const [y, m, d] = log.date.split('-');
             const dateObj = new Date(parseInt(y, 10), parseInt(m, 10) - 1, parseInt(d, 10));
             const dayOfWeek = ['日', '月', '火', '水', '木', '金', '土'][dateObj.getDay()];
@@ -1432,15 +1994,40 @@ function renderHistoryLogs() {
                 exHTML = '<div class="history-ex-empty">詳細ログはありません</div>';
             }
 
-            card.innerHTML = `
-                <div class="history-card-header">
-                    <span class="history-date">${formattedDate}</span>
-                </div>
-                <div class="history-title">${titleText}</div>
-                ${exHTML}
+            const dayItem = document.createElement('div');
+            dayItem.className = 'date-accordion-item history-date-item';
+
+            const dayHeader = document.createElement('div');
+            dayHeader.className = 'date-accordion-header';
+            dayHeader.innerHTML = `
+                <span class="inbody-list-date">${formattedDate}</span>
+                <span class="date-accordion-preview">${titleText}</span>
+                <span class="arrow-icon">▾</span>
             `;
 
-            bodyEl.appendChild(card);
+            const dayBody = document.createElement('div');
+            dayBody.className = 'date-accordion-body';
+            dayBody.innerHTML = exHTML;
+
+            dayHeader.onclick = () => {
+                const isActive = dayItem.classList.contains('active');
+                if (isActive) {
+                    dayBody.style.maxHeight = '0px';
+                    dayItem.classList.remove('active');
+                } else {
+                    dayItem.classList.add('active');
+                    dayBody.style.maxHeight = dayBody.scrollHeight + 16 + 'px';
+                }
+                if (groupEl.classList.contains('active')) {
+                    setTimeout(() => {
+                        bodyEl.style.maxHeight = bodyEl.scrollHeight + 16 + 'px';
+                    }, 0);
+                }
+            };
+
+            dayItem.appendChild(dayHeader);
+            dayItem.appendChild(dayBody);
+            bodyEl.appendChild(dayItem);
         });
 
         groupEl.appendChild(summaryEl);
@@ -1505,7 +2092,6 @@ function importPastLogs() {
     }
 }
 
-// ▲▼ ボタンで要素を上下に移動させる共通関数
 function moveBlock(btnEl, direction) {
     const block = btnEl.closest('.extra-log-block') || btnEl.closest('.exercise-row');
     if (!block) return;
@@ -1513,13 +2099,11 @@ function moveBlock(btnEl, direction) {
     if (!container) return;
 
     if (direction === -1) {
-        // 上に移動
         const prev = block.previousElementSibling;
         if (prev) {
             container.insertBefore(block, prev);
         }
     } else if (direction === 1) {
-        // 下に移動
         const next = block.nextElementSibling;
         if (next) {
             container.insertBefore(next, block);
