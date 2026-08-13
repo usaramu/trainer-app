@@ -2,14 +2,13 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <!-- スマホでの倍率固定・自動ズーム防止設定 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>うさトレ</title>
     
     <!-- ▼ まる文字フォント（Zen Maru Gothic） -->
     <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700;900&display=swap" rel="stylesheet">
-    <!-- バージョン更新: v=20260813_14 -->
-    <link rel="stylesheet" href="style.css?v=20260813_14">
+    <!-- バージョン更新: v=20260813_21 -->
+    <link rel="stylesheet" href="style.css?v=20260813_21">
 </head>
 <body>
 
@@ -55,6 +54,11 @@
             <div class="banner-actions" style="margin-top: 12px;">
                 <button class="btn-offday" onclick="recordOffDay()" style="width: 100%;">今日はオフ</button>
             </div>
+        </div>
+
+        <!-- ▼ 新設：本日の記録サマリーカード -->
+        <div id="today-summary-card" class="today-summary-card">
+            <!-- JSで動的生成 -->
         </div>
 
         <!-- カレンダーセクション -->
@@ -401,7 +405,7 @@
             </div>
             <div class="modal-body">
                 <label class="form-label">JSONを貼り付け</label>
-                <textarea id="inbody-import-textarea" class="form-input form-textarea" style="margin-bottom:12px;" ></textarea>
+                <textarea id="inbody-import-textarea" class="form-input form-textarea" style="margin-bottom:12px;" placeholder="ここにJSONを貼り付け"></textarea>
 
                 <details style="font-size:0.75rem; color:var(--text-sub); background:var(--bg-color); border-radius:12px; padding:8px 10px; border:1px solid var(--border-color);">
                     <summary style="font-weight:700; cursor:pointer; user-select:none;">💡 フォーマット例・注意事項を表示</summary>
@@ -447,7 +451,7 @@
         <button type="button" class="btn-reset" onclick="resetData()">履歴・メニュー設定を初期化</button>
     </footer>
 
-    <!-- バージョン更新: v=20260813_14 -->
-    <script src="script.js?v=20260813_14"></script>
+    <!-- バージョン更新: v=20260813_21 -->
+    <script src="script.js?v=20260813_21"></script>
 </body>
 </html>

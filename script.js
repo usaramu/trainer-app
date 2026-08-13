@@ -88,6 +88,7 @@ function init() {
     loadState();
     applyTheme(state.theme);
     renderRecommendation();
+    renderTodaySummary(); // ★ 本日のサマリー初期描画
     renderCalendar();
     renderMenuTable();
 
@@ -231,6 +232,72 @@ function renderRecommendation() {
     if (cardioEl) cardioEl.textContent = `前回: ${calcDaysAgo('有酸素')}`;
 }
 
+// ★ 本日の記録サマリーのレンダリング関数
+function renderTodaySummary() {
+    const cardContainer = document.getElementById('today-summary-card');
+    if (!cardContainer) return;
+
+    const todayISO = getTodayISO();
+    const todayLogIndex = state.logs.findIndex(l => l.date === todayISO);
+    const todayLog = todayLogIndex !== -1 ? state.logs[todayLogIndex] : null;
+
+    if (!todayLog) {
+        cardContainer.innerHTML = `
+            <div class="today-summary-header">
+                <span class="today-summary-title">TODAY'S LOG</span>
+                <span class="today-summary-date">${todayISO.replace(/-/g, '/')}</span>
+            </div>
+            <div class="today-summary-empty">本日の記録はまだありません</div>
+        `;
+        return;
+    }
+
+    let titleText = '';
+    if (todayLog.menuId === 'OFF') {
+        titleText = '☕ 今日はオフ';
+    } else if (todayLog.menuId === 'ALL') {
+        titleText = '全身トレーニング';
+    } else {
+        const menu = state.menus.find(m => m.id === todayLog.menuId);
+        titleText = menu ? menu.title : todayLog.menuId;
+    }
+
+    let exListHTML = '';
+    if (todayLog.menuId === 'OFF') {
+        exListHTML = '<div class="today-summary-empty" style="padding:4px 0;">しっかり体を休めましょう！</div>';
+    } else if (todayLog.exerciseLogs && Object.keys(todayLog.exerciseLogs).length > 0) {
+        exListHTML = '<div class="today-summary-list">';
+        for (const [exName, logVal] of Object.entries(todayLog.exerciseLogs)) {
+            const cleanName = exName.replace('【追加】', '');
+            const valArray = Array.isArray(logVal) ? logVal : [logVal];
+
+            valArray.forEach(item => {
+                const formatted = formatSingleLogObj(item);
+                exListHTML += `
+                    <div class="today-summary-item">
+                        <span class="today-summary-ex-name">• ${cleanName}</span>
+                        <span class="today-summary-ex-val">${formatted}</span>
+                    </div>
+                `;
+            });
+        }
+        exListHTML += '</div>';
+    } else {
+        exListHTML = '<div class="today-summary-empty">種目の記録はありません</div>';
+    }
+
+    cardContainer.innerHTML = `
+        <div class="today-summary-header">
+            <div style="display:flex; align-items:center; gap:8px;">
+                <span class="today-summary-title">TODAY'S LOG</span>
+                <span class="today-summary-badge">${titleText}</span>
+            </div>
+            <button type="button" class="btn-table-edit" style="padding:3px 10px; font-size:0.72rem;" onclick="openDetailLogModal(${todayLogIndex})">確認・編集</button>
+        </div>
+        ${exListHTML}
+    `;
+}
+
 function getLastExerciseLogObj(exerciseName) {
     for (let i = state.logs.length - 1; i >= 0; i--) {
         const log = state.logs[i];
@@ -352,6 +419,8 @@ function recordOffDay() {
     state.logs.push({ date: todayISO, menuId: 'OFF', exerciseLogs: {} });
 
     saveState();
+    renderRecommendation();
+    renderTodaySummary(); // ★ 即時更新
     renderCalendar();
 }
 
@@ -893,6 +962,7 @@ function submitWorkoutLog() {
         state.logs.sort((a, b) => a.date.localeCompare(b.date));
         saveState();
         renderRecommendation();
+        renderTodaySummary(); // ★ 即時反映
         renderCalendar();
         renderMenuTable();
         closeWorkoutLogModal();
@@ -965,6 +1035,7 @@ function submitWorkoutLog() {
 
     saveState();
     renderRecommendation();
+    renderTodaySummary(); // ★ 即時反映
     renderCalendar();
     renderMenuTable();
 
@@ -1044,6 +1115,7 @@ function deleteLogByIndex(logIndex) {
     state.logs.splice(logIndex, 1);
     saveState();
     renderRecommendation();
+    renderTodaySummary(); // ★ 即時反映
     renderCalendar();
     renderMenuTable();
 }
@@ -1814,20 +1886,17 @@ function saveInbodyLog() {
     renderInbodyTab();
 }
 
-function deleteInbodyLog() {
-    const editingId = document.getElementById('inbody-editing-id').value;
-    if (!editingId) return;
-    if (!confirm('この測定記録を削除しますか？')) return;
-
-    state.inbodyLogs = state.inbodyLogs.filter(l => l.id !== editingId);
-    saveState();
-    closeInbodyModal();
-    renderInbodyTab();
-}
-
 function openInbodyImportModal() {
-    document.getElementById('inbody-import-textarea').value = '';
+    const textarea = document.getElementById('inbody-import-textarea');
+    if (textarea) {
+        textarea.value = '';
+    }
+    
     document.getElementById('inbody-import-modal').classList.add('active');
+    
+    setTimeout(() => {
+        if (textarea) textarea.focus();
+    }, 100);
 }
 
 function closeInbodyImportModal() {
@@ -2009,6 +2078,7 @@ function renderHistoryLogs() {
             dayBody.className = 'date-accordion-body';
             dayBody.innerHTML = exHTML;
 
+            // ▼ 日付アコーディオンの開閉処理（絶対に途中で切れず100%展開）
             dayHeader.onclick = () => {
                 const isActive = dayItem.classList.contains('active');
                 if (isActive) {
@@ -2016,12 +2086,25 @@ function renderHistoryLogs() {
                     dayItem.classList.remove('active');
                 } else {
                     dayItem.classList.add('active');
-                    dayBody.style.maxHeight = dayBody.scrollHeight + 16 + 'px';
-                }
-                if (groupEl.classList.contains('active')) {
+                    
+                    // 中身が切れないよう高さを超大きめに確保したあと制限解除
+                    dayBody.style.maxHeight = (dayBody.scrollHeight + 100) + 'px';
+                    
                     setTimeout(() => {
-                        bodyEl.style.maxHeight = bodyEl.scrollHeight + 16 + 'px';
-                    }, 0);
+                        if (dayItem.classList.contains('active')) {
+                            dayBody.style.maxHeight = 'none';
+                        }
+                    }, 350);
+
+                    // 開いたカードが見える位置に自動スライド
+                    setTimeout(() => {
+                        dayItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }, 100);
+                }
+                
+                // 親（月グループ）の高さ制限を外す
+                if (groupEl.classList.contains('active')) {
+                    bodyEl.style.maxHeight = 'none';
                 }
             };
 
@@ -2033,6 +2116,7 @@ function renderHistoryLogs() {
         groupEl.appendChild(summaryEl);
         groupEl.appendChild(bodyEl);
 
+        // ▼ 月グループアコーディオンの開閉処理
         summaryEl.onclick = () => {
             const isActive = groupEl.classList.contains('active');
             if (isActive) {
@@ -2040,7 +2124,7 @@ function renderHistoryLogs() {
                 groupEl.classList.remove('active');
             } else {
                 groupEl.classList.add('active');
-                bodyEl.style.maxHeight = bodyEl.scrollHeight + 16 + 'px';
+                bodyEl.style.maxHeight = 'none';
             }
         };
 
@@ -2049,7 +2133,7 @@ function renderHistoryLogs() {
         if (monthKey === latestMonthKey) {
             setTimeout(() => {
                 groupEl.classList.add('active');
-                bodyEl.style.maxHeight = bodyEl.scrollHeight + 16 + 'px';
+                bodyEl.style.maxHeight = 'none';
             }, 50);
         }
     });
@@ -2083,6 +2167,7 @@ function importPastLogs() {
             state.logs.sort((a, b) => a.date.localeCompare(b.date));
             saveState();
             renderRecommendation();
+            renderTodaySummary(); // ★ 即時反映
             renderCalendar();
             if (typeof renderHistoryLogs === 'function') renderHistoryLogs();
             alert("過去データを正常に一括登録しました！");

@@ -1767,3 +1767,119 @@ body.modal-open {
     width: 100%;
     overflow: hidden;
 }
+
+/* アコーディオンの中身が見切れないようマージンと表示領域を調整 */
+.history-month-body {
+    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 0 10px;
+}
+
+.date-accordion-body {
+    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 0 14px;
+}
+
+.date-accordion-item.active .date-accordion-body {
+    padding: 0 14px 14px;
+}
+
+/* InBody 部位別ドロップダウンのスッキリ化 */
+#inbody-segmental-select {
+    font-size: 0.8125rem !important; /* 文字サイズをコンパクトに */
+    font-weight: 500 !important;      /* 太字を解除してすっきり */
+    padding: 6px 10px !important;    /* パディングを少し控えめに */
+    border-radius: 10px !important;  /* 角丸の微調整 */
+    color: var(--text-main);
+    background-color: var(--bg-color);
+    border: 1.5px solid var(--border-color);
+}
+
+#inbody-segmental-select optgroup {
+    font-weight: 700;
+    color: var(--text-sub);
+}
+
+#inbody-segmental-select option {
+    font-weight: 400;
+    color: var(--text-main);
+}
+
+/* 本日の記録サマリーカード */
+.today-summary-card {
+    background-color: var(--card-bg);
+    border: 1.5px solid var(--border-color);
+    border-radius: 18px;
+    padding: 12px 14px;
+    margin-bottom: 18px;
+    box-shadow: 0 4px 12px rgba(62, 72, 82, 0.03);
+}
+
+.today-summary-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.today-summary-title {
+    font-size: 0.75rem;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    color: var(--primary-color);
+}
+
+.today-summary-date {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-sub);
+}
+
+.today-summary-badge {
+    font-size: 0.75rem;
+    font-weight: 900;
+    color: var(--text-main);
+    background-color: var(--primary-soft);
+    padding: 2px 8px;
+    border-radius: 8px;
+}
+
+.today-summary-empty {
+    font-size: 0.78rem;
+    color: var(--text-sub);
+    text-align: center;
+    padding: 6px 0;
+}
+
+.today-summary-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background-color: var(--bg-color);
+    padding: 8px 10px;
+    border-radius: 12px;
+}
+
+.today-summary-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.78rem;
+    border-bottom: 1px dashed var(--border-color);
+    padding-bottom: 4px;
+}
+
+.today-summary-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.today-summary-ex-name {
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.today-summary-ex-val {
+    font-weight: 900;
+    color: var(--primary-color);
+    font-size: 0.72rem;
+}
