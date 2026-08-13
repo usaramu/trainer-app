@@ -8,7 +8,7 @@
     <!-- ▼ まる文字フォント（Zen Maru Gothic） -->
     <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700;900&display=swap" rel="stylesheet">
     <!-- バージョン更新: v=20260813_21 -->
-    <link rel="stylesheet" href="style.css?v=20260813_21">
+    <link rel="stylesheet" href="style.css?v=20260813_22">
 </head>
 <body>
 
@@ -266,18 +266,18 @@
                 <input type="date" id="inbody-date" class="form-input">
 
                 <label class="form-label">体重 (kg)</label>
-                <input type="number" step="0.1" inputmode="decimal" id="inbody-weight" class="form-input" placeholder="例: 52.4">
+                <input type="number" step="0.1" inputmode="decimal" id="inbody-weight" class="form-input">
 
                 <label class="form-label">骨格筋量 (kg)</label>
-                <input type="number" step="0.1" inputmode="decimal" id="inbody-muscle" class="form-input" placeholder="例: 21.3">
+                <input type="number" step="0.1" inputmode="decimal" id="inbody-muscle" class="form-input">
 
                 <label class="form-label">体脂肪率 (%)</label>
-                <input type="number" step="0.1" inputmode="decimal" id="inbody-fat-percent" class="form-input" placeholder="例: 24.5">
+                <input type="number" step="0.1" inputmode="decimal" id="inbody-fat-percent" class="form-input">
 
                 <label class="form-label">体脂肪量 (kg)</label>
-                <input type="number" step="0.1" inputmode="decimal" id="inbody-fat-mass" class="form-input" placeholder="任意">
+                <input type="number" step="0.1" inputmode="decimal" id="inbody-fat-mass" class="form-input">
 
-                <label class="form-label">部位別筋肉量 (%)（任意）</label>
+                <label class="form-label">部位別筋肉量 (%)</label>
                 <div class="segmental-input-grid">
                     <div class="segmental-input-item">
                         <span class="segmental-input-label">左腕</span>
@@ -301,7 +301,7 @@
                     </div>
                 </div>
 
-                <label class="form-label">部位別体脂肪量 (%)（任意）</label>
+                <label class="form-label">部位別体脂肪量 (%)</label>
                 <div class="segmental-input-grid" style="margin-bottom: 12px;">
                     <div class="segmental-input-item">
                         <span class="segmental-input-label">左腕</span>
@@ -326,10 +326,10 @@
                 </div>
 
                 <label class="form-label">内臓脂肪レベル</label>
-                <input type="number" step="1" inputmode="numeric" id="inbody-visceral" class="form-input" placeholder="任意">
+                <input type="number" step="1" inputmode="numeric" id="inbody-visceral" class="form-input">
 
                 <label class="form-label">BMI</label>
-                <input type="number" step="0.1" inputmode="decimal" id="inbody-bmi" class="form-input" placeholder="任意">
+                <input type="number" step="0.1" inputmode="decimal" id="inbody-bmi" class="form-input">
             </div>
             <div class="modal-footer">
                 <button class="btn-reset" id="inbody-delete-btn" style="margin-top:0; margin-right:auto; color:#ef4444; display:none;" onclick="deleteInbodyLog()">削除する</button>
@@ -452,6 +452,6 @@
     </footer>
 
     <!-- バージョン更新: v=20260813_21 -->
-    <script src="script.js?v=20260813_21"></script>
+    <script src="script.js?v=20260813_22"></script>
 </body>
 </html>
