@@ -123,7 +123,7 @@ const DEFAULT_EQUIPMENT_PATTERNS = {
   'グルートキックバック': ['ケーブル', 'マシン', 'バンド'],
 
   // 腹筋・体幹
-  'アブドミナル': ['マシン'],
+  'アブドミナル': ['マシン','グリップ'],
   'トーソローテーション': ['マシン'],
   'プランク': ['自重'],
   '上体起こし': ['自重', 'マシン'],
@@ -193,19 +193,42 @@ function loadState() {
     state.inbodyLogs = parsed.inbodyLogs || [];
     state.exerciseLabels = ['胸', '背中', '脚', '肩', '腕', 'お尻', '腹筋', '全身', '有酸素運動', 'その他'];
     
-    // ★ スキーマ更新時は最新のデフォルト分類を強制適用
-    if (parsed.exerciseLibrarySchema === CURRENT_SCHEMA_VERSION && parsed.exerciseLibrary) {
-      state.exerciseLibrary = parsed.exerciseLibrary;
-    } else {
-      state.exerciseLibrary = buildDefaultExerciseLibrary();
+    // 種目ライブラリの同期（ユーザーが追加したカスタム種目を維持しつつ最新デフォルトを補完）
+    state.exerciseLibrary = buildDefaultExerciseLibrary();
+    if (parsed.exerciseLibrary) {
+      Object.keys(parsed.exerciseLibrary).forEach(label => {
+        if (!state.exerciseLibrary[label]) {
+          state.exerciseLibrary[label] = [];
+        }
+        parsed.exerciseLibrary[label].forEach(name => {
+          if (!state.exerciseLibrary[label].includes(name)) {
+            state.exerciseLibrary[label].push(name);
+          }
+        });
+      });
     }
 
-    // 器具辞書を最新デフォルトとマージ
-    state.exerciseEquipment = Object.assign(
-      {},
-      JSON.parse(JSON.stringify(DEFAULT_EQUIPMENT_PATTERNS)),
-      parsed.exerciseEquipment || {}
-    );
+    // ★ 【ここを修正】既存の保存済み器具データに、コード側の最新 DEFAULT_EQUIPMENT_PATTERNS を賢くマージする
+    // ユーザーが個別に編集・追加した器具設定は残しつつ、新しく追加された種目やデフォルト器具の変更を自動反映します
+    const mergedEquipment = JSON.parse(JSON.stringify(DEFAULT_EQUIPMENT_PATTERNS));
+    if (parsed.exerciseEquipment) {
+      Object.keys(parsed.exerciseEquipment).forEach(exName => {
+        if (mergedEquipment[exName]) {
+          // デフォルトにも存在する種目の場合：ユーザーが追加したカスタム器具があればマージする
+          const userEquips = parsed.exerciseEquipment[exName];
+          userEquips.forEach(eq => {
+            if (!mergedEquipment[exName].includes(eq)) {
+              mergedEquipment[exName].push(eq);
+            }
+          });
+        } else {
+          // ユーザーが独自に作成した種目の場合：そのまま保持
+          mergedEquipment[exName] = parsed.exerciseEquipment[exName];
+        }
+      });
+    }
+    state.exerciseEquipment = mergedEquipment;
+
   } else {
     state.exerciseLibrary = buildDefaultExerciseLibrary();
     state.exerciseEquipment = JSON.parse(JSON.stringify(DEFAULT_EQUIPMENT_PATTERNS));
@@ -1628,7 +1651,7 @@ function renderLibraryExerciseChips() {
         <div class="lib-exercise-equip-row">
           <div class="lib-equip-list">${equipChipsHTML}</div>
           <div class="lib-equip-add-form">
-            <input type="text" class="form-input lib-new-equip-input" placeholder="器具追加 (例: スミス, ダンベル)" data-exname="${name}">
+            <input type="text" class="form-input lib-new-equip-input" placeholder="" data-exname="${name}">
             <button type="button" class="btn-lib-equip-add" onclick="addExerciseEquip('${name}', this)">+ 追加</button>
           </div>
           ${showResetBtn ? `<button type="button" class="btn-lib-equip-reset" onclick="resetExerciseEquip('${name}')">デフォルトに戻す</button>` : ''}
