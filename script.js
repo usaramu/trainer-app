@@ -552,8 +552,12 @@ function renderEquipmentChips(blockEl, exerciseName, selectedEquip = '') {
         <div class="equipment-chips-list">
             ${chipsHTML}
         </div>
-    
+        <input type="text" class="form-input extra-equip-input" value="${isCustomValue ? selectedEquip : ''}" placeholder="その他" oninput="onCustomEquipInput(this)">
     `;
+
+    // ★ 保存時に確実に読めるよう、選択中の器具をdata属性にも保持しておく
+    // (標準チップ選択時は上のinputのvalueが空になるため、こちらを正とする)
+    equipContainer.dataset.selectedEquip = selectedEquip || '';
 }
 
 function selectEquipmentChip(btnEl, equipName) {
@@ -578,6 +582,8 @@ function selectEquipmentChip(btnEl, equipName) {
         chosenEquip = equipName;
     }
 
+    row.dataset.selectedEquip = chosenEquip;
+
     if (exName) {
         const lastObj = getLastExerciseEquipLogObj(exName, chosenEquip);
         const holder = block.querySelector('.last-btn-holder');
@@ -601,6 +607,7 @@ function onCustomEquipInput(inputEl) {
     allBtns.forEach(b => b.classList.remove('active'));
 
     const equipName = inputEl.value.trim();
+    row.dataset.selectedEquip = equipName;
     const nameSelect = block.querySelector('.extra-name-select');
     const nameInput = block.querySelector('.extra-name-input');
     const exName = (nameSelect && nameSelect.value) ? nameSelect.value : (nameInput ? nameInput.value : '');
@@ -1207,8 +1214,11 @@ function submitWorkoutLog() {
         const minInput = block.querySelector('.extra-minutes');
         const setRows = block.querySelectorAll('.set-input-row');
 
+        const equipRow = block.querySelector('.equipment-select-row');
         const equipInput = block.querySelector('.extra-equip-input');
-        const equipment = equipInput ? equipInput.value.trim() : '';
+        // ★ 標準チップ選択時はinputのvalueが空になるため、data-selectedEquipを優先して読む
+        const equipFromDataset = equipRow ? (equipRow.dataset.selectedEquip || '') : '';
+        const equipment = equipFromDataset || (equipInput ? equipInput.value.trim() : '');
 
         if (name && equipment) {
             if (!state.exerciseEquipment[name]) {
