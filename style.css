@@ -884,15 +884,16 @@ h1 {
 .modal-content {
     background-color: var(--card-bg);
     border-radius: 22px;
-    width: 100%;
+    width: 92%; /* スマホの画面幅に合わせて少しマージンを持たせる */
     max-width: 460px;
-    max-height: 92vh; /* 気持ち高さを広げる */
+    max-height: 90vh;
     display: flex;
     flex-direction: column;
     overflow: hidden;
     box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
     border: 2px solid #FFFFFF;
     box-sizing: border-box;
+    margin: 0 auto; /* 画面中央に綺麗に配置 */
 }
 
 .modal-header {
@@ -935,7 +936,7 @@ h1 {
 }
 
 .modal-body {
-    padding: 16px 14px; /* 上下のパディングを少しスリムに調整 */
+    padding: 14px 16px;
     overflow-y: auto !important;
     overflow-x: hidden !important;
     flex-grow: 1;
@@ -954,6 +955,7 @@ h1 {
 
 .form-input {
     width: 100%;
+    max-width: 100%; /* 横幅がはみ出さないようにガード */
     padding: 10px 12px;
     border: 1.5px solid var(--border-color);
     border-radius: 14px;
@@ -962,6 +964,7 @@ h1 {
     background-color: var(--bg-color);
     transition: all 0.15s;
     font-weight: 700;
+    box-sizing: border-box; /* パディングやボーダーを含めて幅を計算させる */
 }
 
 .form-input:focus {
