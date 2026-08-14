@@ -1,6 +1,7 @@
 let isEditingLogMode = false;
+const STORAGE_KEY = 'trainingRecords';
 
-// 初期メニュー構成データ（ヒップアブダクションの分類反映版）
+// 初期メニュー構成データ
 const initialDefaultMenus = [
     {
         id: 'A',
@@ -70,6 +71,58 @@ const MENU_LABELS = {
     'A': '上', 'B': '下', 'C': '下', 'D': '上', 'E': '下', 'F': '🏃', 'ALL': '全', 'OFF': '休'
 };
 
+// ★ 主要種目のデフォルト器具パターン辞書（最新反映版）
+const DEFAULT_EQUIPMENT_PATTERNS = {
+  // 胸
+  'インクラインプレス': ['アイソラテラル', 'ダンベル', 'バーベル', 'スミス', 'スミスベンチ'],
+  'ベンチプレス': ['バーベル', 'ダンベル', 'スミス', 'スーパースミス'],
+  'ペックフライ': ['マシン', 'ケーブル', 'ダンベル'],
+  'チェストプレス': ['マシン', 'スミス', 'スーパースミス'],
+  'ケーブルクロス': ['ケーブル'],
+  'ディップス': ['自重', 'アシストマシン', 'ウェイト付加'],
+  'ダンベルフライ': ['ダンベル'],
+  'ダンベルプレス': ['ダンベル'],
+
+  // 背中
+  'デッドリフト': ['バーベル', 'ダンベル', 'トラップバー'],
+  'ラットプルダウン': ['マシン', 'マググリップ', 'ケーブル'],
+  'プーリーロー': ['ケーブル', 'マシン'],
+  'チンニング（懸垂）': ['自重', 'アシストマシン', 'ウェイト付加'],
+  'ベントオーバーロー': ['バーベル', 'ダンベル'],
+  'シーテッドローイング': ['縦持ち(広背筋)', '横持ち(僧帽筋)', 'アイソラテラル', 'ケーブル', 'ダンベル'],
+
+  // 脚
+  'アダクション': ['マシン', 'バンド'],
+  'ブルガリアンスクワット': ['ダンベル', 'スミス', '自重'],
+  'スクワット': ['バーベル', 'ハック', 'スミス', 'ダンベル', '自重'],
+  'レッグプレス': ['シーテッド', '45度リニア'],
+  'レッグエクステンション': ['マシン'],
+  'レッグカール': ['マシン'],
+
+  // 肩
+  'サイドレイズ': ['ダンベル', 'ケーブル'],
+  'ショルダープレス': ['MTSマシン', 'ダンベル', 'バーベル', 'スミス'],
+  'フロントレイズ': ['ダンベル', 'ケーブル', 'バーベル'],
+  'ケーブルフェイスプル': ['ケーブル'],
+
+  // 腕
+  'バーベルカール': ['バーベル'],
+  'アームカール': ['シーテッド台', 'ダンベル', 'バーベル', 'ケーブル'],
+  'ケーブルプレスダウン': ['ケーブル'],
+
+  // お尻
+  'ヒップアブダクション（骨盤前傾）': ['マシン', 'バンド'],
+  'ヒップアブダクション（骨盤立て）': ['マシン', 'バンド'],
+  'ヒップアブダクション（骨盤後傾）': ['マシン', 'バンド'],
+  'ヒップスラスト': ['グルートドライブ', 'バーベル', 'スミス'],
+
+  // 腹筋
+  'アブドミナル': ['マシン'],
+  'トーソローテーション': ['マシン'],
+  'プランク': ['自重'],
+  '上体起こし': ['自重', 'マシン'],
+};
+
 // アプリ全体の状態
 let state = {
     theme: 'blue',
@@ -80,6 +133,7 @@ let state = {
     editingMenuId: null,
     exerciseLabels: ['胸', '背中', '脚', '肩', '腕', 'お尻', '腹筋', '全身', '有酸素運動', 'その他'],
     exerciseLibrary: {},
+    exerciseEquipment: {}, // ★ 種目ごとの器具設定辞書
     inbodyLogs: [],
     inbodyMetric: 'weight'
 };
@@ -88,7 +142,7 @@ function init() {
     loadState();
     applyTheme(state.theme);
     renderRecommendation();
-    renderTodaySummary(); // ★ 本日のサマリー初期描画
+    renderTodaySummary();
     renderCalendar();
     renderMenuTable();
 
@@ -98,25 +152,14 @@ function init() {
     }
 }
 
+
+
 function loadState() {
     const savedState = localStorage.getItem('workout_tracker_state');
     if (savedState) {
         const parsed = JSON.parse(savedState);
         if (parsed.theme) state.theme = parsed.theme;
-        
-        if (parsed.menus) {
-            state.menus = parsed.menus;
-            state.menus.forEach(menu => {
-                if (menu.id === 'B') {
-                    menu.exercises.forEach(ex => { if (ex.name === 'ヒップアブダクション') ex.name = 'ヒップアブダクション（骨盤後傾）'; });
-                } else if (menu.id === 'C') {
-                    menu.exercises.forEach(ex => { if (ex.name === 'ヒップアブダクション') ex.name = 'ヒップアブダクション（骨盤前傾）'; });
-                } else if (menu.id === 'E') {
-                    menu.exercises.forEach(ex => { if (ex.name === 'ヒップアブダクション') ex.name = 'ヒップアブダクション（骨盤立て）'; });
-                }
-            });
-        }
-        
+        if (parsed.menus) state.menus = parsed.menus;
         if (parsed.logs) state.logs = parsed.logs;
         state.inbodyLogs = parsed.inbodyLogs || [];
         state.exerciseLabels = parsed.exerciseLabels || ['胸', '背中', '脚', '肩', '腕', 'お尻', '腹筋', '全身', '有酸素運動', 'その他'];
@@ -126,8 +169,16 @@ function loadState() {
         } else {
             state.exerciseLibrary = buildDefaultExerciseLibrary();
         }
+
+        // ★ 既存の保存データにデフォルト器具辞書をマージして最新化する
+        state.exerciseEquipment = Object.assign(
+            {},
+            JSON.parse(JSON.stringify(DEFAULT_EQUIPMENT_PATTERNS)),
+            parsed.exerciseEquipment || {}
+        );
     } else {
         state.exerciseLibrary = buildDefaultExerciseLibrary();
+        state.exerciseEquipment = JSON.parse(JSON.stringify(DEFAULT_EQUIPMENT_PATTERNS));
     }
 }
 
@@ -139,6 +190,7 @@ function saveState() {
         exerciseLabels: state.exerciseLabels,
         exerciseLibrarySchema: 'label-v3',
         exerciseLibrary: state.exerciseLibrary,
+        exerciseEquipment: state.exerciseEquipment,
         inbodyLogs: state.inbodyLogs
     }));
 }
@@ -174,20 +226,19 @@ function changeTheme(themeName) {
 }
 
 function buildDefaultExerciseLibrary() {
-    return {
-        '胸': ['インクラインプレス', 'ベンチプレス', 'ペックフライ', 'チェストプレス', 'スミスマシン・インクラインベンチプレス', 'ケーブルクロス', 'ディップス', 'ダンベルフライ', 'ダンベルプレス', 'インクラインダンベルプレス'],
-        '背中': ['デッドリフト', 'ラットプルダウン', 'プーリーロー', 'チンニング（懸垂）', 'ベントオーバーロー'],
-        '脚': ['アダクション', 'ブルガリアンスクワット', 'スクワット', 'スミスマシン・バーベルスクワット', 'レッグプレス', 'レッグエクステンション', 'レッグカール'],
-        '肩': ['サイドレイズ', 'ショルダープレス', 'フロントレイズ', 'ダンベルショルダープレス', 'ケーブルフェイスプル'],
-        '腕': ['バーベルカール', 'アームカール', 'ケーブルプレスダウン'],
-        'お尻': ['ヒップアブダクション（骨盤前傾）', 'ヒップアブダクション（骨盤立て）','ヒップアブダクション（骨盤後傾）','ヒップスラスト'],
-        '腹筋': ['アブドミナル', 'トーソ・ローテーション', 'プランク', '上体起こし'],
-        '全身': ['クリーン', 'スナッチ', 'バーピー'],
-        '有酸素運動': ['トレッドミル', '傾斜ウォーキング'],
-        'その他': []
-    };
+  return {
+    '胸': ['インクラインプレス', 'ベンチプレス', 'ペックフライ', 'チェストプレス', 'ケーブルクロス', 'ディップス', 'ダンベルフライ', 'ダンベルプレス'],
+    '背中': ['デッドリフト', 'ラットプルダウン', 'プーリーロー', 'チンニング（懸垂）', 'ベントオーバーロー', 'シーテッドローイング'],
+    '脚': ['アダクション', 'ブルガリアンスクワット', 'スクワット', 'レッグプレス', 'レッグエクステンション', 'レッグカール'],
+    '肩': ['サイドレイズ', 'ショルダープレス', 'フロントレイズ', 'ケーブルフェイスプル'],
+    '腕': ['バーベルカール', 'アームカール', 'ケーブルプレスダウン'],
+    'お尻': ['ヒップアブダクション（骨盤前傾）', 'ヒップアブダクション（骨盤立て）', 'ヒップアブダクション（骨盤後傾）', 'ヒップスラスト'],
+    '腹筋': ['アブドミナル', 'トーソローテーション', 'プランク', '上体起こし'],
+    '全身': ['クリーン', 'スナッチ', 'バーピー'],
+    '有酸素運動': ['トレッドミル', '傾斜ウォーキング'],
+    'その他': []
+  };
 }
-
 function renderRecommendation() {
     const calcDaysAgo = (category) => {
         const catLogs = state.logs.filter(l => {
@@ -232,7 +283,6 @@ function renderRecommendation() {
     if (cardioEl) cardioEl.textContent = `前回: ${calcDaysAgo('有酸素')}`;
 }
 
-// ★ 本日の記録サマリーのレンダリング関数
 function renderTodaySummary() {
     const cardContainer = document.getElementById('today-summary-card');
     if (!cardContainer) return;
@@ -313,6 +363,27 @@ function getLastExerciseLogObj(exerciseName) {
     return null;
 }
 
+// ★ 種目名＋器具名に合致する直近の過去記録を取得する関数
+// equipmentが指定されている場合、一致する記録が無ければ他の器具の記録にはフォールバックせずnullを返す
+function getLastExerciseEquipLogObj(exerciseName, equipment = '') {
+    for (let i = state.logs.length - 1; i >= 0; i--) {
+        const log = state.logs[i];
+        if (log.exerciseLogs && log.exerciseLogs[exerciseName] !== undefined) {
+            const val = log.exerciseLogs[exerciseName];
+            const valArray = Array.isArray(val) ? val : [val];
+
+            for (let j = valArray.length - 1; j >= 0; j--) {
+                const item = valArray[j];
+                if (!equipment || (item.equipment || '') === equipment) {
+                    return item;
+                }
+            }
+        }
+    }
+    // 器具が指定されていない場合のみ、器具不問で直近を返す
+    return equipment ? null : getLastExerciseLogObj(exerciseName);
+}
+
 function fillSetsContainerFromItem(block, item) {
     const setsContainer = block.querySelector('.sets-container');
     if (!setsContainer || !item) return;
@@ -321,25 +392,30 @@ function fillSetsContainerFromItem(block, item) {
 
     const setsToRestore = (Array.isArray(item.setsArray) && item.setsArray.length > 0)
         ? item.setsArray
-        : [{ weight: item.weight, reps: item.reps }];
+        : [{ weight: item.weight, reps: item.reps, isPartial: item.isPartial }];
 
     setsToRestore.forEach(s => {
         addSetRowToBlock(
             block,
             s.weight !== undefined && s.weight !== null ? s.weight : '',
-            s.reps !== undefined && s.reps !== null ? s.reps : ''
+            s.reps !== undefined && s.reps !== null ? s.reps : '',
+            s.isPartial === true
         );
     });
 }
 
-function formatSingleLogObj(logObj) {
+// ★ 同じ重量・回数のセットをまとめて簡略化表示するフォーマッター
+// showEquipBadge=falseにすると末尾の[器具名]表示を省略する(呼び出し側で既に器具名を表示している場合用)
+function formatSingleLogObj(logObj, showEquipBadge = true) {
     if (!logObj) return '';
+
+    const equipBadge = (showEquipBadge && logObj.equipment) ? ` [${logObj.equipment}]` : '';
 
     if (logObj.isCardio || logObj.minutes !== undefined || logObj.calories !== undefined) {
         const parts = [];
         if (logObj.minutes) parts.push(`${logObj.minutes}分`);
         if (logObj.calories) parts.push(`(${logObj.calories}kcal)`);
-        return parts.join(' ');
+        return parts.join(' ') + equipBadge;
     }
 
     if (logObj.setsArray && Array.isArray(logObj.setsArray) && logObj.setsArray.length > 0) {
@@ -347,27 +423,41 @@ function formatSingleLogObj(logObj) {
         let currentGroup = null;
 
         logObj.setsArray.forEach(set => {
-            if (currentGroup && currentGroup.weight === set.weight && currentGroup.reps === set.reps) {
+            const isP = set.isPartial === true;
+            if (
+                currentGroup &&
+                currentGroup.weight === set.weight &&
+                currentGroup.reps === set.reps &&
+                currentGroup.isPartial === isP
+            ) {
                 currentGroup.count++;
             } else {
                 if (currentGroup) {
                     groupedSets.push(currentGroup);
                 }
-                currentGroup = { weight: set.weight, reps: set.reps, count: 1 };
+                currentGroup = {
+                    weight: set.weight,
+                    reps: set.reps,
+                    isPartial: isP,
+                    count: 1
+                };
             }
         });
         if (currentGroup) groupedSets.push(currentGroup);
 
-        return groupedSets.map(g => {
-            if (g.count > 1) return `${g.weight}kg×${g.reps}回 × ${g.count}set`;
-            return `${g.weight}kg×${g.reps}回`;
-        }).join(', ');
+        const formatted = groupedSets.map(g => {
+            const partialTag = g.isPartial ? '(P)' : '';
+            const baseText = `${g.weight}kg×${g.reps}回${partialTag}`;
+            return g.count > 1 ? `${baseText} × ${g.count}set` : baseText;
+        });
+
+        return formatted.join(', ') + equipBadge;
     }
 
     const parts = [];
     if (logObj.weight !== null && logObj.weight !== undefined && logObj.weight !== '') parts.push(`${logObj.weight}kg`);
     if (logObj.reps) parts.push(`${logObj.reps}回`);
-    return parts.join(' × ');
+    return parts.join(' × ') + equipBadge;
 }
 
 function renderMenuTable() {
@@ -420,8 +510,114 @@ function recordOffDay() {
 
     saveState();
     renderRecommendation();
-    renderTodaySummary(); // ★ 即時更新
+    renderTodaySummary();
     renderCalendar();
+}
+
+function renderEquipmentChips(blockEl, exerciseName, selectedEquip = '') {
+    const equipContainer = blockEl.querySelector('.equipment-select-row');
+    if (!equipContainer) return;
+
+    if (!exerciseName) {
+        equipContainer.innerHTML = '';
+        equipContainer.style.display = 'none';
+        return;
+    }
+
+    const nameLower = (exerciseName || '').toLowerCase();
+    const isCardio = nameLower.includes('トレッドミル') || nameLower.includes('ウォーキング') || nameLower.includes('ランニング') || nameLower.includes('有酸素');
+
+    if (isCardio) {
+        equipContainer.style.display = 'none';
+        return;
+    }
+    equipContainer.style.display = 'flex';
+
+    // 完全一致を探し、なければ部分一致で辞書から取得
+    let patterns = state.exerciseEquipment[exerciseName] || DEFAULT_EQUIPMENT_PATTERNS[exerciseName];
+    if (!patterns) {
+        const matchedKey = Object.keys(DEFAULT_EQUIPMENT_PATTERNS).find(key => exerciseName.includes(key) || key.includes(exerciseName));
+        patterns = matchedKey ? DEFAULT_EQUIPMENT_PATTERNS[matchedKey] : ['マシン', 'ダンベル', 'バーベル', 'ケーブル', '自重'];
+    }
+
+    const isCustomValue = selectedEquip && !patterns.includes(selectedEquip);
+
+    let chipsHTML = patterns.map(eq => {
+        const isActive = selectedEquip === eq ? 'active' : '';
+        return `<button type="button" class="equipment-chip-btn ${isActive}" onclick="selectEquipmentChip(this, '${eq}')">${eq}</button>`;
+    }).join('');
+
+    equipContainer.innerHTML = `
+        <span style="font-size:0.72rem; color:var(--text-sub); font-weight:700; flex-shrink:0;">器具:</span>
+        <div class="equipment-chips-list">
+            ${chipsHTML}
+        </div>
+    
+    `;
+}
+
+function selectEquipmentChip(btnEl, equipName) {
+    const block = btnEl.closest('.extra-log-block');
+    const row = btnEl.closest('.equipment-select-row');
+    const input = row.querySelector('.extra-equip-input');
+    const allBtns = row.querySelectorAll('.equipment-chip-btn');
+    const nameSelect = block.querySelector('.extra-name-select');
+    const nameInput = block.querySelector('.extra-name-input');
+    const exName = (nameSelect && nameSelect.value) ? nameSelect.value : (nameInput ? nameInput.value : '');
+
+    let chosenEquip = '';
+
+    if (btnEl.classList.contains('active')) {
+        btnEl.classList.remove('active');
+        if (input) input.value = '';
+        chosenEquip = '';
+    } else {
+        allBtns.forEach(b => b.classList.remove('active'));
+        btnEl.classList.add('active');
+        if (input) input.value = equipName;
+        chosenEquip = equipName;
+    }
+
+    if (exName) {
+        const lastObj = getLastExerciseEquipLogObj(exName, chosenEquip);
+        const holder = block.querySelector('.last-btn-holder');
+        if (lastObj) {
+            if (holder) {
+                const formatted = formatSingleLogObj(lastObj, false);
+                holder.innerHTML = `<div style="font-size:0.72rem; color:var(--primary-hover); font-weight:700; margin-bottom:4px; padding-left:2px;">前回(${chosenEquip || '指定なし'}): ${formatted}</div>`;
+            }
+            fillSetsContainerFromItem(block, lastObj);
+        } else if (holder) {
+            // 一致する記録が無い場合は「記録なし」を明示し、他の器具の記録は出さない
+            holder.innerHTML = `<div style="font-size:0.72rem; color:var(--text-sub); font-weight:700; margin-bottom:4px; padding-left:2px;">前回(${chosenEquip || '指定なし'}): 記録なし</div>`;
+        }
+    }
+}
+
+function onCustomEquipInput(inputEl) {
+    const block = inputEl.closest('.extra-log-block');
+    const row = inputEl.closest('.equipment-select-row');
+    const allBtns = row.querySelectorAll('.equipment-chip-btn');
+    allBtns.forEach(b => b.classList.remove('active'));
+
+    const equipName = inputEl.value.trim();
+    const nameSelect = block.querySelector('.extra-name-select');
+    const nameInput = block.querySelector('.extra-name-input');
+    const exName = (nameSelect && nameSelect.value) ? nameSelect.value : (nameInput ? nameInput.value : '');
+
+    const holder = block.querySelector('.last-btn-holder');
+    if (exName && equipName) {
+        const lastObj = getLastExerciseEquipLogObj(exName, equipName);
+        if (lastObj) {
+            if (holder) {
+                const formatted = formatSingleLogObj(lastObj, false);
+                holder.innerHTML = `<div style="font-size:0.72rem; color:var(--primary-hover); font-weight:700; margin-bottom:4px; padding-left:2px;">前回(${equipName}): ${formatted}</div>`;
+            }
+            fillSetsContainerFromItem(block, lastObj);
+        } else if (holder) {
+            holder.innerHTML = `<div style="font-size:0.72rem; color:var(--text-sub); font-weight:700; margin-bottom:4px; padding-left:2px;">前回(${equipName}): 記録なし</div>`;
+        }
+    }
 }
 
 function openWorkoutLogModal(defaultMenuId, presetDateISO, isEdit = false) {
@@ -508,7 +704,7 @@ function openWorkoutLogModal(defaultMenuId, presetDateISO, isEdit = false) {
                 const itemIsCardio = item.isCardio === true || (item.weight === undefined && item.reps === undefined && item.minutes !== undefined);
 
                 if (!isFree) {
-                    addSuggestedExerciseInput(exName, '', selectEl.value, itemIsCardio);
+                    addSuggestedExerciseInput(exName, '', selectEl.value, itemIsCardio, item.equipment);
                     const container = document.getElementById('suggested-fields-container');
                     const lastBlock = container ? container.lastElementChild : null;
                     if (lastBlock) {
@@ -522,7 +718,7 @@ function openWorkoutLogModal(defaultMenuId, presetDateISO, isEdit = false) {
                         }
                     }
                 } else {
-                    addExtraExerciseInput();
+                    addExtraExerciseInput(item.equipment);
                     const container = document.getElementById('extra-exercise-container');
                     const currentBlock = container ? container.lastElementChild : null;
                     
@@ -555,6 +751,7 @@ function openWorkoutLogModal(defaultMenuId, presetDateISO, isEdit = false) {
                                 nameSelect.appendChild(newOpt);
                             }
                             nameSelect.value = exName;
+                            renderEquipmentChips(currentBlock, exName, item.equipment || '');
                         }
 
                         if (itemIsCardio) {
@@ -674,7 +871,7 @@ function renderWorkoutLogInputs(menuId) {
     container.appendChild(fieldsContainer);
 }
 
-function addSuggestedExerciseInput(exerciseName, detailStr = '', menuId = '', forceCardio = null) {
+function addSuggestedExerciseInput(exerciseName, detailStr = '', menuId = '', forceCardio = null, initEquip = '') {
     const container = document.getElementById('suggested-fields-container');
     const lastObj = getLastExerciseLogObj(exerciseName) || {};
 
@@ -691,8 +888,8 @@ function addSuggestedExerciseInput(exerciseName, detailStr = '', menuId = '', fo
 
     const lastFormatted = formatSingleLogObj(lastObj);
     const lastBadgeHTML = lastFormatted 
-        ? `<div style="font-size:0.72rem; color:var(--primary-hover); font-weight:700; margin-bottom:4px; padding-left:2px;">前回: ${lastFormatted}</div>` 
-        : '<div style="font-size:0.72rem; color:var(--text-sub); margin-bottom:4px; padding-left:2px;">前回: なし</div>';
+        ? `<div class="last-btn-holder" style="font-size:0.72rem; color:var(--primary-hover); font-weight:700; margin-bottom:4px; padding-left:2px;">前回: ${lastFormatted}</div>` 
+        : '<div class="last-btn-holder" style="font-size:0.72rem; color:var(--text-sub); margin-bottom:4px; padding-left:2px;">前回: なし</div>';
 
     const moveBtnsHTML = `
         <div class="move-btn-group">
@@ -722,10 +919,13 @@ function addSuggestedExerciseInput(exerciseName, detailStr = '', menuId = '', fo
                 <input type="text" class="form-input extra-name-input" value="${exerciseName}" readonly style="font-weight:700; background-color:var(--primary-soft); color:var(--text-main); margin-bottom:0; flex: 1;">
                 <button type="button" class="btn-remove-row" onclick="this.closest('.extra-log-block').remove()">&times;</button>
             </div>
+            <div class="equipment-select-row"></div>
             <div class="sets-container"></div>
             <button type="button" class="btn-add-set-row" onclick="addSetRowToBlock(this.closest('.extra-log-block'))">＋ セットを追加</button>
         `;
         
+        renderEquipmentChips(block, exerciseName, initEquip || lastObj.equipment || '');
+
         if (lastObj && (Array.isArray(lastObj.setsArray) || lastObj.weight !== undefined)) {
             fillSetsContainerFromItem(block, lastObj);
         } else {
@@ -738,7 +938,7 @@ function addSuggestedExerciseInput(exerciseName, detailStr = '', menuId = '', fo
     container.appendChild(block);
 }
 
-function addSetRowToBlock(blockEl, initWeight = null, initReps = null) {
+function addSetRowToBlock(blockEl, initWeight = null, initReps = null, initPartial = false) {
     const setsContainer = blockEl.querySelector('.sets-container');
     if (!setsContainer) return;
 
@@ -746,11 +946,14 @@ function addSetRowToBlock(blockEl, initWeight = null, initReps = null) {
     
     let w = initWeight;
     let r = initReps;
+    let isPartial = initPartial;
+
     if (w === null || r === null) {
         const lastRow = setsContainer.lastElementChild;
         if (lastRow) {
             w = lastRow.querySelector('.set-weight').value;
             r = lastRow.querySelector('.set-reps').value;
+            isPartial = lastRow.querySelector('.btn-partial-toggle').classList.contains('active');
         }
     }
 
@@ -761,11 +964,16 @@ function addSetRowToBlock(blockEl, initWeight = null, initReps = null) {
         <div class="set-field-group">
             <input type="number" class="form-input set-weight" step="0.5" value="${w !== null ? w : ''}" placeholder="0"><span class="set-unit">kg</span>
             <input type="number" class="form-input set-reps" value="${r !== null ? r : ''}" placeholder="0"><span class="set-unit">回</span>
+            <button type="button" class="btn-partial-toggle ${isPartial ? 'active' : ''}" onclick="togglePartial(this)">P</button>
             <button type="button" class="btn-remove-set" onclick="removeSetRow(this)" title="このセットを削除">&times;</button>
         </div>
     `;
 
     setsContainer.appendChild(setRow);
+}
+
+function togglePartial(btnEl) {
+    btnEl.classList.toggle('active');
 }
 
 function removeSetRow(btnEl) {
@@ -782,7 +990,7 @@ function removeSetRow(btnEl) {
     }
 }
 
-function addExtraExerciseInput() {
+function addExtraExerciseInput(initEquip = '') {
     const isFree = document.getElementById('record-type-free') ? document.getElementById('record-type-free').checked : false;
     
     let container = isFree ? document.getElementById('extra-exercise-container') : document.getElementById('suggested-fields-container');
@@ -811,11 +1019,12 @@ function addExtraExerciseInput() {
         </div>
         
         <div class="extra-chip-list"></div>
+        <div class="equipment-select-row"></div>
         <div class="extra-fields-container"></div>
     `;
 
     container.appendChild(block);
-    renderExerciseChipsForBlock(block);
+    renderExerciseChipsForBlock(block, initEquip);
     block.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
@@ -863,12 +1072,17 @@ function getDragAfterElement(container, y) {
     }, { offset: Number.NEGATIVE_INFINITY }).element;
 }
 
-function renderExerciseChipsForBlock(block) {
+function renderExerciseChipsForBlock(block, initEquip = '') {
     const label = block.querySelector('.extra-label-select').value;
     const chipList = block.querySelector('.extra-chip-list');
     const fieldsContainer = block.querySelector('.extra-fields-container');
+    const equipContainer = block.querySelector('.equipment-select-row');
 
     const isCardio = (label === '有酸素運動');
+
+    if (equipContainer) {
+        equipContainer.style.display = isCardio ? 'none' : 'flex';
+    }
 
     if (isCardio) {
         fieldsContainer.innerHTML = `
@@ -928,6 +1142,7 @@ function renderExerciseChipsForBlock(block) {
                 badge.textContent = `前回: ${formatted}`;
                 holder.appendChild(badge);
             }
+            renderEquipmentChips(block, selectedName, initEquip || (lastObj ? lastObj.equipment : ''));
             prefillLastLogValues(block, selectedName);
         }
     });
@@ -962,7 +1177,7 @@ function submitWorkoutLog() {
         state.logs.sort((a, b) => a.date.localeCompare(b.date));
         saveState();
         renderRecommendation();
-        renderTodaySummary(); // ★ 即時反映
+        renderTodaySummary();
         renderCalendar();
         renderMenuTable();
         closeWorkoutLogModal();
@@ -992,28 +1207,43 @@ function submitWorkoutLog() {
         const minInput = block.querySelector('.extra-minutes');
         const setRows = block.querySelectorAll('.set-input-row');
 
+        const equipInput = block.querySelector('.extra-equip-input');
+        const equipment = equipInput ? equipInput.value.trim() : '';
+
+        if (name && equipment) {
+            if (!state.exerciseEquipment[name]) {
+                state.exerciseEquipment[name] = [];
+            }
+            if (!state.exerciseEquipment[name].includes(equipment)) {
+                state.exerciseEquipment[name].push(equipment);
+            }
+        }
+
         if (name) {
             if (minInput) {
                 const calories = block.querySelector('.extra-calories').value;
                 appendExerciseLog(name, {
                     isCardio: true,
                     minutes: minInput.value !== '' ? parseInt(minInput.value, 10) : 0,
-                    calories: calories !== '' ? parseInt(calories, 10) : 0
+                    calories: calories !== '' ? parseInt(calories, 10) : 0,
+                    equipment: equipment
                 });
             } else if (setRows.length > 0) {
                 const setsArray = [];
                 setRows.forEach(row => {
                     const w = row.querySelector('.set-weight').value;
                     const r = row.querySelector('.set-reps').value;
+                    const isPartial = row.querySelector('.btn-partial-toggle').classList.contains('active');
                     if (w !== '' || r !== '') {
                         setsArray.push({
                             weight: w !== '' ? parseFloat(w) : 0,
-                            reps: r !== '' ? parseInt(r, 10) : 0
+                            reps: r !== '' ? parseInt(r, 10) : 0,
+                            isPartial: isPartial
                         });
                     }
                 });
 
-                if (setsArray.length > 0) appendExerciseLog(name, { setsArray: setsArray });
+                if (setsArray.length > 0) appendExerciseLog(name, { setsArray: setsArray, equipment: equipment });
             }
         }
     });
@@ -1035,7 +1265,7 @@ function submitWorkoutLog() {
 
     saveState();
     renderRecommendation();
-    renderTodaySummary(); // ★ 即時反映
+    renderTodaySummary();
     renderCalendar();
     renderMenuTable();
 
@@ -1115,7 +1345,7 @@ function deleteLogByIndex(logIndex) {
     state.logs.splice(logIndex, 1);
     saveState();
     renderRecommendation();
-    renderTodaySummary(); // ★ 即時反映
+    renderTodaySummary();
     renderCalendar();
     renderMenuTable();
 }
@@ -1301,10 +1531,14 @@ function resetData() {
         state.logs = [];
         state.exerciseLabels = ['胸', '背中', '脚', '肩', '腕', 'お尻', '腹筋', '全身', '有酸素運動', 'その他'];
         state.exerciseLibrary = buildDefaultExerciseLibrary();
+        state.exerciseEquipment = JSON.parse(JSON.stringify(DEFAULT_EQUIPMENT_PATTERNS));
         init();
     }
 }
 
+// ==========================================
+// ★ 種目リスト＆器具マスター管理モーダル
+// ==========================================
 let currentLibraryLabel = null;
 
 function openExerciseLibraryModal() {
@@ -1313,6 +1547,9 @@ function openExerciseLibraryModal() {
     }
     if (!state.exerciseLibrary) {
         state.exerciseLibrary = buildDefaultExerciseLibrary();
+    }
+    if (!state.exerciseEquipment) {
+        state.exerciseEquipment = JSON.parse(JSON.stringify(DEFAULT_EQUIPMENT_PATTERNS));
     }
 
     currentLibraryLabel = state.exerciseLabels[0];
@@ -1352,23 +1589,81 @@ function renderLibraryExerciseChips() {
         return;
     }
 
-    container.innerHTML = names.map(name => `
-        <span class="exercise-chip removable">
-            ${name}
-            <button type="button" class="chip-remove-btn" data-name="${name}" title="削除">&times;</button>
-        </span>
-    `).join('');
+    container.innerHTML = names.map(name => {
+        const equips = state.exerciseEquipment[name] || DEFAULT_EQUIPMENT_PATTERNS[name] || [];
+        const equipChipsHTML = equips.map(eq => `
+            <span class="lib-equip-chip">${eq}<button type="button" onclick="removeExerciseEquip('${name}', '${eq}')">&times;</button></span>
+        `).join('');
 
-    container.querySelectorAll('.chip-remove-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const name = btn.getAttribute('data-name');
-            if (confirm(`「${name}」をリストから削除しますか？`)) {
-                state.exerciseLibrary[currentLibraryLabel] = state.exerciseLibrary[currentLibraryLabel].filter(n => n !== name);
-                saveState();
-                renderLibraryExerciseChips();
-            }
-        });
-    });
+        // ★ このメニューが保存済みスナップショットを持っていて、かつ現在のデフォルト定義と内容が異なる場合のみ「デフォルトに戻す」を表示
+        const hasCustomSnapshot = !!state.exerciseEquipment[name];
+        const defaultPatternForName = DEFAULT_EQUIPMENT_PATTERNS[name];
+        const differsFromDefault = defaultPatternForName &&
+            JSON.stringify([...(state.exerciseEquipment[name] || [])].sort()) !== JSON.stringify([...defaultPatternForName].sort());
+        const showResetBtn = hasCustomSnapshot && defaultPatternForName && differsFromDefault;
+
+        return `
+            <div class="lib-exercise-item-card">
+                <div class="lib-exercise-header">
+                    <span class="lib-exercise-name"><strong>${name}</strong></span>
+                    <button type="button" class="chip-remove-btn" onclick="removeLibraryExercise('${name}')" title="種目を削除">&times;</button>
+                </div>
+                <div class="lib-exercise-equip-row">
+                    <div class="lib-equip-list">${equipChipsHTML}</div>
+                    <div class="lib-equip-add-form">
+                        <input type="text" class="form-input lib-new-equip-input" placeholder="器具追加 (例: スミス, ダンベル)" data-exname="${name}">
+                        <button type="button" class="btn-lib-equip-add" onclick="addExerciseEquip('${name}', this)">+ 追加</button>
+                    </div>
+                    ${showResetBtn ? `<button type="button" class="btn-lib-equip-reset" onclick="resetExerciseEquip('${name}')">デフォルトに戻す</button>` : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function resetExerciseEquip(exName) {
+    if (!DEFAULT_EQUIPMENT_PATTERNS[exName]) return;
+    delete state.exerciseEquipment[exName];
+    saveState();
+    renderLibraryExerciseChips();
+}
+
+function removeLibraryExercise(name) {
+    if (confirm(`「${name}」をリストから削除しますか？`)) {
+        state.exerciseLibrary[currentLibraryLabel] = state.exerciseLibrary[currentLibraryLabel].filter(n => n !== name);
+        delete state.exerciseEquipment[name];
+        saveState();
+        renderLibraryExerciseChips();
+    }
+}
+
+function addExerciseEquip(exName, btnEl) {
+    const input = btnEl.previousElementSibling;
+    const equipName = input.value.trim();
+    if (!equipName) return;
+
+    if (!state.exerciseEquipment[exName]) {
+        state.exerciseEquipment[exName] = [...(DEFAULT_EQUIPMENT_PATTERNS[exName] || ['マシン', 'ダンベル', 'バーベル', 'ケーブル', '自重'])];
+    }
+
+    if (state.exerciseEquipment[exName].includes(equipName)) {
+        alert('既に登録されている器具です');
+        return;
+    }
+
+    state.exerciseEquipment[exName].push(equipName);
+    saveState();
+    input.value = '';
+    renderLibraryExerciseChips();
+}
+
+function removeExerciseEquip(exName, equipName) {
+    if (!state.exerciseEquipment[exName]) {
+        state.exerciseEquipment[exName] = [...(DEFAULT_EQUIPMENT_PATTERNS[exName] || ['マシン', 'ダンベル', 'バーベル', 'ケーブル', '自重'])];
+    }
+    state.exerciseEquipment[exName] = state.exerciseEquipment[exName].filter(e => e !== equipName);
+    saveState();
+    renderLibraryExerciseChips();
 }
 
 function addLibraryExercise() {
@@ -1386,6 +1681,7 @@ function addLibraryExercise() {
     }
 
     state.exerciseLibrary[currentLibraryLabel].push(name);
+    state.exerciseEquipment[name] = ['マシン', 'ダンベル', 'スミス'];
     saveState();
     input.value = '';
     renderLibraryExerciseChips();
@@ -1495,7 +1791,6 @@ function renderInbodyTab() {
     `;
     summaryContainer.appendChild(summaryEl);
 
-    // 新しい記録から順に日付ごとのアコーディオン表示
     const listSorted = [...sorted].reverse();
     listSorted.forEach((log, index) => {
         const [ly, lm, ld] = log.date.split('-');
@@ -1503,7 +1798,6 @@ function renderInbodyTab() {
         const dayOfWeek = ['日', '月', '火', '水', '木', '金', '土'][dateObj.getDay()];
         const formattedDate = `${ly}/${parseInt(lm, 10)}/${parseInt(ld, 10)} (${dayOfWeek})`;
 
-        // ▼ 基本指標のミニチップ群
         const chips = [];
         if (log.weight !== null && log.weight !== undefined && log.weight !== '') chips.push(`体重<span>${log.weight}kg</span>`);
         if (log.muscle !== null && log.muscle !== undefined && log.muscle !== '') chips.push(`骨格筋量<span>${log.muscle}kg</span>`);
@@ -1512,7 +1806,6 @@ function renderInbodyTab() {
         if (log.visceral !== null && log.visceral !== undefined && log.visceral !== '') chips.push(`内臓脂肪<span>Lv.${log.visceral}</span>`);
         if (log.bmi !== null && log.bmi !== undefined && log.bmi !== '') chips.push(`BMI<span>${log.bmi}</span>`);
 
-        // ▼ 部位別データの表形式構築（単位: %）
         const ms = log.muscleSegments || {};
         const fs = log.fatSegments || {};
         const segKeys = [
@@ -2078,7 +2371,6 @@ function renderHistoryLogs() {
             dayBody.className = 'date-accordion-body';
             dayBody.innerHTML = exHTML;
 
-            // ▼ 日付アコーディオンの開閉処理（絶対に途中で切れず100%展開）
             dayHeader.onclick = () => {
                 const isActive = dayItem.classList.contains('active');
                 if (isActive) {
@@ -2086,8 +2378,6 @@ function renderHistoryLogs() {
                     dayItem.classList.remove('active');
                 } else {
                     dayItem.classList.add('active');
-                    
-                    // 中身が切れないよう高さを超大きめに確保したあと制限解除
                     dayBody.style.maxHeight = (dayBody.scrollHeight + 100) + 'px';
                     
                     setTimeout(() => {
@@ -2096,13 +2386,11 @@ function renderHistoryLogs() {
                         }
                     }, 350);
 
-                    // 開いたカードが見える位置に自動スライド
                     setTimeout(() => {
                         dayItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                     }, 100);
                 }
                 
-                // 親（月グループ）の高さ制限を外す
                 if (groupEl.classList.contains('active')) {
                     bodyEl.style.maxHeight = 'none';
                 }
@@ -2116,7 +2404,6 @@ function renderHistoryLogs() {
         groupEl.appendChild(summaryEl);
         groupEl.appendChild(bodyEl);
 
-        // ▼ 月グループアコーディオンの開閉処理
         summaryEl.onclick = () => {
             const isActive = groupEl.classList.contains('active');
             if (isActive) {
@@ -2167,7 +2454,7 @@ function importPastLogs() {
             state.logs.sort((a, b) => a.date.localeCompare(b.date));
             saveState();
             renderRecommendation();
-            renderTodaySummary(); // ★ 即時反映
+            renderTodaySummary();
             renderCalendar();
             if (typeof renderHistoryLogs === 'function') renderHistoryLogs();
             alert("過去データを正常に一括登録しました！");

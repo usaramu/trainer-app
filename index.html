@@ -7,8 +7,8 @@
     
     <!-- ▼ まる文字フォント（Zen Maru Gothic） -->
     <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700;900&display=swap" rel="stylesheet">
-    <!-- バージョン更新: v=20260813_21 -->
-    <link rel="stylesheet" href="style.css?v=20260813_22">
+    <!-- バージョン更新: v=20260814_10 -->
+    <link rel="stylesheet" href="style.css?v=20260814_10">
 </head>
 <body>
 
@@ -27,11 +27,9 @@
 
     <!-- ▼ 1. 記録タブ用コンテンツ -->
     <div id="tab-content-record" class="main-tab-content active">
-        <!-- メイン：部位選択ガイドバナー -->
         <div class="recommendation-card">
             <div class="recommendation-header">SELECT WORKOUT</div>
             
-            <!-- 部位選択ボタン群 -->
             <div class="category-select-grid">
                 <button type="button" class="btn-category-select" onclick="openCategoryWorkout('上半身')">
                     <span class="cat-label">上半身</span>
@@ -56,12 +54,10 @@
             </div>
         </div>
 
-        <!-- ▼ 新設：本日の記録サマリーカード -->
         <div id="today-summary-card" class="today-summary-card">
             <!-- JSで動的生成 -->
         </div>
 
-        <!-- カレンダーセクション -->
         <section class="log-section">
             <div class="calendar-card">
                 <div class="calendar-header">
@@ -372,7 +368,7 @@
     <div class="modal-overlay" id="exercise-library-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>種目リスト管理</h2>
+                <h2>種目リスト・器具管理</h2>
                 <button class="btn-close" onclick="closeExerciseLibraryModal()">&times;</button>
             </div>
             <div class="modal-body">
@@ -381,11 +377,11 @@
                     <!-- JSでラベルタブを生成 -->
                 </div>
 
-                <div class="exercise-chip-list" id="library-exercise-chips">
-                    <!-- JSで種目チップを生成 -->
+                <div class="exercise-chip-list" id="library-exercise-chips" style="display:flex; flex-direction:column; gap:8px;">
+                    <!-- JSで種目ごとの器具管理カードを生成 -->
                 </div>
 
-                <div class="library-add-row">
+                <div class="library-add-row" style="margin-top:10px;">
                     <input type="text" id="library-new-exercise-input" class="form-input" placeholder="新しい種目を追加" style="margin-bottom:0;">
                     <button type="button" class="btn-library-add" onclick="addLibraryExercise()">追加</button>
                 </div>
@@ -451,7 +447,7 @@
         <button type="button" class="btn-reset" onclick="resetData()">履歴・メニュー設定を初期化</button>
     </footer>
 
-    <!-- バージョン更新: v=20260813_21 -->
-    <script src="script.js?v=20260813_22"></script>
+    <!-- バージョン更新: v=20260814_10 -->
+    <script src="script.js?v=20260814_10"></script>
 </body>
 </html>
