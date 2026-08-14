@@ -1,5 +1,6 @@
 let isEditingLogMode = false;
 const STORAGE_KEY = 'trainingRecords';
+const CURRENT_SCHEMA_VERSION = 'label-v4'; // ★ スキーマバージョンを更新して自動同期
 
 // 初期メニュー構成データ
 const initialDefaultMenus = [
@@ -71,7 +72,7 @@ const MENU_LABELS = {
   'A': '上', 'B': '下', 'C': '下', 'D': '上', 'E': '下', 'F': '🏃', 'ALL': '全', 'OFF': '休'
 };
 
-// ★ 主要種目のデフォルト器具パターン辞書（最新反映版）
+// ★ 主要種目のデフォルト器具パターン辞書
 const DEFAULT_EQUIPMENT_PATTERNS = {
   // 胸
   'インクラインプレス': ['アイソラテラル', 'ダンベル', 'バーベル', 'スミス', 'スミスベンチ'],
@@ -85,7 +86,7 @@ const DEFAULT_EQUIPMENT_PATTERNS = {
 
   // 背中
   'デッドリフト': ['バーベル', 'ダンベル', 'トラップバー'],
-  'ルーマニアンデッドリフト': ['バーベル', 'ダンベル'],
+  'バックエクステンション': ['自重', 'マシン'],
   'ラットプルダウン': ['マシン', 'マググリップ', 'ケーブル'],
   'プーリーロー': ['ケーブル', 'マシン'],
   'チンニング（懸垂）': ['自重', 'アシストマシン', 'ウェイト付加'],
@@ -93,6 +94,7 @@ const DEFAULT_EQUIPMENT_PATTERNS = {
   'シーテッドローイング': ['縦持ち(広背筋)', '横持ち(僧帽筋)', 'アイソラテラル', 'ケーブル', 'ダンベル'],
 
   // 脚
+  'ルーマニアンデッドリフト': ['バーベル', 'ダンベル'],
   'アダクション': ['マシン', 'バンド'],
   'ブルガリアンスクワット': ['ダンベル', 'スミス', '自重'],
   'スクワット': ['バーベル', 'ハック', 'スミス', 'ダンベル', '自重'],
@@ -127,11 +129,10 @@ const DEFAULT_EQUIPMENT_PATTERNS = {
   '上体起こし': ['自重', 'マシン'],
   'ハンギングレッグレイズ': ['自重'],
 
-  // 全身・その他
+  // 全身・有酸素
   'クリーン': ['バーベル', 'ダンベル'],
   'スナッチ': ['バーベル', 'ダンベル'],
   'バーピー': ['自重'],
-  'バックエクステンション': ['自重', 'マシン'],
   'トレッドミル': ['マシン'],
   '傾斜ウォーキング': ['トレッドミル']
 };
@@ -170,6 +171,8 @@ function loadState() {
   if (savedState) {
     const parsed = JSON.parse(savedState);
     if (parsed.theme) state.theme = parsed.theme;
+    
+    // メニューの同期
     if (parsed.menus) {
       state.menus = parsed.menus;
       const defaultMenuIds = ['A', 'B', 'C', 'D', 'E', 'F'];
@@ -185,24 +188,19 @@ function loadState() {
     } else {
       state.menus = JSON.parse(JSON.stringify(initialDefaultMenus));
     }
+
     if (parsed.logs) state.logs = parsed.logs;
     state.inbodyLogs = parsed.inbodyLogs || [];
-    state.exerciseLabels = parsed.exerciseLabels || ['胸', '背中', '脚', '肩', '腕', 'お尻', '腹筋', '全身', '有酸素運動', 'その他'];
+    state.exerciseLabels = ['胸', '背中', '脚', '肩', '腕', 'お尻', '腹筋', '全身', '有酸素運動', 'その他'];
     
-    state.exerciseLibrary = buildDefaultExerciseLibrary();
-    if (parsed.exerciseLibrary) {
-      Object.keys(parsed.exerciseLibrary).forEach(label => {
-        if (!state.exerciseLibrary[label]) {
-          state.exerciseLibrary[label] = [];
-        }
-        parsed.exerciseLibrary[label].forEach(name => {
-          if (!state.exerciseLibrary[label].includes(name)) {
-            state.exerciseLibrary[label].push(name);
-          }
-        });
-      });
+    // ★ スキーマ更新時は最新のデフォルト分類を強制適用
+    if (parsed.exerciseLibrarySchema === CURRENT_SCHEMA_VERSION && parsed.exerciseLibrary) {
+      state.exerciseLibrary = parsed.exerciseLibrary;
+    } else {
+      state.exerciseLibrary = buildDefaultExerciseLibrary();
     }
 
+    // 器具辞書を最新デフォルトとマージ
     state.exerciseEquipment = Object.assign(
       {},
       JSON.parse(JSON.stringify(DEFAULT_EQUIPMENT_PATTERNS)),
@@ -220,7 +218,7 @@ function saveState() {
     menus: state.menus,
     logs: state.logs,
     exerciseLabels: state.exerciseLabels,
-    exerciseLibrarySchema: 'label-v3',
+    exerciseLibrarySchema: CURRENT_SCHEMA_VERSION,
     exerciseLibrary: state.exerciseLibrary,
     exerciseEquipment: state.exerciseEquipment,
     inbodyLogs: state.inbodyLogs
@@ -260,15 +258,15 @@ function changeTheme(themeName) {
 function buildDefaultExerciseLibrary() {
   return {
     '胸': ['インクラインプレス', 'ベンチプレス', 'ペックフライ', 'チェストプレス', 'ケーブルクロス', 'ディップス', 'ダンベルフライ', 'ダンベルプレス'],
-    '背中': ['デッドリフト', 'ルーマニアンデッドリフト', 'ラットプルダウン', 'プーリーロー', 'チンニング（懸垂）', 'ベントオーバーロー', 'シーテッドローイング'],
-    '脚': ['アダクション', 'ブルガリアンスクワット', 'スクワット', 'レッグプレス', 'レッグエクステンション', 'レッグカール', 'グッドモーニング'],
+    '背中': ['デッドリフト', 'バックエクステンション', 'ラットプルダウン', 'プーリーロー', 'チンニング（懸垂）', 'ベントオーバーロー', 'シーテッドローイング'],
+    '脚': ['ルーマニアンデッドリフト', 'アダクション', 'ブルガリアンスクワット', 'スクワット', 'レッグプレス', 'レッグエクステンション', 'レッグカール', 'グッドモーニング'],
     '肩': ['サイドレイズ', 'ショルダープレス', 'フロントレイズ', 'ケーブルフェイスプル'],
     '腕': ['バーベルカール', 'アームカール', 'ケーブルプレスダウン', 'ケーブルトライセプスキックバック'],
     'お尻': ['ヒップアブダクション（骨盤前傾）', 'ヒップアブダクション（骨盤立て）', 'ヒップアブダクション（骨盤後傾）', 'ヒップスラスト', 'グルートキックバック'],
     '腹筋': ['アブドミナル', 'トーソローテーション', 'プランク', '上体起こし', 'ハンギングレッグレイズ'],
     '全身': ['クリーン', 'スナッチ', 'バーピー'],
     '有酸素運動': ['トレッドミル', '傾斜ウォーキング'],
-    'その他': ['バックエクステンション']
+    'その他': []
   };
 }
 
@@ -2337,7 +2335,7 @@ function renderHistoryLogs() {
 
     monthLogs.forEach(log => {
       const [y, m, d] = log.date.split('-');
-      const dateObj = new Date(parseInt(y, 10), parseInt(lm, 10) - 1, parseInt(d, 10));
+      const dateObj = new Date(parseInt(y, 10), parseInt(m, 10) - 1, parseInt(d, 10));
       const dayOfWeek = ['日', '月', '火', '水', '木', '金', '土'][dateObj.getDay()];
       const formattedDate = `${y}/${parseInt(m, 10)}/${parseInt(d, 10)} (${dayOfWeek})`;
 
