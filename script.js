@@ -704,16 +704,16 @@ function openWorkoutLogModal(defaultMenuId, presetDateISO, isEdit = false) {
 
   if (currentMenuId) selectEl.value = currentMenuId;
 
-  toggleRecordType();
-
-  const activeMenuId = (selectEl.value === 'OFF' || selectEl.value === 'ALL' || !selectEl.value) ? 'A' : selectEl.value;
-  renderWorkoutLogInputs(activeMenuId);
-
   const suggestedContainer = document.getElementById('suggested-fields-container');
   if (suggestedContainer) suggestedContainer.innerHTML = '';
   
   const extraContainer = document.getElementById('extra-exercise-container');
   if (extraContainer) extraContainer.innerHTML = '';
+
+  toggleRecordType();
+
+  const activeMenuId = (selectEl.value === 'OFF' || selectEl.value === 'ALL' || !selectEl.value) ? 'A' : selectEl.value;
+  renderWorkoutLogInputs(activeMenuId);
 
   if (isEdit && existingLog && existingLog.exerciseLogs && existingLog.menuId !== 'OFF') {
     const isFree = existingLog.recordType === 'free';    
@@ -816,11 +816,6 @@ function toggleRecordType() {
     selectMenuLabel.textContent = '対象部位';
     if (extraLabel) extraLabel.textContent = '実施した種目（▲▼ボタンで並び替え）';
     if (addExtraBtn) addExtraBtn.style.display = 'inline-block';
-
-    const container = document.getElementById('extra-exercise-container');
-    if (container.children.length === 0) {
-      addExtraExerciseInput();
-    }
   } else {
     selectMenuLabel.style.display = 'block';
     selectMenu.style.display = 'block';
@@ -2342,7 +2337,7 @@ function renderHistoryLogs() {
 
     monthLogs.forEach(log => {
       const [y, m, d] = log.date.split('-');
-      const dateObj = new Date(parseInt(y, 10), parseInt(m, 10) - 1, parseInt(d, 10));
+      const dateObj = new Date(parseInt(y, 10), parseInt(lm, 10) - 1, parseInt(d, 10));
       const dayOfWeek = ['日', '月', '火', '水', '木', '金', '土'][dateObj.getDay()];
       const formattedDate = `${y}/${parseInt(m, 10)}/${parseInt(d, 10)} (${dayOfWeek})`;
 
