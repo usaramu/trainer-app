@@ -2020,19 +2020,37 @@ function drawInbodyChart(metric) {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, cssWidth, cssHeight);
 
+  // --- 綺麗な目盛り（step）を計算するアルゴリズム ---
   const values = sorted.map(l => getMetricValue(l, metric));
-  let minVal = Math.min(...values);
-  let maxVal = Math.max(...values);
-  if (minVal === maxVal) {
-    minVal -= 1;
-    maxVal += 1;
+  let dataMin = Math.min(...values);
+  let dataMax = Math.max(...values);
+  if (dataMin === dataMax) {
+    dataMin -= 1;
+    dataMax += 1;
   }
-  const pad = (maxVal - minVal) * 0.15 || 1;
-  minVal -= pad;
-  maxVal += pad;
 
-  const leftPad = 34;
-  const rightPad = 10;
+  let range = dataMax - dataMin;
+  let roughStep = range / 3;
+  let mag = Math.pow(10, Math.floor(Math.log10(roughStep)));
+  let norm = roughStep / mag;
+  let niceNorm = norm < 1.5 ? 1 : (norm < 3 ? 2 : (norm < 7 ? 5 : 10));
+  let step = niceNorm * mag;
+
+  let minVal = Math.floor(dataMin / step) * step;
+  let maxVal = Math.ceil(dataMax / step) * step;
+  
+  if (dataMin - minVal < step * 0.1) minVal -= step;
+  if (maxVal - dataMax < step * 0.1) maxVal += step;
+
+  let gridCount = Math.round((maxVal - minVal) / step);
+  if (gridCount < 2) {
+    gridCount = 2;
+    maxVal = minVal + step * gridCount;
+  }
+  // ------------------------------------------------
+
+  const leftPad = 40;  // 左側の余白を少し増やす
+  const rightPad = 20; // 右側の余白をしっかり確保する
   const topPad = 14;
   const bottomPad = 26;
   const plotW = cssWidth - leftPad - rightPad;
@@ -2051,18 +2069,22 @@ function drawInbodyChart(metric) {
   ctx.font = '10px sans-serif';
   ctx.textAlign = 'right';
   ctx.textBaseline = 'middle';
-  const gridCount = 3;
+
+  // --- 目盛りの描画 ---
   for (let g = 0; g <= gridCount; g++) {
-    const v = minVal + ((maxVal - minVal) * g) / gridCount;
+    const v = minVal + step * g;
     const y = yForValue(v);
     ctx.beginPath();
     ctx.moveTo(leftPad, y);
     ctx.lineTo(cssWidth - rightPad, y);
     ctx.lineWidth = 1;
     ctx.stroke();
-    ctx.fillText(v.toFixed(1), leftPad - 6, y);
+    
+    let labelText = v.toFixed(step < 1 ? 1 : 0);
+    ctx.fillText(labelText, leftPad - 6, y);
   }
 
+  // --- 折れ線グラフの描画 ---
   ctx.beginPath();
   sorted.forEach((log, i) => {
     const x = xForIndex(i);
@@ -2075,6 +2097,7 @@ function drawInbodyChart(metric) {
   ctx.lineJoin = 'round';
   ctx.stroke();
 
+  // --- ポイント（点）の描画 ---
   sorted.forEach((log, i) => {
     const x = xForIndex(i);
     const y = yForValue(getMetricValue(log, metric));
@@ -2087,14 +2110,15 @@ function drawInbodyChart(metric) {
     ctx.stroke();
   });
 
+  // --- X軸（日付）の描画 ---
   ctx.fillStyle = textMain;
   ctx.font = '10px sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
   const maxLabels = 5;
-  const step = Math.max(1, Math.ceil(sorted.length / maxLabels));
+  const stepX = Math.max(1, Math.ceil(sorted.length / maxLabels));
   sorted.forEach((log, i) => {
-    if (i % step !== 0 && i !== sorted.length - 1) return;
+    if (i % stepX !== 0 && i !== sorted.length - 1) return;
     const [y, m, d] = log.date.split('-');
     const x = xForIndex(i);
     ctx.fillText(`${parseInt(m, 10)}/${parseInt(d, 10)}`, x, cssHeight - bottomPad + 6);
@@ -2522,3 +2546,30 @@ function moveBlock(btnEl, direction) {
     }
   }
 }
+
+// ▼▼▼ モーダルの背景スクロールを防止する追加コード ▼▼▼
+const modalObserver = new MutationObserver(() => {
+  const isModalOpen = document.querySelectorAll('.modal-overlay.active').length > 0;
+  if (isModalOpen) {
+    document.body.style.overflow = 'hidden';
+  } else {
+    document.body.style.overflow = '';
+  }
+});
+
+// すべてのモーダルの「表示/非表示（activeクラス）」を監視
+document.querySelectorAll('.modal-overlay').forEach(modal => {
+  modalObserver.observe(modal, { attributes: true, attributeFilter: ['class'] });
+});
+
+// スマホ特有の「背景が引っ張られる（スクロール漏れ）」現象を防ぐ
+document.addEventListener('touchmove', (e) => {
+  const activeModal = document.querySelector('.modal-overlay.active');
+  if (activeModal) {
+    // スクロールしている場所が「モーダルの中身」以外なら、スワイプを無効化する
+    if (!e.target.closest('.modal-body')) {
+      e.preventDefault();
+    }
+  }
+}, { passive: false });
+// ▲▲▲ ここまで ▲▲▲

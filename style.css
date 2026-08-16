@@ -941,6 +941,7 @@ h1 {
     overflow-x: hidden !important;
     flex-grow: 1;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain; /* ← ★この1行を追加！ */
     width: 100%;
     box-sizing: border-box;
 }
@@ -972,6 +973,18 @@ h1 {
     border-color: var(--primary-color);
     background-color: #ffffff;
 }
+
+/* iOSでの日付入力欄の文字見切れ対策 */
+input[type="date"].form-input {
+    min-height: 44px; /* タップしやすい高さを強制 */
+    height: auto;     /* 高さを自動調整にして見切れを防ぐ */
+    appearance: none;
+    -webkit-appearance: none;
+    line-height: normal; /* 行間の衝突をリセット */
+    padding-top: 12px;   /* 上下のパディングを微調整して中央揃えに */
+    padding-bottom: 12px;
+}
+
 
 /* ▼ タイプ切り替え（メニューから／自由入力／オフ） */
 #workout-log-modal .rotation-mode-options {
