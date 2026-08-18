@@ -358,9 +358,19 @@ h1 {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
 }
 
+.cal-tag {
+    color: #FFFFFF !important; /* すべての文字色を白に統一 */
+}
+
 .cal-tag.A, .cal-tag.D { background-color: var(--primary-color); }
-.cal-tag.B, .cal-tag.C, .cal-tag.E { background-color: var(--primary-hover); }
-.cal-tag.F { background-color: #FFFFFF; color: var(--text-main) !important; }
+.cal-tag.B, .cal-tag.C { background-color: var(--primary-hover); }
+
+/* 有酸素（E）と全身（F）の背景色を反転・調整 */
+.cal-tag.E { background-color: var(--text-main) !important; } /* 走るマークはシックなメインカラー等に */
+.cal-tag.F { background-color: var(--accent-color) !important; color: #FFFFFF !important; } /* 「全」はアクセントカラーに */
+
+.cal-tag.ALL { background-color: var(--accent-color) !important; }
+.cal-tag.OFF { background-color: var(--offday-color) !important; color: #FFFFFF !important; }
 .cal-tag.ALL { background-color: var(--accent-color) !important; }
 .cal-tag.OFF { background-color: var(--offday-color) !important; color: #FFFFFF !important; }
 
