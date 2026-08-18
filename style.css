@@ -1736,3 +1736,29 @@ footer {
     border-color: var(--primary-color) !important;
     background-color: #FFFFFF !important;
 }
+
+/* ▼ スマホでの意図しない1文字改行を防ぐ設定 */
+
+/* 1. ヘッダーのサブタイトルやタブ、ボタン内のテキストを改行させない */
+.subtitle,
+.main-tab-btn,
+.btn-category-select .cat-label,
+.btn-category-select .cat-days,
+.recommendation-header {
+    white-space: nowrap;
+}
+
+/* 2. モーダルのタイトルやボタン名なども必要に応じて1行で収める */
+.modal-header h2,
+.rotation-mode-option span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 3. カレンダーのタグや各種バッジの折り返し防止 */
+.cal-tag,
+.today-summary-badge,
+.inbody-metric-tab {
+    white-space: nowrap;
+}

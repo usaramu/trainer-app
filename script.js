@@ -6,70 +6,82 @@ const CURRENT_SCHEMA_VERSION = 'label-v4'; // ★ スキーマバージョンを
 const initialDefaultMenus = [
   {
     id: 'A',
-    title: '上半身（デコルテ・二の腕・肩）',
-    memo: 'インターバル60〜90秒。限界まで追い込みすぎず、あと1〜2回できる余裕を残す。',
+    title: '上半身 A（フリーウェイト＆ケーブル）',
+    memo: 'デコルテ、背中の広がり、二の腕のトーン調整に重点を置いた構成。',
     exercises: [
-      { name: 'インクラインプレス', detail: '軽いダンベル / 15~20回 × 3セット' },
       { name: 'ラットプルダウン', detail: '15~20回 × 3セット' },
-      { name: 'ケーブルプレスダウン', detail: '15〜20回 × 3セット' },
-      { name: 'サイドレイズ', detail: '自重〜1・2kg / 15〜20回 × 3セット' },
+      { name: 'アイソラテラルインクラインチェストプレス', detail: '15~20回 × 3セット' },
+      { name: 'サイドレイズ', detail: '15~20回 × 3セット' },
+      { name: 'ケーブルトライセプスエクステンション', detail: '15~20回 × 3セット' },
     ]
   },
   {
     id: 'B',
-    title: '下半身（お尻・裏もも・腰）',
-    memo: '前ももを使わず、もも裏とお尻の境目を作って小尻・脚長を狙う。',
+    title: '上半身 B（マシン＆ローイング）',
+    memo: '背中の厚みと姿勢改善、胸の追い込みに重点。',
     exercises: [
-      { name: 'ルーマニアンデッドリフト', detail: 'バーベル/ダンベル / 15~20回 × 3セット' },
-      { name: 'ブルガリアンスクワット', detail: '左右各12~15回 × 3セット' },
-      { name: 'ヒップアブダクション（骨盤後傾）', detail: '20回 × 3セット' },
+      { name: 'シーテッドローイング', detail: '15~20回 × 3セット' },
+      { name: 'チェストプレス', detail: '15~20回 × 3セット' },
+      { name: 'リアデルトイド', detail: '15~20回 × 3セット' },
+      { name: 'アブドミナルクランチ', detail: '15~20回 × 3セット' },
+      { name: 'バックエクステンション', detail: '15回 × 3セット' },
     ]
   },
   {
     id: 'C',
-    title: '下半身（ヒップトップ・体幹・脂肪燃焼）',
-    memo: 'お尻の高さを出しつつ、体脂肪削減を加速させる。',
+    title: '下半身 A（美尻・美脚マシン）',
+    memo: 'マシンを使用して、お尻と裏ももの境目をクリアに。',
     exercises: [
-      { name: 'ヒップスラスト', detail: '15~20回 × 3セット' },
-      { name: 'バックエクステンション', detail: '自重 / 15回 × 3セット' },
-      { name: 'ハンギングレッグレイズ', detail: '自重 / 12〜15回 × 3セット' },
-      { name: 'ヒップアブダクション（骨盤前傾）', detail: '15~20回 × 3セット' },
+      { name: 'グルートドライブ', detail: '15~20回 × 3セット' },
+      { name: 'シーテッドレッグカール', detail: '15~20回 × 3セット' },
+      { name: 'リニアレッグプレス', detail: '足幅を広め・上位置に / 15~20回 × 3セット' },
+      { name: 'ヒップアブダクション', detail: '15~20回 × 3セット' },
     ]
   },
   {
     id: 'D',
-    title: '上半身（バストアップ＆二の腕メイン）',
-    memo: 'デコルテのボリューム形成と二の腕のトーン調整に重点。',
+    title: '下半身 B（代謝向上・フリーウェイト）',
+    memo: '多関節種目でカロリー消費を高め、ヒップアップを狙う。',
     exercises: [
-      { name: 'ダンベルフライ', detail: 'インクライン / 軽いダンベル / 15~20回 × 3セット' },
-      { name: 'シーテッドローイング', detail: '15~20回 × 3セット' },
-      { name: 'ケーブルトライセプスキックバック', detail: 'ケーブル軽め / 15〜20回 × 3セット' },
-      { name: 'ケーブルフェイスプル', detail: 'ケーブル軽め / 15〜20回 × 3セット' },
+      { name: 'ルーマニアンデッドリフト', detail: '15~20回 × 3セット' },
+      { name: 'ブルガリアンスクワット', detail: '左右各12~15回 × 3セット' },
+      { name: 'グルートキックバック', detail: 'ケーブル使用 / 左右各15~20回 × 3セット' },
+      { name: 'ヒップアブダクション', detail: '15~20回 × 3セット' },
     ]
   },
   {
     id: 'E',
-    title: '下半身（裏ももストレッチ＆ヒップアップ）',
-    memo: 'もも裏のストレッチ感を重視し、前ももの張りを予防しながらお尻を引き締める。',
-    exercises: [
-      { name: 'グルートキックバック', detail: 'ケーブル / 左右各15〜20回 × 3セット' },
-      { name: 'グッドモーニング', detail: '空バー〜軽め / 15~20回 × 3セット' },
-      { name: 'レッグカール', detail: 'ライイング・マシン軽め / 15~20回 × 3セット' },
-      { name: 'ヒップアブダクション（骨盤立て）', detail: '15~20回 × 3セット' },
-    ]
-  },
-  {
-    id: 'F',
     title: 'リカバリー・有酸素',
-    memo: '高頻度トレーニングの疲労を抜きつつ、有酸素運動で脂肪燃焼を促進。',
+    memo: '疲労を抜きつつ、脂肪燃焼を促進。',
     exercises: [
       { name: '傾斜ウォーキング', detail: 'トレッドミル / 30〜40分 (傾斜5〜8%、時速4.0〜4.5km)' },
+    ]
+  },
+
+  {
+    id: 'F',
+    title: '全身',
+    memo: '1週間空いた時や旅行後など、1回で全身をバランスよく刺激したい時に。',
+    exercises: [
+      { name: 'ブルガリアンスクワット', detail: '左右各10回 × 3セット' },
+      { name: 'ラットプルダウン', detail: '10回 × 3セット' },
+      { name: 'チェストプレス', detail: '10回 × 3セット' },
+      { name: 'サイドレイズ', detail: '15回 × 2〜3セット' },
+      { name: 'アブドミナル', detail: '10回 × 3セット' },
+      { name: '傾斜ウォーキング', detail: 'トレッドミル / 30分' },
     ]
   }
 ];
 
+// script.js の MENU_LABELS 定義をこうしておきます
 const MENU_LABELS = {
-  'A': '上', 'B': '下', 'C': '下', 'D': '上', 'E': '下', 'F': '🏃', 'ALL': '全', 'OFF': '休'
+  'A': '上A', 
+  'B': '上B', 
+  'C': '下A', 
+  'D': '下B', 
+  'E': '🏃', 
+  'F': '全', 
+  'OFF': '休'
 };
 
 // ★ 主要種目のデフォルト器具パターン辞書
@@ -359,7 +371,7 @@ function renderTodaySummary() {
   if (todayLog.menuId === 'OFF') {
     titleText = '☕ 今日はオフ';
   } else if (todayLog.menuId === 'ALL') {
-    titleText = '全身トレーニング';
+    titleText = '全身の日';
   } else {
     const menu = state.menus.find(m => m.id === todayLog.menuId);
     titleText = menu ? menu.title : todayLog.menuId;
@@ -515,9 +527,10 @@ function renderMenuTable() {
   tbody.innerHTML = '';
 
   const getMenuGroupOrder = (menu) => {
-    if (menu.title.includes('上半身')) return 1;
-    if (menu.title.includes('下半身')) return 2;
-    if (menu.title.includes('有酸素') || menu.title.includes('リカバリー')) return 3;
+    if (menu.id === 'F' || menu.title.includes('全身')) return 1; // 全身（F）を最優先
+    if (menu.title.includes('上半身')) return 2;                // 上半身（A, B）
+    if (menu.title.includes('下半身')) return 3;                // 下半身（C, D）
+    if (menu.title.includes('有酸素') || menu.title.includes('リカバリー')) return 4; // 有酸素（E）
     return 9;
   };
 
@@ -671,10 +684,6 @@ function openWorkoutLogModal(defaultMenuId, presetDateISO, isEdit = false) {
   const selectEl = document.getElementById('select-log-menu');
   selectEl.innerHTML = '';
 
-  const allOption = document.createElement('option');
-  allOption.value = 'ALL';
-  allOption.textContent = '全身（部位ミックス・自由入力）';
-  selectEl.appendChild(allOption);
 
   const getMenuGroupOrder = (menu) => {
     if (menu.title.includes('上半身')) return 1;
@@ -1327,7 +1336,7 @@ function openDetailLogModal(logIndex) {
     titleEl.textContent = 'OFF';
     bodyEl.innerHTML = '<p style="color:var(--text-sub);">この日はオフとして記録されています。</p>';
   } else if (log.menuId === 'ALL') {
-    titleEl.textContent = '全身トレーニング';
+    titleEl.textContent = '全身の日';
   } else {
     const menu = state.menus.find(m => m.id === log.menuId);
     const menuTitle = menu ? menu.title : '';
@@ -1514,17 +1523,7 @@ function renderCalendar() {
         tag.className = `cal-tag ${log.menuId}`;
         
         let shortLabel = MENU_LABELS[log.menuId] || log.menuId;
-        
-        if (log.menuId !== 'ALL' && log.menuId !== 'OFF') {
-          const menu = state.menus.find(m => m.id === log.menuId);
-          if (menu) {
-            if (menu.title.includes('上半身')) shortLabel = '上';
-            else if (menu.title.includes('下半身')) shortLabel = '下';
-            else if (menu.title.includes('有酸素') || menu.title.includes('リカバリー')) shortLabel = '🏃';
-          }
-        }
-
-        tag.textContent = log.recordType === 'free' ? `${shortLabel}` : shortLabel;
+        tag.textContent = shortLabel;
         
         tag.onclick = (e) => {
           e.stopPropagation();
@@ -2390,7 +2389,7 @@ function renderHistoryLogs() {
       if (log.menuId === 'OFF') {
         titleText = 'OFF';
       } else if (log.menuId === 'ALL') {
-        titleText = '全身トレーニング';
+        titleText = '全身の日';
       } else {
         const menu = state.menus.find(m => m.id === log.menuId);
         titleText = menu ? menu.title : log.menuId;
@@ -2494,6 +2493,7 @@ function openCategoryWorkout(category) {
   const matchedMenus = state.menus.filter(m => {
     if (category === '上半身') return m.title.includes('上半身');
     if (category === '下半身') return m.title.includes('下半身');
+    if (category === '全身') return m.title.includes('全身') || m.id === 'F'; // ← ここを追加！
     if (category === '有酸素') return m.title.includes('有酸素') || m.title.includes('リカバリー');
     return false;
   });
