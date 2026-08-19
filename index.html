@@ -8,7 +8,7 @@
     <!-- ▼ まる文字フォント（Zen Maru Gothic） -->
     <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700;900&display=swap" rel="stylesheet">
     <!-- バージョン更新: v=20260814_10 -->
-    <link rel="stylesheet" href="style.css?v=20260819_01">
+    <link rel="stylesheet" href="style.css?v=20260819_02">
 </head>
 <body>
 
@@ -20,7 +20,7 @@
     <!-- ▼ タブ切り替えボタン -->
     <div class="main-tabs">
         <button type="button" class="main-tab-btn active" onclick="switchMainTab('record')">LOG</button>
-        <button type="button" class="main-tab-btn" onclick="switchMainTab('menu-list')">MENU</button>
+        <button type="button" class="main-tab-btn" onclick="switchMainTab('body-map')">BODY</button>
         <button type="button" class="main-tab-btn" onclick="switchMainTab('history')">HISTORY</button>
         <button type="button" class="main-tab-btn" onclick="switchMainTab('inbody')">InBody</button>
     </div>
@@ -147,6 +147,14 @@
         </section>
     </div>
 
+    <div id="tab-content-body-map" class="main-tab-content">
+        <section class="table-section">
+            <div id="body-map-list" style="padding: 10px;">
+                <!-- ここにJSで部位別種目リストが表示される -->
+            </div>
+        </section>
+    </div>
+
     <!-- メニュー編集用モーダルウィンドウ -->
     <div class="modal-overlay" id="edit-modal">
         <div class="modal-content">
@@ -155,17 +163,21 @@
                 <button class="btn-close" onclick="closeEditModal()">&times;</button>
             </div>
             <div class="modal-body">
-                <label class="form-label">メニュータイトル / 対象部位</label>
+                <label class="form-label">メニュータイトル</label>
                 <input type="text" id="edit-menu-title" class="form-input">
 
-                <label class="form-label">メモ・フォームの注意点</label>
-                <textarea id="edit-menu-memo" class="form-input form-textarea" placeholder="例: シートの高さは3、グリップは広め"></textarea>
+                <label class="form-label">メモ</label>
+                <textarea id="edit-menu-memo" class="form-input form-textarea"></textarea>
 
-                <label class="form-label">種目リスト（⋮⋮ ドラッグで並び替え）</label>
-                <div id="exercise-inputs-container">
-                    <!-- Dynamic exercise inputs -->
+                <label class="form-label">種目リスト（▲▼で並び替え）</label>
+                <div id="exercise-inputs-container" style="display:flex; flex-direction:column; gap:8px;">
+                    <!-- 動的生成 -->
                 </div>
-                <button class="btn-add-exercise" onclick="addExerciseInput()">+ 種目を追加</button>
+                
+                <div class="library-add-row" style="margin-top:12px;">
+                    <input type="text" id="edit-new-exercise-input" class="form-input" placeholder="新しい種目を追加" style="margin-bottom:0;">
+                    <button type="button" class="btn-library-add" onclick="addMenuExerciseInputFromEdit()">追加</button>
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn-cancel" onclick="closeEditModal()">キャンセル</button>
@@ -364,6 +376,49 @@
         </div>
     </div>
 
+    <!-- メニュー設定・アコーディオン管理用モーダル -->
+    <div class="modal-overlay" id="menu-settings-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>メニュー設定・管理</h2>
+                <button class="btn-close" onclick="closeMenuSettingsModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="menu-settings-accordion-container">
+                <!-- JSでアコーディオンカードを動的生成 -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeMenuSettingsModal()">閉じる</button>
+            </div>
+        </div>
+    </div>
+
+<!-- 辞書（BODYタブ）編集用モーダル -->
+    <div class="modal-overlay" id="dict-edit-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>種目詳細の編集 (<span id="dict-edit-name"></span>)</h2>
+                <button class="btn-close" onclick="closeDictEditModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="dict-edit-basename">
+                
+                <label class="form-label">全体のポイント・概要</label>
+                <textarea id="dict-edit-general" class="form-input form-textarea" style="height: 80px;" placeholder="種目の基本的な説明など"></textarea>
+
+                <label class="form-label" style="margin-top: 10px;">▍ やり方・バリエーション</label>
+                <div id="dict-variations-container" style="display:flex; flex-direction:column; gap:12px;">
+                    <!-- JSで動的生成されます -->
+                </div>
+                
+                <button type="button" class="btn-add-extra" style="margin-top:12px; width:100%; padding:8px;" onclick="addDictVariation()">＋ バリエーションを追加</button>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeDictEditModal()">キャンセル</button>
+                <button class="btn-save" onclick="saveDictEdit()">保存する</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 種目リスト管理モーダル -->
     <div class="modal-overlay" id="exercise-library-modal">
         <div class="modal-content">
@@ -438,15 +493,13 @@
         </div>
     </div>
 
-    <footer>
-        <div class="footer-tools">
-            <button type="button" class="btn-footer-tool" id="btn-open-exercise-library" onclick="openExerciseLibraryModal()">📋</button>
-            <button type="button" class="btn-footer-tool" onclick="openThemeSettingsModal()">🎨</button>
-            <button type="button" class="btn-footer-tool" onclick="importPastLogs()">📥</button>
-        </div>
-        <button type="button" class="btn-reset" onclick="resetData()">履歴・メニュー設定を初期化</button>
-    </footer>
+    <div class="footer-tools">
+        <button type="button" class="btn-footer-tool" onclick="openMenuSettingsModal()">⚙️</button>
+        <button type="button" class="btn-footer-tool" id="btn-open-exercise-library" onclick="openExerciseLibraryModal()">📋</button>
+        <button type="button" class="btn-footer-tool" onclick="openThemeSettingsModal()">🎨</button>
+        <button type="button" class="btn-footer-tool" onclick="importPastLogs()">📥</button>
+    </div> 
 
-    <script src="script.js?v=20260819_01"></script>
+    <script src="script.js?v=20260819_03"></script>
 </body>
 </html>

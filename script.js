@@ -2,74 +2,73 @@ let isEditingLogMode = false;
 const STORAGE_KEY = 'trainingRecords';
 const CURRENT_SCHEMA_VERSION = 'label-v5'; // ★ スキーマバージョンを更新して自動同期
 
-// 初期メニュー構成データ
 const initialDefaultMenus = [
-  {
-    id: 'A',
-    title: '上半身 A（フリーウェイト＆ケーブル）',
-    memo: 'デコルテ、背中の広がり、二の腕のトーン調整に重点を置いた構成。',
-    exercises: [
-      { name: 'ラットプルダウン', detail: '15~20回 × 3セット', equipment: 'マググリップ' },
-      { name: 'インクラインプレス', detail: '15~20回 × 3セット', equipment: 'アイソラテラル' },
-      { name: 'サイドレイズ', detail: '15~20回 × 3セット' },
-      { name: 'ケーブルトライセプスエクステンション', detail: '15~20回 × 3セット' },
-    ]
-  },
-  {
-    id: 'B',
-    title: '上半身 B（マシン＆ローイング）',
-    memo: '背中の厚みと姿勢改善、胸の追い込みに重点。',
-    exercises: [
-      { name: 'ローイング', detail: '15~20回 × 3セット', equipment: 'シーテッド/縦持ち' },
-      { name: 'チェストプレス', detail: '15~20回 × 3セット', equipment: 'マシン' },
-      { name: 'リアデルトイド', detail: '15~20回 × 3セット' },
-      { name: 'アブドミナル', detail: '15~20回 × 3セット' },
-      { name: 'バックエクステンション', detail: '15回 × 3セット' },
-    ]
-  },
-  {
-    id: 'C',
-    title: '下半身 A（美尻・美脚マシン）',
-    memo: 'マシンを使用して、お尻と裏ももの境目をクリアに。',
-    exercises: [
-      { name: 'ヒップスラスト', detail: '15~20回 × 3セット', equipment: 'グルートドライブ' },
-      { name: 'レッグカール', detail: '15~20回 × 3セット' },
-      { name: 'レッグプレス', detail: '足幅を広め・上位置に / 15~20回 × 3セット', equipment: 'シーテッド' },
-      { name: 'ヒップアブダクション（骨盤後傾）', detail: '15~20回 × 3セット' },
-    ]
-  },
-  {
-    id: 'D',
-    title: '下半身 B（代謝向上・フリーウェイト）',
-    memo: '多関節種目でカロリー消費を高め、ヒップアップを狙う。',
-    exercises: [
-      { name: 'ルーマニアンデッドリフト', detail: '15~20回 × 3セット' },
-      { name: 'ブルガリアンスクワット', detail: '左右各12~15回 × 3セット' },
-      { name: 'グルートキックバック', detail: 'ケーブル使用 / 左右各15~20回 × 3セット' },
-      { name: 'ヒップアブダクション（骨盤立て）', detail: '15~20回 × 3セット' },
-    ]
-  },
-  {
-    id: 'E',
-    title: 'リカバリー・有酸素',
-    memo: '疲労を抜きつつ、脂肪燃焼を促進。',
-    exercises: [
-      { name: '傾斜ウォーキング', detail: 'トレッドミル / 30〜40分 (傾斜5〜8%、時速4.0〜4.5km)' },
-    ]
-  },
-  {
-    id: 'F',
-    title: '全身',
-    memo: '1週間空いた時や旅行後など、1回で全身をバランスよく刺激したい時に。',
-    exercises: [
-      { name: 'ブルガリアンスクワット', detail: '左右各10回 × 3セット' },
-      { name: 'ラットプルダウン', detail: '10回 × 3セット', equipment: 'マググリップ' },
-      { name: 'チェストプレス', detail: '10回 × 3セット', equipment: 'マシン' },
-      { name: 'サイドレイズ', detail: '15回 × 2〜3セット' },
-      { name: 'アブドミナル', detail: '10回 × 3セット' },
-      { name: '傾斜ウォーキング', detail: 'トレッドミル / 30分' },
-    ]
-  }
+    {
+      id: 'A',
+      title: '上半身 A（フリーウェイト＆ケーブル）',
+      memo: 'デコルテ、背中の広がり、二の腕のトーン調整に重点を置いた構成。',
+      exercises: [
+        { name: 'ラットプルダウン', detail: '15~20回 × 3セット', equipment: 'マググリップ' },
+        { name: 'インクラインプレス', detail: '15~20回 × 3セット', equipment: 'アイソラテラル' },
+        { name: 'サイドレイズ', detail: '15~20回 × 3セット' },
+        { name: 'ケーブルトライセプスエクステンション', detail: '15~20回 × 3セット' },
+      ]
+    },
+    {
+      id: 'B',
+      title: '上半身 B（マシン＆ローイング）',
+      memo: '背中の厚みと姿勢改善、胸の追い込みに重点。',
+      exercises: [
+        { name: 'ローイング', detail: '15~20回 × 3セット', equipment: 'シーテッド/縦持ち' },
+        { name: 'チェストプレス', detail: '15~20回 × 3セット', equipment: 'マシン' },
+        { name: 'リアデルトイド', detail: '15~20回 × 3セット' },
+        { name: 'アブドミナル', detail: '15~20回 × 3セット' },
+        { name: 'バックエクステンション', detail: '15回 × 3セット' },
+      ]
+    },
+    {
+      id: 'C',
+      title: '下半身 A（美尻・美脚マシン）',
+      memo: 'マシンを使用して、お尻と裏ももの境目をクリアに。',
+      exercises: [
+        { name: 'ヒップスラスト', detail: '15~20回 × 3セット', equipment: 'グルートドライブ' },
+        { name: 'レッグカール', detail: '15~20回 × 3セット' },
+        { name: 'レッグプレス', detail: '足幅を広め・上位置に / 15~20回 × 3セット', equipment: 'シーテッド' },
+        { name: 'ヒップアブダクション（骨盤後傾）', detail: '15~20回 × 3セット' },
+      ]
+    },
+    {
+      id: 'D',
+      title: '下半身 B（代謝向上・フリーウェイト）',
+      memo: '多関節種目でカロリー消費を高め、ヒップアップを狙う。',
+      exercises: [
+        { name: 'ルーマニアンデッドリフト', detail: '15~20回 × 3セット' },
+        { name: 'ブルガリアンスクワット', detail: '左右各12~15回 × 3セット' },
+        { name: 'グルートキックバック', detail: 'ケーブル使用 / 左右各15~20回 × 3セット' },
+        { name: 'ヒップアブダクション（骨盤立て）', detail: '15~20回 × 3セット' },
+      ]
+    },
+    {
+      id: 'E',
+      title: 'リカバリー・有酸素',
+      memo: '疲労を抜きつつ、脂肪燃焼を促進。',
+      exercises: [
+        { name: '傾斜ウォーキング', detail: 'トレッドミル / 30〜40分 (傾斜5〜8%、時速4.0〜4.5km)' },
+      ]
+    },
+    {
+      id: 'F',
+      title: '全身',
+      memo: '1週間空いた時や旅行後など、1回で全身をバランスよく刺激したい時に。',
+      exercises: [
+        { name: 'ブルガリアンスクワット', detail: '左右各10回 × 3セット' },
+        { name: 'ラットプルダウン', detail: '10回 × 3セット', equipment: 'マググリップ' },
+        { name: 'チェストプレス', detail: '10回 × 3セット', equipment: 'マシン' },
+        { name: 'サイドレイズ', detail: '15回 × 2〜3セット' },
+        { name: 'アブドミナル', detail: '10回 × 3セット' },
+        { name: '傾斜ウォーキング', detail: 'トレッドミル / 30分' },
+      ]
+    }
 ];
 
 // script.js の MENU_LABELS 定義をこうしておきます
@@ -151,6 +150,361 @@ const DEFAULT_EQUIPMENT_PATTERNS = {
   '傾斜ウォーキング': ['トレッドミル']
 };
 
+// ★ 変更：全種目・器具・バリエーションを網羅した辞書データ
+const INITIAL_EXERCISE_DETAILS = {
+  // =========================
+  // 胸 (CHEST)
+  // =========================
+  'インクラインプレス': {
+    generalTips: '大胸筋上部を狙い、バストの引き上げやデコルテラインを形成する種目。ベンチ角度は30〜45度が目安。',
+    variations: [
+      { name: 'ダンベル', target: '大胸筋上部', tips: '可動域が広く、胸のストレッチを強くかけられる。トップでダンベル同士を寄せすぎない。' },
+      { name: 'バーベル / スミス', target: '大胸筋上部', tips: '高重量を扱える。スミスマシンは軌道が固定されるため、より安全に追い込める。' },
+      { name: 'アイソラテラルマシン', target: '大胸筋上部', tips: '左右独立して動くため、左右差の改善に有効。軌道に沿って押し切る。' }
+    ]
+  },
+  'ベンチプレス': {
+    generalTips: '上半身の押す力を総合的に高める多関節種目。肩甲骨を寄せ、胸を張ってアーチを作るのが基本。',
+    variations: [
+      { name: 'バーベル', target: '大胸筋全体、三角筋前部、上腕三頭筋', tips: 'みぞおちのやや上にバーを下ろす。肩が上がらないよう広背筋で土台を安定させる。' },
+      { name: 'ダンベル', target: '大胸筋全体', tips: 'バーベルよりも深く下ろせるためストレッチ効果が高い。' },
+      { name: 'スミス', target: '大胸筋全体', tips: '軌道が固定されているため、フォームの習得や胸への意識を集中させやすい。' }
+    ]
+  },
+  'ペックフライ': {
+    generalTips: '大胸筋を単関節で鍛え、胸の輪郭や谷間を作る種目。腕の力ではなく胸で挟む意識を持つ。',
+    variations: [
+      { name: 'マシン', target: '大胸筋（内側〜輪郭）', tips: 'シートの高さを調整し、手が胸のトップラインにくるようにする。' },
+      { name: 'ケーブル', target: '大胸筋（内側）', tips: '収縮ポジションでも負荷が抜けず、最後まで胸を絞り込める。' },
+      { name: 'ダンベルフライ', target: '大胸筋（外側・ストレッチ）', tips: '下ろした時のストレッチ感が最も強い。肩関節の過伸展に注意。' }
+    ]
+  },
+  'チェストプレス': {
+    generalTips: 'ベンチプレスのマシン版。マシンの軌道に沿って押すため、初心者でも安全に大胸筋に効かせやすい。',
+    variations: [
+      { name: 'マシン', target: '大胸筋全体、上腕三頭筋', tips: 'グリップが胸の中央の高さになるようシートを調整。戻す時に負荷を抜かない。' },
+      { name: 'スミス', target: '大胸筋全体', tips: 'フラットベンチを使い、バーベルに近い感覚で安全に行う。' }
+    ]
+  },
+  'ケーブルクロス': {
+    generalTips: 'ケーブルの滑車を用いて大胸筋を鍛える。滑車の高さで狙う部位が変わる。',
+    variations: [
+      { name: 'ハイプーリー（上から下）', target: '大胸筋下部', tips: '胸の輪郭の下部を作る。上体を少し前傾させて下方に絞り込む。' },
+      { name: 'ミドルプーリー（水平）', target: '大胸筋中部・内側', tips: '大胸筋全体の厚みと谷間を作る。大木を抱え込むイメージで。' },
+      { name: 'ロープーリー（下から上）', target: '大胸筋上部', tips: 'デコルテラインを鍛える。手のひらを上に向けて引き上げる。' }
+    ]
+  },
+  'ディップス': {
+    generalTips: '上半身のスクワットと呼ばれる強力な種目。上体の傾きで効く部位が変わる。',
+    variations: [
+      { name: '前傾姿勢（胸狙い）', target: '大胸筋下部', tips: '上体を前に倒し、肘を開き気味にして動作する。' },
+      { name: '直立姿勢（腕狙い）', target: '上腕三頭筋', tips: '上体を立てて、脇を締めたまま肘を曲げ伸ばしする。' },
+      { name: 'アシストマシン', target: '大胸筋・三頭筋', tips: '自重でできない場合に有効。下から膝を押し上げて負荷を軽くする。' }
+    ]
+  },
+  'ダンベルフライ': {
+    generalTips: '大胸筋のストレッチを主目的とした種目。',
+    variations: [
+      { name: 'ダンベル', target: '大胸筋全体（外側）', tips: '肘を軽く曲げたまま固定し、肩甲骨を寄せて胸を開く。上げきった所でダンベルをぶつけない。' }
+    ]
+  },
+  'ダンベルプレス': {
+    generalTips: '大胸筋全体を鍛えるプレス種目。',
+    variations: [
+      { name: 'ダンベル', target: '大胸筋全体、上腕三頭筋', tips: 'バーベルと違い手首の角度を自由に変えられるため、肩に違和感がある場合にも適している。' }
+    ]
+  },
+
+  // =========================
+  // 背中 (BACK)
+  // =========================
+  'デッドリフト': {
+    generalTips: '背面全体を鍛えるビッグ3の一つ。背中が丸まると腰を痛めるためフォーム重視で。',
+    variations: [
+      { name: 'バーベル', target: '脊柱起立筋、広背筋、大臀筋、ハムストリングス', tips: 'すねにバーを沿わせながら引き上げる。胸を張り、腹圧を逃がさない。' },
+      { name: 'ダンベル', target: '背面全体', tips: '体の側面に重心を置けるため、バーベルより腰への負担が少ない場合がある。' },
+      { name: 'トラップバー（ヘックスバー）', target: '背面全体、大腿四頭筋', tips: '体の中心に重心が来るため、腰の負担が少なく高重量を安全に扱える。' }
+    ]
+  },
+  'バックエクステンション': {
+    generalTips: '腰（脊柱起立筋）を中心に鍛える種目。',
+    variations: [
+      { name: '自重 / ウェイト', target: '脊柱起立筋', tips: '背中を丸めながら下ろし、背筋の力で反り上がる。腰を過剰に反らせない。' },
+      { name: 'マシン', target: '脊柱起立筋', tips: 'マシンのパッドに背中を当て、重りに逆らって上体を起こす。' }
+    ]
+  },
+  'ラットプルダウン': {
+    generalTips: '背中の広がりや厚みを作る種目。肩甲骨の動きを意識する。',
+    variations: [
+      { name: '順手・ワイドグリップ', target: '広背筋（上部・外側）、大円筋', tips: '背中の「広がり」を作る。肩幅の1.5倍で握り、鎖骨に向かって引く。' },
+      { name: '逆手・ナローグリップ', target: '広背筋（下部）、上腕二頭筋', tips: '背中の「厚み」を作る。腕の関与が大きくなる。脇を締め、みぞおちに引く。' },
+      { name: 'マググリップ（パラレル）', target: '広背筋（中部〜下部）', tips: '手首の負担が少なく、自然な軌道で肩甲骨を寄せやすい。' },
+      { name: 'ケーブル', target: '広背筋', tips: 'アタッチメントを自由に変えられ、片手（ワンアーム）でより強く収縮させることも可能。' }
+    ]
+  },
+  'チンニング（懸垂）': {
+    generalTips: '自重で背中全体を強烈に鍛える種目。',
+    variations: [
+      { name: '自重', target: '広背筋、大円筋', tips: '胸をバーに近づけるイメージで引く。反動を使わない。' },
+      { name: 'アシストマシン', target: '広背筋', tips: '正しいフォームで背中の収縮を感じるための補助として活用。' }
+    ]
+  },
+  'ローイング': {
+    generalTips: '前から後ろへ引く動作で、背中の「厚み」を作る種目。',
+    variations: [
+      { name: 'シーテッド / 縦持ち（パラレル）', target: '広背筋（下部）、僧帽筋中部', tips: '脇を締めて引く。肩甲骨を寄せる意識を持ちやすい。' },
+      { name: 'シーテッド / 横持ち（オーバー）', target: '僧帽筋（中部〜上部）、広背筋上部', tips: '脇を開いて引く。背中の上部に厚みを作る。' },
+      { name: 'アイソラテラルマシン', target: '広背筋、僧帽筋', tips: '軌道が決まっており、片手ずつ交互に引いて左右差をなくすのに有効。' },
+      { name: 'ダンベル（ワンハンドロー）', target: '広背筋', tips: '片手で行うため可動域が広く、背中を大きくストレッチできる。' },
+      { name: 'ベントオーバーロー（バーベル）', target: '広背筋、脊柱起立筋', tips: '前傾姿勢を維持するため、体幹部や腰回りも同時に鍛えられる。' }
+    ]
+  },
+  'ベントオーバーロー': {
+    generalTips: '上体を前傾させて下から引く多関節種目。',
+    variations: [
+      { name: 'バーベル', target: '広背筋、僧帽筋、脊柱起立筋', tips: '上体を45度前後に保ち、おへそに向かってバーを引く。' },
+      { name: 'ダンベル', target: '広背筋', tips: '手首の角度が自由で、より深く引き切ることができる。' }
+    ]
+  },
+  'リアデルトイド': {
+    generalTips: '肩の後ろと背中の上部を鍛え、姿勢改善や立体的な肩を作る種目。',
+    variations: [
+      { name: 'マシン', target: '三角筋後部、僧帽筋', tips: 'ペックフライマシンの逆向き。肩甲骨を寄せすぎず、腕を外に開く軌道で引く。' }
+    ]
+  },
+
+  // =========================
+  // 脚 (LEGS)
+  // =========================
+  'スクワット': {
+    generalTips: '下半身全体を鍛えるトレーニングの王様。股関節と膝関節を連動させる。',
+    variations: [
+      { name: 'バーベル（ハイバー）', target: '大腿四頭筋（前もも）、大臀筋', tips: '首の付け根にバーを担ぐ。上体が起きるため前ももに効きやすい。' },
+      { name: 'バーベル（ローバー）', target: '大臀筋、ハムストリングス', tips: '肩甲骨の下部でバーを担ぐ。上体が前傾し、お尻や裏ももに効きやすい。' },
+      { name: 'スミスマシン', target: '下半身全体', tips: '軌道が固定されるため安全。足を置く位置を前にするとお尻に効きやすい。' },
+      { name: 'ダンベル（ゴブレット）', target: '大腿四頭筋', tips: '胸の前にダンベルを持ち、上体を立ててしゃがむ。' },
+      { name: 'ハックスクワット', target: '大腿四頭筋', tips: '背もたれに寄りかかって行うマシン。腰への負担が少なく脚を追い込める。' }
+    ]
+  },
+  'レッグプレス': {
+    generalTips: '足の置く位置（スタンス）によって、ターゲットとなる部位を細かく調整できるマシン。',
+    variations: [
+      { name: 'スタンダード（板の中央）', target: '大腿四頭筋、大臀筋', tips: '脚全体をバランスよく鍛える基本のスタンス。' },
+      { name: 'ハイスタンス（板の上の方）', target: '大臀筋、ハムストリングス', tips: 'かかと重心で押す。股関節が深く曲がりお尻のストレッチが強くなる。' },
+      { name: 'ワイドスタンス（板の端）', target: '内転筋（内もも）、大臀筋', tips: 'つま先を外に向け、膝も同じ方向に曲げる。内ももの引き締めに。' },
+      { name: '45度リニア / シーテッド', target: '下半身全体', tips: '45度は重力で高負荷、シーテッドは腰の負担が少なく初心者向け。' }
+    ]
+  },
+  'ブルガリアンスクワット': {
+    generalTips: '片脚で行うためバランスが求められ、強い負荷をかけられる種目。',
+    variations: [
+      { name: '前傾姿勢', target: '大臀筋（お尻）、ハムストリングス', tips: '上体を斜め前に倒し、前足のかかと重心で立ち上がる。' },
+      { name: '直立姿勢', target: '大腿四頭筋（前もも）', tips: '上体をまっすぐ立てて、膝を深く曲げるように下に沈む。' },
+      { name: 'ダンベル / スミス', target: '下半身', tips: 'ダンベルはバランス強化、スミスはバランスを気にせず部位に集中できる。' }
+    ]
+  },
+  'ルーマニアンデッドリフト': {
+    generalTips: '裏ももとお尻の境界線を作るのに効果的な種目。',
+    variations: [
+      { name: 'バーベル / ダンベル', target: 'ハムストリングス、大臀筋', tips: '膝は軽く曲げたまま固定し、お尻を後ろに突き出す（ヒンジ動作）。背中は丸めない。' }
+    ]
+  },
+  'レッグエクステンション': {
+    generalTips: '前ももを単独で鍛え、脚のカット（溝）を出す種目。',
+    variations: [
+      { name: 'マシン', target: '大腿四頭筋', tips: '蹴り上げたトップで1秒キープすると収縮が強まる。反動を使わない。' }
+    ]
+  },
+  'レッグカール': {
+    generalTips: '裏ももを単独で鍛える種目。肉離れ予防にも重要。',
+    variations: [
+      { name: 'シーテッドマシン', target: 'ハムストリングス', tips: '座って行う。股関節が曲がった状態のため、ハムストリングスがストレッチされやすい。' },
+      { name: 'ライイングマシン', target: 'ハムストリングス', tips: 'うつ伏せで行う。お尻が浮かないように骨盤をパッドに押し付ける。' }
+    ]
+  },
+  'アダクション': {
+    generalTips: '内ももを引き締め、脚の隙間を作る種目。',
+    variations: [
+      { name: 'マシン', target: '内転筋', tips: '反動を使わず、内ももの付け根から脚を閉じる意識で行う。' }
+    ]
+  },
+  'グッドモーニング': {
+    generalTips: 'お辞儀の動作で背面を鍛える種目。',
+    variations: [
+      { name: 'バーベル / スミス', target: 'ハムストリングス、脊柱起立筋', tips: 'バーを担ぎ、背筋を伸ばしたまま股関節から上体を前傾させる。' }
+    ]
+  },
+
+  // =========================
+  // お尻 (GLUTES)
+  // =========================
+  'ヒップアブダクション（骨盤前傾）': {
+    generalTips: 'お尻の筋肉（主に中臀筋）を鍛え、ヒップの丸みを作る。',
+    variations: [
+      { target: '大臀筋（上部）', tips: '背筋を伸ばしたまま前傾。お尻全体のボリュームアップに。' },
+    ]
+  },
+
+  'ヒップアブダクション（骨盤立て）': {
+    generalTips: 'お尻の側面をピンポイントで鍛え、骨盤を安定させたり、ウエストとのメリハリ（くびれ）を作ったりする基本のポジション。',
+    variations: [
+      { target: '中臀筋・小臀筋', tips: '背もたれにしっかり背中をつけ、背筋をまっすぐ立てて座る。' },
+    ]
+  },
+
+  'ヒップアブダクション（骨盤後傾）': {
+    generalTips: 'お尻の下を鍛えて垂れるのを防止する',
+    variations: [
+      { target: '大臀筋の下部・外側', tips: '浅く座って背もたれにドカッと寄りかかり、骨盤が後ろに倒れた状態になる。' },
+    ]
+  },
+
+  'ヒップスラスト': {
+    generalTips: 'お尻の筋肉を最大収縮させる、ヒップアップの代表種目。',
+    variations: [
+      { name: 'グルートドライブ（マシン）', target: '大臀筋', tips: 'ベルトで固定できるため安全。トップでお尻をキュッと締める。' },
+      { name: 'バーベル / スミス', target: '大臀筋', tips: 'パッドをバーに巻き、肩甲骨下部をベンチに乗せて骨盤を持ち上げる。腰を反りすぎない。' }
+    ]
+  },
+  'グルートキックバック': {
+    generalTips: '脚を後ろに蹴り出し、お尻の上部をピンポイントで鍛える種目。',
+    variations: [
+      { name: 'ケーブル', target: '大臀筋', tips: '足首にアンクルストラップを付け、骨盤を動かさずにお尻の筋肉だけで後ろに蹴る。' },
+      { name: 'マシン / バンド', target: '大臀筋', tips: 'マシンの軌道に沿って蹴る。戻す時も負荷を抜かない。' }
+    ]
+  },
+
+  // =========================
+  // 肩 (SHOULDERS)
+  // =========================
+  'ショルダープレス': {
+    generalTips: '肩全体（特に前部〜中部）を鍛え、肩幅を広げるプレス種目。',
+    variations: [
+      { name: 'ダンベル', target: '三角筋前部・中部', tips: '耳の横まで下ろし、頭の上で弧を描くように上げる。腰を反りすぎない。' },
+      { name: 'マシン / スミス', target: '三角筋前部', tips: '軌道が固定され、安全に高重量を扱える。' },
+      { name: 'バーベル', target: '三角筋前部', tips: '体の前へ下ろすフロントプレスが基本。' }
+    ]
+  },
+  'サイドレイズ': {
+    generalTips: '肩の横の張り出しを作り、逆三角形や小顔効果を狙う種目。',
+    variations: [
+      { name: 'ダンベル', target: '三角筋中部', tips: '小指側から上げるイメージで、遠くに放り投げるように。肩がすくまないよう注意。' },
+      { name: 'ケーブル', target: '三角筋中部', tips: '下ろした時もケーブルの張力で負荷が抜けないため、常に筋肉の緊張を保てる。' }
+    ]
+  },
+  'フロントレイズ': {
+    generalTips: '肩の前面を単独で鍛える種目。',
+    variations: [
+      { name: 'ダンベル / ケーブル', target: '三角筋前部', tips: '反動を使わず、目の高さまで持ち上げる。' }
+    ]
+  },
+  'ケーブルフェイスプル': {
+    generalTips: '肩の後ろと背中上部を鍛える種目。',
+    variations: [
+      { name: 'ロープ', target: '三角筋後部、僧帽筋', tips: 'ロープを顔（目線の高さ）に向かって引く。引く時に手首を外側に開く（外旋）。' }
+    ]
+  },
+
+  // =========================
+  // 腕 (ARMS)
+  // =========================
+  'アームカール': {
+    generalTips: '力こぶ（上腕二頭筋）を作る種目。肘の位置を固定することが重要。',
+    variations: [
+      { name: 'ダンベル', target: '上腕二頭筋', tips: '手首を外側に捻りながら（回外）上げるとより強く収縮する。' },
+      { name: 'ケーブル', target: '上腕二頭筋', tips: '下ろす際にも負荷が抜けない。' },
+      { name: 'バーベル / EZバー', target: '上腕二頭筋', tips: '高重量を扱いやすい。反動で腰を反らさないよう注意。' }
+    ]
+  },
+  'ケーブルプレスダウン': {
+    generalTips: '二の腕（上腕三頭筋）を引き締める種目。',
+    variations: [
+      { name: 'ロープ', target: '上腕三頭筋（外側頭）', tips: '下ろした時にロープを「ハの字」に開くと強く収縮する。' },
+      { name: 'ストレートバー', target: '上腕三頭筋（長頭）', tips: '高重量を扱いやすい。肘を体側で固定して押し下げる。' }
+    ]
+  },
+  'ケーブルトライセプスエクステンション': {
+    generalTips: '二の腕の裏側（長頭）をストレッチさせながら鍛える種目。',
+    variations: [
+      { name: 'ケーブル', target: '上腕三頭筋（長頭）', tips: 'ケーブルに背を向け、頭の後ろから前に向かって肘を伸ばす。' }
+    ]
+  },
+  'ケーブルトライセプスキックバック': {
+    generalTips: '二の腕を最大収縮させる種目。',
+    variations: [
+      { name: 'ケーブル / ダンベル', target: '上腕三頭筋', tips: '上体を前傾させ、肘を固定したまま後方に伸ばし切る。' }
+    ]
+  },
+
+  // =========================
+  // 腹筋・体幹 (ABS & CORE)
+  // =========================
+  'アブドミナル': {
+    generalTips: '腹直筋を鍛え、お腹を引き締めるマシン。',
+    variations: [
+      { name: 'マシン', target: '腹直筋', tips: '息を吐きながら背中を丸め、おへそを覗き込むように収縮させる。' }
+    ]
+  },
+  'トーソローテーション': {
+    generalTips: 'お腹の横（腹斜筋）を鍛え、くびれを作るマシン。',
+    variations: [
+      { name: 'マシン', target: '腹斜筋', tips: '反動を使わず、お腹の力で胴体を捻る。' }
+    ]
+  },
+  'プランク': {
+    generalTips: '体幹全体を固定するアイソメトリック（等尺性）種目。',
+    variations: [
+      { name: '自重', target: '腹横筋、体幹', tips: 'お尻が上がったり腰が反ったりしないよう、頭からかかとまで一直線をキープ。' }
+    ]
+  },
+  '上体起こし': {
+    generalTips: 'いわゆる腹筋運動。',
+    variations: [
+      { name: '自重 / マシン', target: '腹直筋', tips: '完全に起き上がる手前で止めると負荷が逃げない。腰を痛めないようマット等を敷く。' }
+    ]
+  },
+  'ハンギングレッグレイズ': {
+    generalTips: '下腹部を強力に鍛える種目。',
+    variations: [
+      { name: '自重', target: '腹直筋下部', tips: 'ぶら下がった状態から、骨盤を丸め込むように脚を上げる。反動でブラブラしない。' }
+    ]
+  },
+
+  // =========================
+  // 全身・有酸素 (FULL BODY & CARDIO)
+  // =========================
+  'クリーン': {
+    generalTips: '下半身の爆発力でウェイトを引き上げ、キャッチする全身運動。',
+    variations: [
+      { name: 'バーベル / ダンベル', target: '全身（瞬発力）', tips: 'フォームが難しいため、軽い重量で股関節の伸び（トリプルエクステンション）を習得する。' }
+    ]
+  },
+  'スナッチ': {
+    generalTips: '床から一気に頭上までウェイトを引き上げる全身運動。',
+    variations: [
+      { name: 'バーベル / ダンベル', target: '全身（瞬発力）', tips: '高度な連動性が求められる。肩周りの柔軟性も必要。' }
+    ]
+  },
+  'バーピー': {
+    generalTips: '全身の筋肉を使い、心拍数を一気に上げるHIITに最適な種目。',
+    variations: [
+      { name: '自重', target: '全身、心肺機能', tips: 'しゃがむ→脚を後ろに蹴り出す→腕立て伏せ→脚を戻す→ジャンプ、を素早く連続で行う。' }
+    ]
+  },
+  'トレッドミル': {
+    generalTips: '定番の有酸素マシン。',
+    variations: [
+      { name: 'ランニング / ウォーキング', target: '心肺機能、脂肪燃焼', tips: '軽く息が弾む程度のペース（心拍数120〜130程度）が脂肪燃焼に効果的。' }
+    ]
+  },
+  '傾斜ウォーキング': {
+    generalTips: 'ランニングより膝への負担が少なく、消費カロリーを稼げる有酸素運動。',
+    variations: [
+      { name: 'トレッドミル（傾斜）', target: '大臀筋、ふくらはぎ、脂肪燃焼', tips: '傾斜を5〜15%程度つけ、手すりを持たずに腕を振って歩く。お尻の筋肉も動員される。' }
+    ]
+  }
+};
+
 // アプリ全体の状態
 let state = {
   theme: 'blue',
@@ -163,7 +517,8 @@ let state = {
   exerciseLibrary: {},
   exerciseEquipment: {},
   inbodyLogs: [],
-  inbodyMetric: 'weight'
+  inbodyMetric: 'weight',
+  exerciseDetails: {} // ★ これを追加
 };
 
 function init() {
@@ -222,8 +577,7 @@ function loadState() {
       });
     }
 
-    // ★ 【ここを修正】既存の保存済み器具データに、コード側の最新 DEFAULT_EQUIPMENT_PATTERNS を賢くマージする
-    // ユーザーが個別に編集・追加した器具設定は残しつつ、新しく追加された種目やデフォルト器具の変更を自動反映します
+    // 既存の保存済み器具データに、コード側の最新 DEFAULT_EQUIPMENT_PATTERNS を賢くマージする
     const mergedEquipment = JSON.parse(JSON.stringify(DEFAULT_EQUIPMENT_PATTERNS));
     if (parsed.exerciseEquipment) {
       Object.keys(parsed.exerciseEquipment).forEach(exName => {
@@ -243,9 +597,26 @@ function loadState() {
     }
     state.exerciseEquipment = mergedEquipment;
 
+    // ★ 辞書データ（BODYタブ用）の賢いマージ処理
+    if (parsed.exerciseDetails) {
+      state.exerciseDetails = parsed.exerciseDetails;
+      
+      // コード側（INITIAL_EXERCISE_DETAILS）に新しく追加された種目があれば、それだけを補完する
+      Object.keys(INITIAL_EXERCISE_DETAILS).forEach(exName => {
+        // 保存データ内にその種目が存在しない場合のみ、コード側のデータをコピーして追加
+        if (!state.exerciseDetails[exName]) {
+          state.exerciseDetails[exName] = JSON.parse(JSON.stringify(INITIAL_EXERCISE_DETAILS[exName]));
+        }
+      });
+    } else {
+      state.exerciseDetails = JSON.parse(JSON.stringify(INITIAL_EXERCISE_DETAILS));
+    }
+
   } else {
     state.exerciseLibrary = buildDefaultExerciseLibrary();
     state.exerciseEquipment = JSON.parse(JSON.stringify(DEFAULT_EQUIPMENT_PATTERNS));
+    
+    state.exerciseDetails = JSON.parse(JSON.stringify(INITIAL_EXERCISE_DETAILS));
   }
 }
 
@@ -258,7 +629,8 @@ function saveState() {
     exerciseLibrarySchema: CURRENT_SCHEMA_VERSION,
     exerciseLibrary: state.exerciseLibrary,
     exerciseEquipment: state.exerciseEquipment,
-    inbodyLogs: state.inbodyLogs
+    inbodyLogs: state.inbodyLogs,
+    exerciseDetails: state.exerciseDetails // ★ これを追加
   }));
 }
 
@@ -596,8 +968,6 @@ function renderEquipmentChips(blockEl, exerciseName, selectedEquip = '') {
     patterns = matchedKey ? DEFAULT_EQUIPMENT_PATTERNS[matchedKey] : ['マシン', 'ダンベル', 'バーベル', 'ケーブル', '自重'];
   }
 
-  const isCustomValue = selectedEquip && !patterns.includes(selectedEquip);
-
   let chipsHTML = patterns.map(eq => {
     const isActive = selectedEquip === eq ? 'active' : '';
     return `<button type="button" class="equipment-chip-btn ${isActive}" onclick="selectEquipmentChip(this, '${eq}')">${eq}</button>`;
@@ -608,7 +978,6 @@ function renderEquipmentChips(blockEl, exerciseName, selectedEquip = '') {
     <div class="equipment-chips-list">
       ${chipsHTML}
     </div>
-    <input type="text" class="form-input extra-equip-input" value="${isCustomValue ? selectedEquip : ''}" placeholder="その他" oninput="onCustomEquipInput(this)">
   `;
 
   equipContainer.dataset.selectedEquip = selectedEquip || '';
@@ -617,7 +986,6 @@ function renderEquipmentChips(blockEl, exerciseName, selectedEquip = '') {
 function selectEquipmentChip(btnEl, equipName) {
   const block = btnEl.closest('.extra-log-block');
   const row = btnEl.closest('.equipment-select-row');
-  const input = row.querySelector('.extra-equip-input');
   const allBtns = row.querySelectorAll('.equipment-chip-btn');
   const nameSelect = block.querySelector('.extra-name-select');
   const nameInput = block.querySelector('.extra-name-input');
@@ -627,12 +995,10 @@ function selectEquipmentChip(btnEl, equipName) {
 
   if (btnEl.classList.contains('active')) {
     btnEl.classList.remove('active');
-    if (input) input.value = '';
     chosenEquip = '';
   } else {
     allBtns.forEach(b => b.classList.remove('active'));
     btnEl.classList.add('active');
-    if (input) input.value = equipName;
     chosenEquip = equipName;
   }
 
@@ -653,32 +1019,6 @@ function selectEquipmentChip(btnEl, equipName) {
   }
 }
 
-function onCustomEquipInput(inputEl) {
-  const block = inputEl.closest('.extra-log-block');
-  const row = inputEl.closest('.equipment-select-row');
-  const allBtns = row.querySelectorAll('.equipment-chip-btn');
-  allBtns.forEach(b => b.classList.remove('active'));
-
-  const equipName = inputEl.value.trim();
-  row.dataset.selectedEquip = equipName;
-  const nameSelect = block.querySelector('.extra-name-select');
-  const nameInput = block.querySelector('.extra-name-input');
-  const exName = (nameSelect && nameSelect.value) ? nameSelect.value : (nameInput ? nameInput.value : '');
-
-  const holder = block.querySelector('.last-btn-holder');
-  if (exName && equipName) {
-    const lastObj = getLastExerciseEquipLogObj(exName, equipName);
-    if (lastObj) {
-      if (holder) {
-        const formatted = formatSingleLogObj(lastObj, false);
-        holder.innerHTML = `<div style="font-size:0.72rem; color:var(--primary-hover); font-weight:700; margin-bottom:4px; padding-left:2px;">前回(${equipName}): ${formatted}</div>`;
-      }
-      fillSetsContainerFromItem(block, lastObj);
-    } else if (holder) {
-      holder.innerHTML = `<div style="font-size:0.72rem; color:var(--text-sub); font-weight:700; margin-bottom:4px; padding-left:2px;">前回(${equipName}): 記録なし</div>`;
-    }
-  }
-}
 
 function openWorkoutLogModal(defaultMenuId, presetDateISO, isEdit = false) {
   isEditingLogMode = isEdit;
@@ -988,6 +1328,8 @@ function addSuggestedExerciseInput(exerciseName, detailStr = '', menuId = '', fo
 
   container.appendChild(block);
   makeSortable(container);
+
+  block.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 function addSetRowToBlock(blockEl, initWeight = null, initReps = null, initPartial = false) {
@@ -1406,26 +1748,249 @@ function deleteLogByIndex(logIndex) {
 }
 
 function openEditModal(menuId) {
-  state.editingMenuId = menuId;
   const menu = state.menus.find(m => m.id === menuId);
+  if (!menu) {
+    console.warn(`編集対象のメニューが見つかりません: ${menuId}`);
+    return;
+  }
 
-  document.getElementById('edit-menu-id').textContent = menu.id;
-  document.getElementById('edit-menu-title').value = menu.title;
-  document.getElementById('edit-menu-memo').value = menu.memo || '';
+  state.editingMenuId = menuId;
 
+  const idEl = document.getElementById('edit-menu-id');
+  const titleEl = document.getElementById('edit-menu-title');
+  const memoEl = document.getElementById('edit-menu-memo');
   const container = document.getElementById('exercise-inputs-container');
+  const newExerciseInput = document.getElementById('edit-new-exercise-input');
+
+  if (!idEl || !titleEl || !memoEl || !container) return;
+
+  idEl.textContent = menu.id;
+  titleEl.value = menu.title || '';
+  memoEl.value = menu.memo || '';
+
+  if (newExerciseInput) {
+    newExerciseInput.value = '';
+  }
+
   container.innerHTML = '';
 
-  menu.exercises.forEach(e => {
-    addExerciseInput(e.name, e.detail, e.equipment || '');
+  (Array.isArray(menu.exercises) ? menu.exercises : []).forEach(e => {
+    addExerciseInputCard(
+      e && e.name ? e.name : '',
+      e && e.detail ? e.detail : '',
+      e && e.equipment ? e.equipment : ''
+    );
   });
 
   makeSortable(container);
+
   document.getElementById('edit-modal').classList.add('active');
 }
 
+function addExerciseInputCard(name = '', detail = '', equipment = '') {
+  const container = document.getElementById('exercise-inputs-container');
+  if (!container) return;
+
+  const row = document.createElement('div');
+  row.className = 'exercise-row';
+
+  const card = document.createElement('div');
+  card.className = 'lib-exercise-item-card';
+  card.style.marginBottom = '0';
+  card.dataset.exercisename = name;
+  card.dataset.equipment = equipment || '';
+
+  // =========================
+  // ヘッダー
+  // =========================
+  const header = document.createElement('div');
+  header.className = 'lib-exercise-header';
+  header.style.marginBottom = '4px';
+
+  const left = document.createElement('div');
+  left.style.cssText =
+    'display:flex; align-items:center; gap:6px; flex:1;';
+
+  // ▲▼
+  const moveGroup = document.createElement('div');
+  moveGroup.className = 'move-btn-group';
+
+  const upBtn = document.createElement('button');
+  upBtn.type = 'button';
+  upBtn.className = 'btn-move-row';
+  upBtn.textContent = '▲';
+  upBtn.addEventListener('click', () => {
+    moveBlock(upBtn, -1);
+  });
+
+  const downBtn = document.createElement('button');
+  downBtn.type = 'button';
+  downBtn.className = 'btn-move-row';
+  downBtn.textContent = '▼';
+  downBtn.addEventListener('click', () => {
+    moveBlock(downBtn, 1);
+  });
+
+  moveGroup.append(upBtn, downBtn);
+
+  // 種目名
+  const nameEl = document.createElement('span');
+  nameEl.className = 'lib-exercise-name';
+
+  const strong = document.createElement('strong');
+  strong.textContent = name;
+
+  nameEl.appendChild(strong);
+
+  left.append(moveGroup, nameEl);
+
+  // 削除
+  const removeBtn = document.createElement('button');
+  removeBtn.type = 'button';
+  removeBtn.className = 'chip-remove-btn';
+  removeBtn.title = '種目を削除';
+  removeBtn.textContent = '×';
+
+  removeBtn.addEventListener('click', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    row.remove();
+  });
+
+  header.append(left, removeBtn);
+
+  // =========================
+  // セット・回数
+  // =========================
+  const detailInput = document.createElement('input');
+  detailInput.type = 'text';
+  detailInput.className = 'form-input input-detail';
+  detailInput.placeholder =
+    'セット・回数目安 (例: 15~20回 × 3セット)';
+  detailInput.value = detail;
+  detailInput.style.cssText =
+    'margin-bottom:6px; font-size:0.75rem !important; padding:6px 10px;';
+
+  // =========================
+  // マシン・器具選択
+  // =========================
+  const equipSelectRow = document.createElement('div');
+  equipSelectRow.className = 'menu-equip-select-row';
+
+  // 選択中の器具を保持
+  equipSelectRow.dataset.selectedEquip = equipment || '';
+
+  // カードにも保存しておく
+  // saveMenuEdit() がここを読むため必要
+  card.dataset.equipment = equipment || '';
+
+  // =========================
+  // カードを組み立てる
+  // =========================
+  card.append(
+    header,
+    detailInput,
+    equipSelectRow
+  );
+
+  row.appendChild(card);
+  container.appendChild(row);
+
+  // =========================
+  // 器具候補を表示
+  // =========================
+  renderMenuEquipmentChips(
+    row,
+    name,
+    equipment
+  );
+}
+
+function addMenuExerciseInputFromEdit() {
+  const input = document.getElementById('edit-new-exercise-input');
+  if (!input) return;
+
+  const name = input.value.trim();
+  if (!name) return;
+
+  const existingNames = Array.from(
+    document.querySelectorAll(
+      '#exercise-inputs-container .lib-exercise-item-card'
+    )
+  ).map(card => (card.dataset.exercisename || '').trim());
+
+  if (existingNames.includes(name)) {
+    alert('この種目はすでにメニューに登録されています。');
+    return;
+  }
+
+  addExerciseInputCard(name, '15~20回 × 3セット', '');
+  input.value = '';
+
+  const container = document.getElementById('exercise-inputs-container');
+
+  if (container) {
+    makeSortable(container);
+  }
+}
+
+function addMenuCardEquip(btnEl, exName) {
+  const input = btnEl.previousElementSibling;
+  const equipName = input.value.trim();
+  if (!equipName) return;
+
+  if (!state.exerciseEquipment[exName]) {
+    state.exerciseEquipment[exName] = [...(DEFAULT_EQUIPMENT_PATTERNS[exName] || ['マシン', 'ダンベル'])];
+  }
+
+  if (state.exerciseEquipment[exName].includes(equipName)) {
+    alert('既に登録されている器具です');
+    return;
+  }
+
+  state.exerciseEquipment[exName].push(equipName);
+  saveState();
+
+  // カードのUIを再描画して反映
+  const card = btnEl.closest('.lib-exercise-item-card');
+  const detailInput = card.querySelector('.input-detail').value;
+  const row = card.closest('.exercise-row');
+  
+  // 一旦今のカードを置き換えるために再生成
+  card.outerHTML = '';
+  addExerciseInputCard(exName, detailInput, equipName);
+}
+
+function removeMenuCardEquip(btnEl, exName, equipName) {
+  if (!state.exerciseEquipment[exName]) {
+    state.exerciseEquipment[exName] = [...(DEFAULT_EQUIPMENT_PATTERNS[exName] || ['マシン', 'ダンベル'])];
+  }
+  state.exerciseEquipment[exName] = state.exerciseEquipment[exName].filter(e => e !== equipName);
+  saveState();
+
+  const card = btnEl.closest('.lib-exercise-item-card');
+  const detailInput = card.querySelector('.input-detail').value;
+  
+  card.outerHTML = '';
+  addExerciseInputCard(exName, detailInput, '');
+}
+
+
+
 function closeEditModal() {
-  document.getElementById('edit-modal').classList.remove('active');
+  const modal = document.getElementById('edit-modal');
+
+  if (modal) {
+    modal.classList.remove('active');
+  }
+
+  const newExerciseInput =
+    document.getElementById('edit-new-exercise-input');
+
+  if (newExerciseInput) {
+    newExerciseInput.value = '';
+  }
+
   state.editingMenuId = null;
 }
 
@@ -1433,22 +1998,27 @@ function addExerciseInput(name = '', detail = '', equipment = '') {
   const container = document.getElementById('exercise-inputs-container');
   const row = document.createElement('div');
   row.className = 'exercise-row';
+  
+  // 種目リスト管理モーダルと同じ構造を再現
   row.innerHTML = `
-    <div class="exercise-row-main" style="display:flex; align-items:center; gap:6px;">
-      <div class="move-btn-group">
-        <button type="button" class="btn-move-row" onclick="moveBlock(this, -1)">▲</button>
-        <button type="button" class="btn-move-row" onclick="moveBlock(this, 1)">▼</button>
+    <div class="lib-exercise-item-card" style="margin-bottom:10px;">
+      <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
+        <div class="move-btn-group">
+          <button type="button" class="btn-move-row" onclick="moveBlock(this, -1)">▲</button>
+          <button type="button" class="btn-move-row" onclick="moveBlock(this, 1)">▼</button>
+        </div>
+        <input type="text" class="form-input input-name" placeholder="種目名" value="${name}" style="margin-bottom:0;" oninput="onMenuExerciseNameInput(this)">
+        <button type="button" class="btn-remove-row" onclick="this.closest('.exercise-row').remove()">&times;</button>
       </div>
-      <input type="text" class="form-input input-name" placeholder="種目名" value="${name}" style="margin-bottom:0; flex:1;" oninput="onMenuExerciseNameInput(this)">
-      <input type="text" class="form-input input-detail" placeholder="目安セット・回数" value="${detail}" style="margin-bottom:0; flex:1;">
-      <button type="button" class="btn-remove-row" onclick="this.closest('.exercise-row').remove()">&times;</button>
+      <input type="text" class="form-input input-detail" placeholder="セット・回数目安" value="${detail}" style="margin-bottom:8px;">
+      <div class="menu-equip-select-row"></div>
     </div>
-    <div class="menu-equip-select-row"></div>
   `;
+  
   container.appendChild(row);
+  // 初期状態で器具チップを生成
   renderMenuEquipmentChips(row, name, equipment);
   makeSortable(container);
-  row.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 // メニュー編集画面で、種目名に応じた「器具」候補をチップとして表示する
@@ -1470,8 +2040,6 @@ function renderMenuEquipmentChips(rowEl, exerciseName, selectedEquip = '') {
     patterns = matchedKey ? DEFAULT_EQUIPMENT_PATTERNS[matchedKey] : ['マシン', 'ダンベル', 'バーベル', 'ケーブル', '自重'];
   }
 
-  const isCustomValue = selectedEquip && !patterns.includes(selectedEquip);
-
   const chipsHTML = patterns.map(eq => {
     const isActive = selectedEquip === eq ? 'active' : '';
     return `<button type="button" class="equipment-chip-btn ${isActive}" onclick="selectMenuEquipChip(this, '${eq}')">${eq}</button>`;
@@ -1482,7 +2050,6 @@ function renderMenuEquipmentChips(rowEl, exerciseName, selectedEquip = '') {
     <div class="equipment-chips-list">
       ${chipsHTML}
     </div>
-    <input type="text" class="form-input menu-equip-custom-input" value="${isCustomValue ? selectedEquip : ''}" placeholder="その他" oninput="onMenuEquipCustomInput(this)" style="margin-bottom:0;">
   `;
 
   equipContainer.dataset.selectedEquip = selectedEquip || '';
@@ -1490,69 +2057,109 @@ function renderMenuEquipmentChips(rowEl, exerciseName, selectedEquip = '') {
 
 function selectMenuEquipChip(btnEl, equipName) {
   const row = btnEl.closest('.menu-equip-select-row');
-  const input = row.querySelector('.menu-equip-custom-input');
+
+  if (!row) return;
+
   const allBtns = row.querySelectorAll('.equipment-chip-btn');
 
   let chosenEquip = '';
+
   if (btnEl.classList.contains('active')) {
+    // もう一度押したら選択解除
     btnEl.classList.remove('active');
     chosenEquip = '';
   } else {
-    allBtns.forEach(b => b.classList.remove('active'));
+    // 他の器具の選択を解除
+    allBtns.forEach(btn => {
+      btn.classList.remove('active');
+    });
+
+    // 今押した器具を選択
     btnEl.classList.add('active');
     chosenEquip = equipName;
   }
 
-  if (input) input.value = '';
+  // 器具選択欄に保存
   row.dataset.selectedEquip = chosenEquip;
+
+  // ★ カード側にも保存
+  // saveMenuEdit() がここを読み取る
+  const card = row.closest('.lib-exercise-item-card');
+
+  if (card) {
+    card.dataset.equipment = chosenEquip;
+  }
 }
 
-function onMenuEquipCustomInput(inputEl) {
-  const row = inputEl.closest('.menu-equip-select-row');
-  const allBtns = row.querySelectorAll('.equipment-chip-btn');
-  allBtns.forEach(b => b.classList.remove('active'));
-  row.dataset.selectedEquip = inputEl.value.trim();
-}
-
-// 種目名を変更したら、それに応じて器具の候補チップを再描画する（選択済みの値が新候補になければ引き継ぐ）
 function onMenuExerciseNameInput(inputEl) {
   const row = inputEl.closest('.exercise-row');
-  if (!row) return;
-  const equipRow = row.querySelector('.menu-equip-select-row');
-  const currentSelected = equipRow ? (equipRow.dataset.selectedEquip || '') : '';
-  renderMenuEquipmentChips(row, inputEl.value, currentSelected);
+  // ここで最新の種目名を使ってチップを再描画する
+  renderMenuEquipmentChips(row, inputEl.value);
 }
 
 function saveMenuEdit() {
   if (!state.editingMenuId) return;
 
-  const newTitle = document.getElementById('edit-menu-title').value.trim();
-  const newMemo = document.getElementById('edit-menu-memo').value.trim();
+  const titleEl = document.getElementById('edit-menu-title');
+  const memoEl = document.getElementById('edit-menu-memo');
+
+  if (!titleEl || !memoEl) return;
+
+  const newTitle = titleEl.value.trim();
+  const newMemo = memoEl.value.trim();
 
   if (!newTitle) {
     alert('メニュータイトルを入力してください。');
+    titleEl.focus();
     return;
   }
 
-  const rows = document.querySelectorAll('#exercise-inputs-container .exercise-row');
+  const targetMenu = state.menus.find(
+    m => m.id === state.editingMenuId
+  );
+
+  if (!targetMenu) {
+    alert('編集対象のメニューが見つかりません。');
+    return;
+  }
+
+  const cards = document.querySelectorAll(
+    '#exercise-inputs-container .exercise-row .lib-exercise-item-card'
+  );
+
   const newExercises = [];
 
-  rows.forEach(row => {
-    const name = row.querySelector('.input-name').value.trim();
-    const detail = row.querySelector('.input-detail').value.trim();
-    const equipRow = row.querySelector('.menu-equip-select-row');
-    const equipment = equipRow ? (equipRow.dataset.selectedEquip || '').trim() : '';
-    if (name) newExercises.push(equipment ? { name, detail, equipment } : { name, detail });
+  cards.forEach(card => {
+    const name = (card.dataset.exercisename || '').trim();
+
+    const detailEl = card.querySelector('.input-detail');
+    const detail = detailEl ? detailEl.value.trim() : '';
+
+    const equipment = (card.dataset.equipment || '').trim();
+
+    if (name) {
+      const exercise = {
+        name: name,
+        detail: detail
+      };
+
+      if (equipment) {
+        exercise.equipment = equipment;
+      }
+
+      newExercises.push(exercise);
+    }
   });
 
-  const targetMenu = state.menus.find(m => m.id === state.editingMenuId);
   targetMenu.title = newTitle;
   targetMenu.memo = newMemo;
   targetMenu.exercises = newExercises;
 
   saveState();
+
   renderRecommendation();
   renderMenuTable();
+
   closeEditModal();
 }
 
@@ -1831,9 +2438,10 @@ function switchMainTab(tabName) {
   if (tabName === 'record') {
     buttons[0].classList.add('active');
     document.getElementById('tab-content-record').classList.add('active');
-  } else if (tabName === 'menu-list') {
+  } else if (tabName === 'body-map') {
     buttons[1].classList.add('active');
-    document.getElementById('tab-content-menu-list').classList.add('active');
+    document.getElementById('tab-content-body-map').classList.add('active');
+    renderBodyMap(); // 部位別リストを表示する関数
   } else if (tabName === 'history') {
     buttons[2].classList.add('active');
     document.getElementById('tab-content-history').classList.add('active');
@@ -1841,8 +2449,200 @@ function switchMainTab(tabName) {
   } else if (tabName === 'inbody') {
     buttons[3].classList.add('active');
     document.getElementById('tab-content-inbody').classList.add('active');
-    renderInbodyTab();
+  } else if (tabName === 'menu-list') {
+    document.getElementById('tab-content-menu-list').classList.add('active');
   }
+}
+
+// ▼ 既存の renderBodyMap を上書き
+function renderBodyMap() {
+  const container = document.getElementById('body-map-list');
+  if (!container) return;
+
+  container.innerHTML = state.exerciseLabels.map(label => {
+    const exes = state.exerciseLibrary[label] || [];
+    // 種目がない部位は表示しない
+    if (exes.length === 0) return '';
+
+    // 種目ごとのカードリストを作成
+    const exListHTML = exes.map(exName => {
+      const baseName = exName.split(/（|\(/)[0].trim();
+      let detail = state.exerciseDetails[baseName] || state.exerciseDetails[exName];
+
+      if (!detail) {
+        detail = {
+          generalTips: '',
+          variations: [
+            { name: '基本のやり方', target: '未設定', tips: '自分なりのフォームのコツや注意点などを意識して行いましょう。' }
+          ]
+        };
+      }
+
+      const generalHTML = detail.generalTips 
+        ? `<div style="font-size:0.75rem; color:var(--text-sub); margin-bottom:12px; line-height:1.5;">${detail.generalTips}</div>` 
+        : '';
+
+      const variationsHTML = (detail.variations || []).map(v => {
+        // ★ バリエーション名が空欄でなければ名前の要素を作る
+        const nameHtml = v.name 
+          ? `<div style="font-size:0.8rem; font-weight:900; color:var(--text-main); margin-bottom:4px;">${v.name}</div>` 
+          : '';
+
+        return `
+          <div style="margin-top:6px; margin-bottom:10px; padding-left:14px; border-left:3px solid var(--border-color);">
+            ${nameHtml}
+            <div style="font-size:0.72rem; margin-bottom:3px; display:flex; align-items:flex-start; gap:6px;">
+              <span style="flex-shrink:0;">🎯</span>
+              <div><span style="color:var(--text-main); font-weight:700;">${v.target}</span></div>
+            </div>
+            <div style="font-size:0.72rem; line-height:1.4; display:flex; align-items:flex-start; gap:6px;">
+              <span style="flex-shrink:0;">⚠️</span>
+              <div><span style="color:var(--text-sub);">${v.tips}</span></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      return `
+        <div style="background:var(--bg-color); padding:16px; border-radius:14px; margin-bottom:12px; border:1px solid var(--border-color);">
+          <h4 style="font-size:0.95rem; color:var(--text-main); font-weight:900; margin-bottom:8px; border-bottom:1.5px dashed var(--border-color); padding-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
+            <span>${exName}</span>
+            <button type="button" class="btn-table-edit" style="font-size:0.7rem; padding:4px 10px; margin-left:8px;" onclick="openDictEditModal('${baseName}'); event.stopPropagation();">⚙️</button>
+          </h4>
+          ${generalHTML}
+          <div style="display:flex; flex-direction:column;">
+            ${variationsHTML}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // アコーディオン構造
+    return `
+      <div class="date-accordion-item" style="margin-bottom: 14px; border-radius: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+        <div class="date-accordion-header" onclick="toggleBodyMapAccordion(this)" style="padding: 14px 16px;">
+          <span style="font-size: 0.95rem; font-weight: 900; color: var(--text-main);">${label}</span>
+          <span class="arrow-icon" style="font-size: 1rem; color: var(--text-sub);">▾</span>
+        </div>
+        <div class="date-accordion-body">
+          <div style="padding-top: 4px;">
+            ${exListHTML}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ▼ そのすぐ下に追加：アコーディオンを開閉するための関数
+function toggleBodyMapAccordion(headerEl) {
+  const item = headerEl.closest('.date-accordion-item');
+  if (!item) return;
+  const body = item.querySelector('.date-accordion-body');
+  if (!body) return;
+  
+  const isActive = item.classList.contains('active');
+  
+  if (isActive) {
+    // 閉じる処理
+    body.style.maxHeight = '0px';
+    item.classList.remove('active');
+  } else {
+    // 開く処理（中身の高さに合わせて滑らかに展開）
+    item.classList.add('active');
+    body.style.maxHeight = (body.scrollHeight + 150) + 'px';
+  }
+}
+
+
+// ▼ そのまま下に以下を追加（モーダル制御・保存処理）
+function openDictEditModal(baseName) {
+  const modal = document.getElementById('dict-edit-modal');
+  document.getElementById('dict-edit-name').textContent = baseName;
+  document.getElementById('dict-edit-basename').value = baseName;
+
+  let detail = state.exerciseDetails[baseName];
+  if (!detail) {
+    detail = { generalTips: '', variations: [] };
+  }
+
+  document.getElementById('dict-edit-general').value = detail.generalTips || '';
+
+  const container = document.getElementById('dict-variations-container');
+  container.innerHTML = '';
+  
+  if (detail.variations && detail.variations.length > 0) {
+    detail.variations.forEach(v => {
+      addDictVariation(v.name, v.target, v.tips);
+    });
+  } else {
+    // データが空ならデフォルトの入力枠を1つ出す
+    addDictVariation('基本のやり方', '', '');
+  }
+
+  modal.classList.add('active');
+}
+
+function closeDictEditModal() {
+  document.getElementById('dict-edit-modal').classList.remove('active');
+}
+
+function addDictVariation(name = '', target = '', tips = '') {
+  const container = document.getElementById('dict-variations-container');
+  
+  const block = document.createElement('div');
+  block.className = 'lib-exercise-item-card'; // 既存のカードスタイルを流用
+  block.style.padding = '12px';
+  block.style.position = 'relative';
+
+  block.innerHTML = `
+    <button type="button" class="chip-remove-btn" style="position:absolute; top:8px; right:8px;" onclick="this.closest('.lib-exercise-item-card').remove()">&times;</button>
+    
+    <label style="font-size:0.7rem; font-weight:700; color:var(--primary-color);">▍ バリエーション名</label>
+    <input type="text" class="form-input var-name" value="${name}" style="font-size:0.8rem !important; padding:8px 10px; margin-bottom:8px;">
+    
+    <label style="font-size:0.7rem; font-weight:700; color:var(--primary-color);">🎯 効く部位</label>
+    <input type="text" class="form-input var-target" value="${target}" style="font-size:0.8rem !important; padding:8px 10px; margin-bottom:8px;">
+    
+    <label style="font-size:0.7rem; font-weight:700; color:var(--primary-color);">⚠️ コツ</label>
+    <textarea class="form-input form-textarea var-tips" style="font-size:0.8rem !important; padding:8px 10px; height:60px; margin-bottom:0;">${tips}</textarea>
+  `;
+
+  container.appendChild(block);
+}
+
+function saveDictEdit() {
+  const baseName = document.getElementById('dict-edit-basename').value;
+  const generalTips = document.getElementById('dict-edit-general').value.trim();
+  
+  const blocks = document.querySelectorAll('#dict-variations-container .lib-exercise-item-card');
+  const variations = [];
+  
+  blocks.forEach(block => {
+    const name = block.querySelector('.var-name').value.trim();
+    const target = block.querySelector('.var-target').value.trim();
+    const tips = block.querySelector('.var-tips').value.trim();
+    
+    // どれか1つでも入力されていれば保存する
+    if (name || target || tips) {
+      variations.push({
+        name: name, // ← 「名称未設定」にする処理を削除してそのまま保存
+        target: target || '未設定',
+        tips: tips || ''
+      });
+    }
+  });
+
+  // stateを更新
+  if (!state.exerciseDetails) state.exerciseDetails = {};
+  state.exerciseDetails[baseName] = {
+    generalTips: generalTips,
+    variations: variations
+  };
+
+  saveState();
+  closeDictEditModal();
+  renderBodyMap(); // 最新のデータでBODYタブを描画し直す
 }
 
 /* ================================
@@ -2629,6 +3429,451 @@ function moveBlock(btnEl, direction) {
   }
 }
 
+function openMenuSettingsModal() {
+  renderMenuSettingsAccordion();
+  document.getElementById('menu-settings-modal').classList.add('active');
+}
+
+function closeMenuSettingsModal() {
+  document.getElementById('menu-settings-modal').classList.remove('active');
+  renderMenuTable(); // 閉じるときにメイン画面のテーブルやデータを更新
+  renderRecommendation();
+}
+
+function renderMenuSettingsAccordion(openMenuId = null) {
+  const container = document.getElementById(
+    'menu-settings-accordion-container'
+  );
+
+  if (!container) return;
+
+  // 現在開いているメニューを記憶
+  if (!openMenuId) {
+    const activeItem = container.querySelector(
+      '.date-accordion-item.active'
+    );
+
+    if (activeItem) {
+      openMenuId = activeItem.dataset.menuid;
+    }
+  }
+
+  container.innerHTML = state.menus.map(menu => {
+
+    const exercisesHTML = menu.exercises.map((e, idx) => {
+
+      // この種目で選べるマシン・器具
+      let patterns =
+        state.exerciseEquipment[e.name] ||
+        DEFAULT_EQUIPMENT_PATTERNS[e.name];
+
+      // 完全一致しない場合は近い種目を探す
+      if (!patterns) {
+        const matchedKey = Object.keys(
+          DEFAULT_EQUIPMENT_PATTERNS
+        ).find(
+          key =>
+            e.name.includes(key) ||
+            key.includes(e.name)
+        );
+
+        patterns = matchedKey
+          ? DEFAULT_EQUIPMENT_PATTERNS[matchedKey]
+          : ['マシン', 'ダンベル', 'バーベル', 'ケーブル', '自重'];
+      }
+
+      // 現在設定されている器具
+      const selectedEquipment = e.equipment || '';
+
+      // マシン・器具ボタン
+      const equipmentHTML = patterns.map(eq => {
+        const active =
+          selectedEquipment === eq
+            ? 'active'
+            : '';
+
+        return `
+          <button
+            type="button"
+            class="equipment-chip-btn ${active}"
+            onclick="selectMenuAccordionEquipChip(this, '${menu.id}', ${idx}); event.stopPropagation();"
+          >
+            ${eq}
+          </button>
+        `;
+      }).join('');
+
+      return `
+        <div
+          class="lib-exercise-item-card"
+          data-exercisename="${e.name}"
+          style="margin-bottom:6px;"
+        >
+
+          <div
+            class="lib-exercise-header"
+            style="margin-bottom:4px;"
+          >
+            <span class="lib-exercise-name">
+              <strong>${e.name}</strong>
+            </span>
+
+            <button
+              type="button"
+              class="chip-remove-btn"
+              onclick="removeMenuAccordionExercise('${menu.id}', ${idx}); event.stopPropagation();"
+            >
+              &times;
+            </button>
+          </div>
+
+          <input
+            type="text"
+            class="form-input input-detail"
+            placeholder="セット・回数目安"
+            value="${e.detail || ''}"
+            style="
+              margin-bottom:6px;
+              font-size:0.75rem !important;
+              padding:6px 10px;
+            "
+            oninput="updateMenuAccordionDetail('${menu.id}', ${idx}, this.value)"
+          >
+
+          <!-- マシン・器具 -->
+          <div
+            class="menu-equipment-setting"
+            style="
+              display:flex;
+              flex-wrap:wrap;
+              align-items:center;
+              gap:5px;
+              margin-top:4px;
+              padding-top:2px;
+            "
+          >
+            <span
+              style="
+                font-size:0.7rem;
+                color:var(--text-sub);
+                font-weight:700;
+                width:100%;
+                margin-bottom:1px;
+              "
+            >
+              使うマシン・器具
+            </span>
+
+            <div
+              class="equipment-chips-list"
+              style="
+                display:flex;
+                flex-wrap:wrap;
+                gap:4px;
+              "
+            >
+              ${equipmentHTML}
+            </div>
+          </div>
+
+        </div>
+      `;
+    }).join('');
+
+    const isOpen =
+      String(menu.id) === String(openMenuId)
+        ? 'active'
+        : '';
+
+    return `
+      <div
+        class="date-accordion-item ${isOpen}"
+        data-menuid="${menu.id}"
+        style="margin-bottom:8px;"
+      >
+
+        <div
+          class="date-accordion-header"
+          onclick="toggleMenuAccordion(this)"
+        >
+          <span style="font-weight:900;">
+            <span
+              class="menu-badge menu-badge-${menu.id}"
+              style="margin-right:6px;"
+            >
+              ${menu.id}
+            </span>
+
+            ${menu.title}
+          </span>
+
+          <span class="arrow-icon">▾</span>
+        </div>
+
+        <div
+          class="date-accordion-body"
+          style="background:var(--bg-color);"
+        >
+
+          <label class="form-label">
+            メニュータイトル
+          </label>
+
+          <input
+            type="text"
+            class="form-input menu-title-input"
+            value="${menu.title}"
+            oninput="updateMenuAccordionTitle('${menu.id}', this.value)"
+            style="margin-bottom:8px;"
+          >
+
+          <label class="form-label">
+            メモ
+          </label>
+
+          <textarea
+            class="form-input form-textarea menu-memo-input"
+            oninput="updateMenuAccordionMemo('${menu.id}', this.value)"
+            style="margin-bottom:8px; height:50px;"
+          >${menu.memo || ''}</textarea>
+
+          <label class="form-label">
+            種目一覧
+          </label>
+
+          <div
+            class="menu-exercises-container"
+            style="margin-bottom:8px;"
+          >
+            ${exercisesHTML}
+          </div>
+
+          <div
+            style="
+              display:flex;
+              gap:6px;
+            "
+          >
+            <input
+              type="text"
+              class="form-input menu-new-ex-input"
+              placeholder="新しい種目名"
+              style="
+                margin-bottom:0;
+                font-size:0.75rem;
+              "
+            >
+
+            <button
+              type="button"
+              class="btn-library-add"
+              onclick="addMenuAccordionExercise('${menu.id}', this); event.stopPropagation();"
+            >
+              + 追加
+            </button>
+          </div>
+
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function selectMenuAccordionEquipChip(btnEl, menuId, exerciseIndex) {
+  const menu = state.menus.find(
+    m => String(m.id) === String(menuId)
+  );
+
+  if (!menu || !menu.exercises[exerciseIndex]) {
+    return;
+  }
+
+  const card = btnEl.closest(
+    '.lib-exercise-item-card'
+  );
+
+  if (!card) return;
+
+  const allBtns = card.querySelectorAll(
+    '.equipment-chip-btn'
+  );
+
+  let selectedEquipment = '';
+
+  // すでに選択されているものをもう一度押したら解除
+  if (btnEl.classList.contains('active')) {
+    btnEl.classList.remove('active');
+    selectedEquipment = '';
+
+  } else {
+    allBtns.forEach(btn => {
+      btn.classList.remove('active');
+    });
+
+    btnEl.classList.add('active');
+
+    selectedEquipment =
+      btnEl.textContent.trim();
+  }
+
+  // メニューの種目データに保存
+  if (selectedEquipment) {
+    menu.exercises[exerciseIndex].equipment =
+      selectedEquipment;
+  } else {
+    delete menu.exercises[exerciseIndex].equipment;
+  }
+
+  saveState();
+}
+
+// アコーディオンの開閉用
+function toggleMenuAccordion(headerEl) {
+  const item = headerEl.closest('.date-accordion-item');
+
+  if (!item) return;
+
+  const body = item.querySelector('.date-accordion-body');
+
+  if (!body) return;
+
+  const isActive = item.classList.contains('active');
+
+  if (isActive) {
+    body.style.maxHeight = '0px';
+    item.classList.remove('active');
+  } else {
+    item.classList.add('active');
+
+    // DOMの現在の高さをそのまま使う
+    body.style.maxHeight =
+      (body.scrollHeight + 200) + 'px';
+  }
+}
+// 各種データのリアルタイム保存用ヘルパー関数
+
+
+
+function updateMenuAccordionTitle(menuId, val) {
+  const m = state.menus.find(item => item.id === menuId);
+  if (m) { m.title = val; saveState(); }
+}
+function updateMenuAccordionMemo(menuId, val) {
+  const m = state.menus.find(item => item.id === menuId);
+  if (m) { m.memo = val; saveState(); }
+}
+function updateMenuAccordionDetail(menuId, exIdx, val) {
+  const m = state.menus.find(item => item.id === menuId);
+  if (m && m.exercises[exIdx]) { m.exercises[exIdx].detail = val; saveState(); }
+}
+
+function removeMenuAccordionExercise(menuId, exIdx) {
+  const m = state.menus.find(item => item.id === menuId);
+  if (m) {
+    m.exercises.splice(exIdx, 1);
+    saveState();
+    renderMenuSettingsAccordion(menuId); // 削除後もこのメニューを開いたままにする
+  }
+}
+
+function addMenuAccordionExercise(menuId, btnEl) {
+  const input = btnEl.previousElementSibling;
+  if (!input) return;
+
+  const name = input.value.trim();
+  if (!name) return;
+
+  const menu = state.menus.find(item => item.id === menuId);
+  if (!menu) return;
+
+  // 同じ種目がすでにある場合
+  const alreadyExists = menu.exercises.some(
+    e => e.name.trim() === name
+  );
+
+  if (alreadyExists) {
+    alert('この種目はすでに登録されています。');
+    return;
+  }
+
+  // データに追加
+  const newExercise = {
+    name: name,
+    detail: '15~20回 × 3セット'
+  };
+
+  menu.exercises.push(newExercise);
+  saveState();
+
+  // 入力欄を空にする
+  input.value = '';
+
+  // ★ アコーディオン全体を再描画しない
+  // ★ 今開いているDOMに新しい種目カードだけ追加する
+  const item = btnEl.closest('.date-accordion-item');
+  if (!item) return;
+
+  const exercisesContainer = item.querySelector(
+    '.menu-exercises-container'
+  );
+
+  if (!exercisesContainer) return;
+
+  const exerciseIndex = menu.exercises.length - 1;
+
+  const card = document.createElement('div');
+  card.className = 'lib-exercise-item-card';
+  card.dataset.exercisename = name;
+  card.style.marginBottom = '6px';
+
+  const header = document.createElement('div');
+  header.className = 'lib-exercise-header';
+  header.style.marginBottom = '4px';
+
+  const nameSpan = document.createElement('span');
+  nameSpan.className = 'lib-exercise-name';
+
+  const strong = document.createElement('strong');
+  strong.textContent = name;
+
+  nameSpan.appendChild(strong);
+
+  const removeBtn = document.createElement('button');
+  removeBtn.type = 'button';
+  removeBtn.className = 'chip-remove-btn';
+  removeBtn.innerHTML = '&times;';
+
+  removeBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    removeMenuAccordionExercise(menuId, exerciseIndex);
+  });
+
+  header.append(nameSpan, removeBtn);
+
+  const detailInput = document.createElement('input');
+  detailInput.type = 'text';
+  detailInput.className = 'form-input input-detail';
+  detailInput.placeholder = 'セット・回数目安';
+  detailInput.value = newExercise.detail;
+  detailInput.style.cssText =
+    'margin-bottom:0; font-size:0.75rem !important; padding:6px 10px;';
+
+  detailInput.addEventListener('input', function() {
+    if (menu.exercises[exerciseIndex]) {
+      menu.exercises[exerciseIndex].detail = this.value;
+      saveState();
+    }
+  });
+
+  card.append(header, detailInput);
+
+  exercisesContainer.appendChild(card);
+
+  // ★ アコーディオンの状態・スクロール位置には一切触らない
+}
+
 // ▼▼▼ モーダルの背景スクロールを防止する追加コード ▼▼▼
 const modalObserver = new MutationObserver(() => {
   const isModalOpen = document.querySelectorAll('.modal-overlay.active').length > 0;
@@ -2654,4 +3899,3 @@ document.addEventListener('touchmove', (e) => {
     }
   }
 }, { passive: false });
-// ▲▲▲ ここまで ▲▲▲

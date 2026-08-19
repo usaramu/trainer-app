@@ -17,11 +17,11 @@
     --offday-color: #A7B3BF;
 
     /* ▼ カレンダーのメニューラベル用カラー（アイスブルーの色相・パステル・文字は常に白） */
-    --cal-a: #9CC0E8;   /* 上半身A：パステルブルー */
-    --cal-b: #AECBEC;   /* 上半身B：パステルブルー（近いトーン） */
-    --cal-c: #C2D9F1;   /* 下半身A：ライトブルー */
-    --cal-d: #94D2DE;   /* 下半身B：パステルティール */
-    --cal-f: #85DCC9;   /* 全身：パステルミント（差し色） */
+    --cal-a: #6f8fbf;   /* 上半身A：パステルブルー */
+    --cal-c: #a7b9d6;   /* 上半身B：パステルブルー（近いトーン） */
+    --cal-b: #88a0c5;   /* 下半身A：ライトブルー */
+    --cal-d: #c2cfe3;   /* 下半身B：パステルティール */
+    --cal-f: #e39a9a;   /* 全身：パステルミント（差し色） */
     --cal-e: #8AA0C4;   /* 有酸素（走るマーク）：くすみブルー */
 }
 
@@ -44,12 +44,12 @@ body.theme-pink {
     --offday-color: #C2B4AE;
 
     /* ▼ カレンダーのメニューラベル用カラー（パステルピンクの色相・パステル） */
-    --cal-a: #F2B9C5;   /* 上半身A：パステルローズ */
-    --cal-b: #F5C9D4;   /* 上半身B：パステルピンク（近いトーン） */
-    --cal-c: #F8DAE1;   /* 下半身A：ライトピンク */
-    --cal-d: #F1C4A8;   /* 下半身B：パステルコーラル */
+    --cal-a: #d46a7c;   /* 上半身A：パステルローズ */
+    --cal-b: #e7a1b3;   /* 上半身B：パステルピンク（近いトーン） */
+    --cal-c: #c9a69d;   /* 下半身A：ライトピンク */
+    --cal-d: #e0c9b8;   /* 下半身B：パステルコーラル */
     --cal-e: #C99AA6;   /* 有酸素（走るマーク）：くすみローズ */
-    --cal-f: #ECBAC7;   /* 全身：パステルローズ（差し色） */
+    --cal-f: #a7a96b;   /* 全身：パステルローズ（差し色） */
 }
 
 /* テーマ：セージグリーン */
@@ -71,11 +71,11 @@ body.theme-green {
     --offday-color: #A2B5B0;
 
     /* ▼ カレンダーのメニューラベル用カラー（セージグリーンの色相・パステル） */
-    --cal-a: #A6DDBF;   /* 上半身A：パステルグリーン */
-    --cal-b: #B7E3CB;   /* 上半身B：パステルグリーン（近いトーン） */
-    --cal-c: #C9E9D7;   /* 下半身A：ライトグリーン */
-    --cal-d: #C5E2A8;   /* 下半身B：パステルモス */
-    --cal-f: #96E6C8;   /* 全身：パステルミント（差し色） */
+    --cal-a: #76a98e;   /* 上半身A：パステルグリーン */
+    --cal-b: #a9c2b3;   /* 上半身B：パステルグリーン（近いトーン） */
+    --cal-c: #bed3c2;   /* 下半身A：ライトグリーン */
+    --cal-d: #d1e3d8;   /* 下半身B：パステルモス */
+    --cal-f: #c7a7aa;   /* 全身：パステルミント（差し色） */
     --cal-e: #96BBA4;   /* 有酸素（走るマーク）：くすみグリーン */
 }
 
@@ -98,11 +98,11 @@ body.theme-lavender {
     --offday-color: #B2AEC4;
 
     /* ▼ カレンダーのメニューラベル用カラー（ラベンダーの色相・パステル） */
-    --cal-a: #C6B9EA;   /* 上半身A：パステルパープル */
-    --cal-b: #D2C7EF;   /* 上半身B：パステルラベンダー（近いトーン） */
-    --cal-c: #DED6F4;   /* 下半身A：ライトラベンダー */
-    --cal-d: #DBC0E5;   /* 下半身B：パステルモーブ */
-    --cal-f: #CBB2EC;   /* 全身：パステルバイオレット（差し色） */
+    --cal-a: #8e7dba;   /* 上半身A：パステルパープル */
+    --cal-b: #B9aed6;   /* 上半身B：パステルラベンダー（近いトーン） */
+    --cal-c: #d3c7f1;   /* 下半身A：ライトラベンダー */
+    --cal-d: #D7d1e4;   /* 下半身B：パステルモーブ */
+    --cal-f: #c9aa7c;   /* 全身：パステルバイオレット（差し色） */
     --cal-e: #A79CC6;   /* 有酸素（走るマーク）：くすみパープル */
 }
 
@@ -994,6 +994,8 @@ h1 {
     overscroll-behavior: contain; /* ← ★この1行を追加！ */
     width: 100%;
     box-sizing: border-box;
+    overflow-y: scroll !important; 
+    -webkit-overflow-scrolling: touch;
 }
 
 .form-label {
@@ -1837,4 +1839,29 @@ footer {
 .today-summary-badge,
 .inbody-metric-tab {
     white-space: nowrap;
+}
+
+/* モーダル内のカードの余白調整 */
+#edit-modal .exercise-row {
+    border-left: none !important; /* メニュー編集用には左線を消す */
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+}
+
+#edit-modal .lib-exercise-item-card {
+    border: 1.5px solid var(--border-color) !important;
+}
+
+/* アコーディオンが閉じている時は余白も0にする */
+.date-accordion-item .date-accordion-body {
+    max-height: 0;
+    overflow: hidden;
+    padding: 0 14px; /* ここを0にする */
+    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), padding 0.35s ease;
+}
+
+/* アコーディオンが開いている時だけ余白を持たせる */
+.date-accordion-item.active .date-accordion-body {
+    padding: 10px 14px; /* 開いた時は余白を入れる */
 }
