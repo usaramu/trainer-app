@@ -15,6 +15,14 @@
     --banner-grad-3: #C4D6E5;
     --accent-color: #88C4C2;
     --offday-color: #A7B3BF;
+
+    /* ▼ カレンダーのメニューラベル用カラー（アイスブルーの色相・パステル・文字は常に白） */
+    --cal-a: #9CC0E8;   /* 上半身A：パステルブルー */
+    --cal-b: #AECBEC;   /* 上半身B：パステルブルー（近いトーン） */
+    --cal-c: #C2D9F1;   /* 下半身A：ライトブルー */
+    --cal-d: #94D2DE;   /* 下半身B：パステルティール */
+    --cal-f: #85DCC9;   /* 全身：パステルミント（差し色） */
+    --cal-e: #8AA0C4;   /* 有酸素（走るマーク）：くすみブルー */
 }
 
 /* テーマ：パステルピンク */
@@ -34,6 +42,14 @@ body.theme-pink {
     --banner-grad-3: #E8DBD2;
     --accent-color: #E0B899;
     --offday-color: #C2B4AE;
+
+    /* ▼ カレンダーのメニューラベル用カラー（パステルピンクの色相・パステル） */
+    --cal-a: #F2B9C5;   /* 上半身A：パステルローズ */
+    --cal-b: #F5C9D4;   /* 上半身B：パステルピンク（近いトーン） */
+    --cal-c: #F8DAE1;   /* 下半身A：ライトピンク */
+    --cal-d: #F1C4A8;   /* 下半身B：パステルコーラル */
+    --cal-e: #C99AA6;   /* 有酸素（走るマーク）：くすみローズ */
+    --cal-f: #ECBAC7;   /* 全身：パステルローズ（差し色） */
 }
 
 /* テーマ：セージグリーン */
@@ -53,6 +69,14 @@ body.theme-green {
     --banner-grad-3: #C2DCD7;
     --accent-color: #9EC288;
     --offday-color: #A2B5B0;
+
+    /* ▼ カレンダーのメニューラベル用カラー（セージグリーンの色相・パステル） */
+    --cal-a: #A6DDBF;   /* 上半身A：パステルグリーン */
+    --cal-b: #B7E3CB;   /* 上半身B：パステルグリーン（近いトーン） */
+    --cal-c: #C9E9D7;   /* 下半身A：ライトグリーン */
+    --cal-d: #C5E2A8;   /* 下半身B：パステルモス */
+    --cal-f: #96E6C8;   /* 全身：パステルミント（差し色） */
+    --cal-e: #96BBA4;   /* 有酸素（走るマーク）：くすみグリーン */
 }
 
 /* テーマ：ラベンダー */
@@ -72,6 +96,14 @@ body.theme-lavender {
     --banner-grad-3: #D0C8E6;
     --accent-color: #CE9BB4;
     --offday-color: #B2AEC4;
+
+    /* ▼ カレンダーのメニューラベル用カラー（ラベンダーの色相・パステル） */
+    --cal-a: #C6B9EA;   /* 上半身A：パステルパープル */
+    --cal-b: #D2C7EF;   /* 上半身B：パステルラベンダー（近いトーン） */
+    --cal-c: #DED6F4;   /* 下半身A：ライトラベンダー */
+    --cal-d: #DBC0E5;   /* 下半身B：パステルモーブ */
+    --cal-f: #CBB2EC;   /* 全身：パステルバイオレット（差し色） */
+    --cal-e: #A79CC6;   /* 有酸素（走るマーク）：くすみパープル */
 }
 
 * {
@@ -360,18 +392,24 @@ h1 {
 
 .cal-tag {
     color: #FFFFFF !important; /* すべての文字色を白に統一 */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25); /* パステル背景でも白文字が読みやすいように */
 }
 
-.cal-tag.A, .cal-tag.D { background-color: var(--primary-color); }
-.cal-tag.B, .cal-tag.C { background-color: var(--primary-hover); }
+.cal-tag.A { background-color: var(--cal-a); }
+.cal-tag.B { background-color: var(--cal-b); }
+.cal-tag.C { background-color: var(--cal-c); }
+.cal-tag.D { background-color: var(--cal-d); }
 
-/* 有酸素（E）と全身（F）の背景色を反転・調整 */
-.cal-tag.E { background-color: var(--text-main) !important; } /* 走るマークはシックなメインカラー等に */
-.cal-tag.F { background-color: var(--accent-color) !important; color: #FFFFFF !important; } /* 「全」はアクセントカラーに */
+/* 有酸素（E）は背景色をつけると走るマークの絵文字と衝突して見づらくなるため、透明背景＋枠線にする */
+.cal-tag.E {
+    background-color: transparent !important;
+    border: 1.5px solid var(--cal-e) !important;
+    box-shadow: none;
+    text-shadow: none;
+}
+.cal-tag.F { background-color: var(--cal-f) !important; color: #FFFFFF !important; } /* 「全」はグリーンに */
 
-.cal-tag.ALL { background-color: var(--accent-color) !important; }
-.cal-tag.OFF { background-color: var(--offday-color) !important; color: #FFFFFF !important; }
-.cal-tag.ALL { background-color: var(--accent-color) !important; }
+.cal-tag.ALL { background-color: var(--cal-f) !important; }
 .cal-tag.OFF { background-color: var(--offday-color) !important; color: #FFFFFF !important; }
 
 .cal-tag:hover {
@@ -566,6 +604,8 @@ h1 {
     font-weight: 900;
     cursor: pointer;
     transition: all 0.15s;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .btn-table-edit:hover {
@@ -1233,6 +1273,32 @@ input[type="date"].form-input {
     background-color: #F59E0B;
     border-color: #F59E0B;
     color: #FFFFFF;
+}
+
+/* ▼ メニュー編集：種目ごとの器具選択チップ行 */
+.menu-equip-select-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 4px 0 10px 0;
+    padding: 6px 8px;
+    background-color: var(--bg-color);
+    border-radius: 10px;
+    border: 1.5px dashed var(--border-color);
+}
+
+.menu-equip-select-row:empty {
+    display: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+
+.menu-equip-custom-input {
+    max-width: 100px;
+    font-size: 0.75rem;
+    padding: 4px 8px;
 }
 
 /* ▼ 器具選択チップ行（崩れ防止＆折り返し対応） */

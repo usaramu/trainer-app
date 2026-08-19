@@ -1,6 +1,6 @@
 let isEditingLogMode = false;
 const STORAGE_KEY = 'trainingRecords';
-const CURRENT_SCHEMA_VERSION = 'label-v4'; // ★ スキーマバージョンを更新して自動同期
+const CURRENT_SCHEMA_VERSION = 'label-v5'; // ★ スキーマバージョンを更新して自動同期
 
 // 初期メニュー構成データ
 const initialDefaultMenus = [
@@ -9,8 +9,8 @@ const initialDefaultMenus = [
     title: '上半身 A（フリーウェイト＆ケーブル）',
     memo: 'デコルテ、背中の広がり、二の腕のトーン調整に重点を置いた構成。',
     exercises: [
-      { name: 'ラットプルダウン', detail: '15~20回 × 3セット' },
-      { name: 'アイソラテラルインクラインチェストプレス', detail: '15~20回 × 3セット' },
+      { name: 'ラットプルダウン', detail: '15~20回 × 3セット', equipment: 'マググリップ' },
+      { name: 'インクラインプレス', detail: '15~20回 × 3セット', equipment: 'アイソラテラル' },
       { name: 'サイドレイズ', detail: '15~20回 × 3セット' },
       { name: 'ケーブルトライセプスエクステンション', detail: '15~20回 × 3セット' },
     ]
@@ -20,10 +20,10 @@ const initialDefaultMenus = [
     title: '上半身 B（マシン＆ローイング）',
     memo: '背中の厚みと姿勢改善、胸の追い込みに重点。',
     exercises: [
-      { name: 'シーテッドローイング', detail: '15~20回 × 3セット' },
-      { name: 'チェストプレス', detail: '15~20回 × 3セット' },
+      { name: 'ローイング', detail: '15~20回 × 3セット', equipment: 'シーテッド/縦持ち' },
+      { name: 'チェストプレス', detail: '15~20回 × 3セット', equipment: 'マシン' },
       { name: 'リアデルトイド', detail: '15~20回 × 3セット' },
-      { name: 'アブドミナルクランチ', detail: '15~20回 × 3セット' },
+      { name: 'アブドミナル', detail: '15~20回 × 3セット' },
       { name: 'バックエクステンション', detail: '15回 × 3セット' },
     ]
   },
@@ -32,10 +32,10 @@ const initialDefaultMenus = [
     title: '下半身 A（美尻・美脚マシン）',
     memo: 'マシンを使用して、お尻と裏ももの境目をクリアに。',
     exercises: [
-      { name: 'グルートドライブ', detail: '15~20回 × 3セット' },
-      { name: 'シーテッドレッグカール', detail: '15~20回 × 3セット' },
-      { name: 'レッグプレス', detail: '足幅を広め・上位置に / 15~20回 × 3セット' },
-      { name: 'ヒップアブダクション（骨盤前傾）', detail: '15~20回 × 3セット' },
+      { name: 'ヒップスラスト', detail: '15~20回 × 3セット', equipment: 'グルートドライブ' },
+      { name: 'レッグカール', detail: '15~20回 × 3セット' },
+      { name: 'レッグプレス', detail: '足幅を広め・上位置に / 15~20回 × 3セット', equipment: 'シーテッド' },
+      { name: 'ヒップアブダクション（骨盤後傾）', detail: '15~20回 × 3セット' },
     ]
   },
   {
@@ -46,7 +46,7 @@ const initialDefaultMenus = [
       { name: 'ルーマニアンデッドリフト', detail: '15~20回 × 3セット' },
       { name: 'ブルガリアンスクワット', detail: '左右各12~15回 × 3セット' },
       { name: 'グルートキックバック', detail: 'ケーブル使用 / 左右各15~20回 × 3セット' },
-      { name: 'ヒップアブダクション（骨盤後継）', detail: '15~20回 × 3セット' },
+      { name: 'ヒップアブダクション（骨盤立て）', detail: '15~20回 × 3セット' },
     ]
   },
   {
@@ -57,15 +57,14 @@ const initialDefaultMenus = [
       { name: '傾斜ウォーキング', detail: 'トレッドミル / 30〜40分 (傾斜5〜8%、時速4.0〜4.5km)' },
     ]
   },
-
   {
     id: 'F',
     title: '全身',
     memo: '1週間空いた時や旅行後など、1回で全身をバランスよく刺激したい時に。',
     exercises: [
       { name: 'ブルガリアンスクワット', detail: '左右各10回 × 3セット' },
-      { name: 'ラットプルダウン', detail: '10回 × 3セット' },
-      { name: 'チェストプレス', detail: '10回 × 3セット' },
+      { name: 'ラットプルダウン', detail: '10回 × 3セット', equipment: 'マググリップ' },
+      { name: 'チェストプレス', detail: '10回 × 3セット', equipment: 'マシン' },
       { name: 'サイドレイズ', detail: '15回 × 2〜3セット' },
       { name: 'アブドミナル', detail: '10回 × 3セット' },
       { name: '傾斜ウォーキング', detail: 'トレッドミル / 30分' },
@@ -104,7 +103,8 @@ const DEFAULT_EQUIPMENT_PATTERNS = {
   'プーリーロー': ['ケーブル', 'マシン'],
   'チンニング（懸垂）': ['自重', 'アシストマシン', 'ウェイト付加'],
   'ベントオーバーロー': ['バーベル', 'ダンベル'],
-  'シーテッドローイング': ['縦持ち(広背筋)', '横持ち(僧帽筋)', 'アイソラテラル', 'ケーブル', 'ダンベル'],
+  'ローイング': ['シーテッド/縦持ち', 'シーテッド/横持ち', 'アイソラテラル/縦持ち', 'アイソラテラル/横持ち', 'ケーブル', 'ダンベル'],
+  'リアデルトイド': ['マシン'],
 
   // 脚
   'ルーマニアンデッドリフト': ['バーベル', 'ダンベル'],
@@ -113,7 +113,7 @@ const DEFAULT_EQUIPMENT_PATTERNS = {
   'スクワット': ['バーベル', 'ハック', 'スミス', 'ダンベル', '自重'],
   'レッグプレス': ['シーテッド', '45度リニア'],
   'レッグエクステンション': ['マシン'],
-  'レッグカール': ['マシン'],
+  'レッグカール': ['マシン', 'ライイング'],
   'グッドモーニング': ['バーベル', 'ダンベル'],
 
   // 肩
@@ -126,6 +126,7 @@ const DEFAULT_EQUIPMENT_PATTERNS = {
   'バーベルカール': ['バーベル'],
   'アームカール': ['シーテッド台', 'ダンベル', 'バーベル', 'ケーブル'],
   'ケーブルプレスダウン': ['ケーブル'],
+  'ケーブルトライセプスエクステンション': ['ケーブル'],
   'ケーブルトライセプスキックバック': ['ケーブル'],
 
   // お尻
@@ -376,6 +377,8 @@ function renderTodaySummary() {
   } else {
     const menu = state.menus.find(m => m.id === todayLog.menuId);
     titleText = menu ? menu.title : todayLog.menuId;
+    // 「（」以降（例: 上半身 A（フリーウェイト＆ケーブル） の括弧部分）は表示しない
+    titleText = titleText.split(/[（(]/)[0].trim();
   }
 
   let exListHTML = '';
@@ -901,9 +904,9 @@ function renderWorkoutLogInputs(menuId) {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'exercise-chip';
-    btn.textContent = `+ ${e.name}`;
+    btn.textContent = e.equipment ? `+ ${e.name}（${e.equipment}）` : `+ ${e.name}`;
     btn.onclick = () => {
-      addSuggestedExerciseInput(e.name, e.detail, menuId);
+      addSuggestedExerciseInput(e.name, e.detail, menuId, null, e.equipment || '');
     };
     chipList.appendChild(btn);
   });
@@ -1414,7 +1417,7 @@ function openEditModal(menuId) {
   container.innerHTML = '';
 
   menu.exercises.forEach(e => {
-    addExerciseInput(e.name, e.detail);
+    addExerciseInput(e.name, e.detail, e.equipment || '');
   });
 
   makeSortable(container);
@@ -1426,22 +1429,98 @@ function closeEditModal() {
   state.editingMenuId = null;
 }
 
-function addExerciseInput(name = '', detail = '') {
+function addExerciseInput(name = '', detail = '', equipment = '') {
   const container = document.getElementById('exercise-inputs-container');
   const row = document.createElement('div');
   row.className = 'exercise-row';
   row.innerHTML = `
-    <div class="move-btn-group">
-      <button type="button" class="btn-move-row" onclick="moveBlock(this, -1)">▲</button>
-      <button type="button" class="btn-move-row" onclick="moveBlock(this, 1)">▼</button>
+    <div class="exercise-row-main" style="display:flex; align-items:center; gap:6px;">
+      <div class="move-btn-group">
+        <button type="button" class="btn-move-row" onclick="moveBlock(this, -1)">▲</button>
+        <button type="button" class="btn-move-row" onclick="moveBlock(this, 1)">▼</button>
+      </div>
+      <input type="text" class="form-input input-name" placeholder="種目名" value="${name}" style="margin-bottom:0; flex:1;" oninput="onMenuExerciseNameInput(this)">
+      <input type="text" class="form-input input-detail" placeholder="目安セット・回数" value="${detail}" style="margin-bottom:0; flex:1;">
+      <button type="button" class="btn-remove-row" onclick="this.closest('.exercise-row').remove()">&times;</button>
     </div>
-    <input type="text" class="form-input input-name" placeholder="種目名" value="${name}" style="margin-bottom:0; flex:1;">
-    <input type="text" class="form-input input-detail" placeholder="目安セット・回数" value="${detail}" style="margin-bottom:0; flex:1;">
-    <button type="button" class="btn-remove-row" onclick="this.parentElement.remove()">&times;</button>
+    <div class="menu-equip-select-row"></div>
   `;
   container.appendChild(row);
+  renderMenuEquipmentChips(row, name, equipment);
   makeSortable(container);
   row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+// メニュー編集画面で、種目名に応じた「器具」候補をチップとして表示する
+// ここで選んだ器具は、記録画面で該当メニューの種目候補ボタンを押した際に自動入力される
+function renderMenuEquipmentChips(rowEl, exerciseName, selectedEquip = '') {
+  const equipContainer = rowEl.querySelector('.menu-equip-select-row');
+  if (!equipContainer) return;
+
+  const trimmedName = (exerciseName || '').trim();
+  if (!trimmedName) {
+    equipContainer.innerHTML = '';
+    equipContainer.dataset.selectedEquip = '';
+    return;
+  }
+
+  let patterns = state.exerciseEquipment[trimmedName] || DEFAULT_EQUIPMENT_PATTERNS[trimmedName];
+  if (!patterns) {
+    const matchedKey = Object.keys(DEFAULT_EQUIPMENT_PATTERNS).find(key => trimmedName.includes(key) || key.includes(trimmedName));
+    patterns = matchedKey ? DEFAULT_EQUIPMENT_PATTERNS[matchedKey] : ['マシン', 'ダンベル', 'バーベル', 'ケーブル', '自重'];
+  }
+
+  const isCustomValue = selectedEquip && !patterns.includes(selectedEquip);
+
+  const chipsHTML = patterns.map(eq => {
+    const isActive = selectedEquip === eq ? 'active' : '';
+    return `<button type="button" class="equipment-chip-btn ${isActive}" onclick="selectMenuEquipChip(this, '${eq}')">${eq}</button>`;
+  }).join('');
+
+  equipContainer.innerHTML = `
+    <span style="font-size:0.72rem; color:var(--text-sub); font-weight:700; flex-shrink:0;">使うマシン・器具（任意）:</span>
+    <div class="equipment-chips-list">
+      ${chipsHTML}
+    </div>
+    <input type="text" class="form-input menu-equip-custom-input" value="${isCustomValue ? selectedEquip : ''}" placeholder="その他" oninput="onMenuEquipCustomInput(this)" style="margin-bottom:0;">
+  `;
+
+  equipContainer.dataset.selectedEquip = selectedEquip || '';
+}
+
+function selectMenuEquipChip(btnEl, equipName) {
+  const row = btnEl.closest('.menu-equip-select-row');
+  const input = row.querySelector('.menu-equip-custom-input');
+  const allBtns = row.querySelectorAll('.equipment-chip-btn');
+
+  let chosenEquip = '';
+  if (btnEl.classList.contains('active')) {
+    btnEl.classList.remove('active');
+    chosenEquip = '';
+  } else {
+    allBtns.forEach(b => b.classList.remove('active'));
+    btnEl.classList.add('active');
+    chosenEquip = equipName;
+  }
+
+  if (input) input.value = '';
+  row.dataset.selectedEquip = chosenEquip;
+}
+
+function onMenuEquipCustomInput(inputEl) {
+  const row = inputEl.closest('.menu-equip-select-row');
+  const allBtns = row.querySelectorAll('.equipment-chip-btn');
+  allBtns.forEach(b => b.classList.remove('active'));
+  row.dataset.selectedEquip = inputEl.value.trim();
+}
+
+// 種目名を変更したら、それに応じて器具の候補チップを再描画する（選択済みの値が新候補になければ引き継ぐ）
+function onMenuExerciseNameInput(inputEl) {
+  const row = inputEl.closest('.exercise-row');
+  if (!row) return;
+  const equipRow = row.querySelector('.menu-equip-select-row');
+  const currentSelected = equipRow ? (equipRow.dataset.selectedEquip || '') : '';
+  renderMenuEquipmentChips(row, inputEl.value, currentSelected);
 }
 
 function saveMenuEdit() {
@@ -1461,7 +1540,9 @@ function saveMenuEdit() {
   rows.forEach(row => {
     const name = row.querySelector('.input-name').value.trim();
     const detail = row.querySelector('.input-detail').value.trim();
-    if (name) newExercises.push({ name, detail });
+    const equipRow = row.querySelector('.menu-equip-select-row');
+    const equipment = equipRow ? (equipRow.dataset.selectedEquip || '').trim() : '';
+    if (name) newExercises.push(equipment ? { name, detail, equipment } : { name, detail });
   });
 
   const targetMenu = state.menus.find(m => m.id === state.editingMenuId);
