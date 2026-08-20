@@ -520,7 +520,8 @@
     </div>
 
         <div class="footer-tools" style="display: flex; gap: 10px; justify-content: center; margin-top: 32px; margin-bottom: 24px;">
-            
+   <button onclick="localStorage.removeItem('workout_tracker_state'); alert('初期化しました！ページをリロード（更新）してください');" style="position:fixed; top:20px; left:20px; z-index:9999; padding:15px 20px; background:#ef4444; color:#fff; font-size:16px; font-weight:bold; border-radius:8px; border:none; box-shadow:0 4px 10px rgba(0,0,0,0.3);">⚠️ 強制リセット</button>
+         
         <button type="button" class="btn-footer-tool" id="btn-open-exercise-library" onclick="openExerciseLibraryModal()">📋</button>
         <button type="button" class="btn-footer-tool" onclick="openThemeSettingsModal()">🎨</button>
         <button type="button" class="btn-footer-tool" onclick="importPastLogs()">📥</button>
