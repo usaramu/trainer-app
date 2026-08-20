@@ -2457,3 +2457,19 @@ input.lib-new-equip-input:focus {
     /* 上段と区別しやすくするため、文字色を少し強調するかサイズを調整（任意） */
     font-size: 0.75rem !important; 
 }
+
+
+
+/* ▼ スマホでの入力時の「ぐわん！」（自動ズーム）を絶対に防ぐ */
+input, textarea, select {
+    font-size: 16px !important;
+}
+
+/* ▼ モーダル展開時の背景スクロールを完全に固定するためのクラス */
+body.modal-open {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+}
+
