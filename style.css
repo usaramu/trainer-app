@@ -1,4 +1,3 @@
-/* ▼ テーマ定義（デフォルト：アイスブルー） */
 :root {
     --primary-color: #82A0C2;
     --primary-hover: #6B8CB3;
@@ -16,13 +15,12 @@
     --accent-color: #88C4C2;
     --offday-color: #A7B3BF;
 
-    /* ▼ カレンダーのメニューラベル用カラー（アイスブルーの色相・パステル・文字は常に白） */
-    --cal-a: #6f8fbf;   /* 上半身A：パステルブルー */
-    --cal-c: #a7b9d6;   /* 上半身B：パステルブルー（近いトーン） */
-    --cal-b: #88a0c5;   /* 下半身A：ライトブルー */
-    --cal-d: #c2cfe3;   /* 下半身B：パステルティール */
-    --cal-f: #e39a9a;   /* 全身：パステルミント（差し色） */
-    --cal-e: #8AA0C4;   /* 有酸素（走るマーク）：くすみブルー */
+    --cal-a: #6f8fbf;
+    --cal-c: #a7b9d6;
+    --cal-b: #88a0c5;
+    --cal-d: #c2cfe3;
+    --cal-f: #e39a9a;
+    --cal-e: #8AA0C4;
 }
 
 /* テーマ：パステルピンク */
@@ -43,13 +41,12 @@ body.theme-pink {
     --accent-color: #E0B899;
     --offday-color: #C2B4AE;
 
-    /* ▼ カレンダーのメニューラベル用カラー（パステルピンクの色相・パステル） */
-    --cal-a: #d46a7c;   /* 上半身A：パステルローズ */
-    --cal-b: #e7a1b3;   /* 上半身B：パステルピンク（近いトーン） */
-    --cal-c: #c9a69d;   /* 下半身A：ライトピンク */
-    --cal-d: #e0c9b8;   /* 下半身B：パステルコーラル */
-    --cal-e: #C99AA6;   /* 有酸素（走るマーク）：くすみローズ */
-    --cal-f: #a7a96b;   /* 全身：パステルローズ（差し色） */
+    --cal-a: #d46a7c;
+    --cal-b: #e7a1b3;
+    --cal-c: #c9a69d;
+    --cal-d: #e0c9b8;
+    --cal-e: #C99AA6;
+    --cal-f: #a7a96b;
 }
 
 /* テーマ：セージグリーン */
@@ -70,13 +67,12 @@ body.theme-green {
     --accent-color: #9EC288;
     --offday-color: #A2B5B0;
 
-    /* ▼ カレンダーのメニューラベル用カラー（セージグリーンの色相・パステル） */
-    --cal-a: #76a98e;   /* 上半身A：パステルグリーン */
-    --cal-b: #a9c2b3;   /* 上半身B：パステルグリーン（近いトーン） */
-    --cal-c: #bed3c2;   /* 下半身A：ライトグリーン */
-    --cal-d: #d1e3d8;   /* 下半身B：パステルモス */
-    --cal-f: #c7a7aa;   /* 全身：パステルミント（差し色） */
-    --cal-e: #96BBA4;   /* 有酸素（走るマーク）：くすみグリーン */
+    --cal-a: #76a98e;
+    --cal-b: #a9c2b3;
+    --cal-c: #bed3c2;
+    --cal-d: #d1e3d8;
+    --cal-f: #c7a7aa;
+    --cal-e: #96BBA4;
 }
 
 /* テーマ：ラベンダー */
@@ -97,13 +93,12 @@ body.theme-lavender {
     --accent-color: #CE9BB4;
     --offday-color: #B2AEC4;
 
-    /* ▼ カレンダーのメニューラベル用カラー（ラベンダーの色相・パステル） */
-    --cal-a: #8e7dba;   /* 上半身A：パステルパープル */
-    --cal-b: #B9aed6;   /* 上半身B：パステルラベンダー（近いトーン） */
-    --cal-c: #d3c7f1;   /* 下半身A：ライトラベンダー */
-    --cal-d: #D7d1e4;   /* 下半身B：パステルモーブ */
-    --cal-f: #c9aa7c;   /* 全身：パステルバイオレット（差し色） */
-    --cal-e: #A79CC6;   /* 有酸素（走るマーク）：くすみパープル */
+    --cal-a: #8e7dba;
+    --cal-b: #B9aed6;
+    --cal-c: #d3c7f1;
+    --cal-d: #D7d1e4;
+    --cal-f: #c9aa7c;
+    --cal-e: #A79CC6;
 }
 
 * {
@@ -184,63 +179,54 @@ h1 {
     margin-bottom: 10px;
 }
 
-.btn-offday {
-    background-color: rgba(255, 255, 255, 0.7);
-    color: var(--text-main);
-    border: 1.5px solid #FFFFFF;
-    padding: 12px 8px;
-    border-radius: 16px;
-    font-size: 0.8125rem;
-    font-weight: 900;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.btn-offday:hover {
-    background-color: rgba(255, 255, 255, 0.95);
-}
-
-/* 部位選択ガイドバナー */
+/* ▼ 7つのボタン（4つ＋3つの中央寄せ配置） */
 .category-select-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
     margin-bottom: 8px;
 }
 
 .btn-category-select {
-    background: rgba(255, 255, 255, 0.92);
-    border: 1.5px solid #FFFFFF;
-    border-radius: 16px;
-    padding: 8px 2px;
+    flex: 0 0 calc(25% - 6px);
+    background: rgba(255, 255, 255, 0.95);
+    border: 2px solid #FFFFFF;
+    border-radius: 20px;
+    padding: 10px 4px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
     transition: transform 0.15s ease, background-color 0.15s ease;
 }
 
 .btn-category-select:hover {
-    transform: translateY(-1px);
+    transform: translateY(-2px);
     background-color: #ffffff;
 }
 
 .btn-category-select .cat-label {
-    font-size: 0.75rem;
+    font-size: 0.72rem !important;
     font-weight: 900;
     color: var(--text-main) !important;
     font-family: "Zen Maru Gothic", sans-serif;
-    margin-bottom: 1px;
+    margin-bottom: 2px;
     white-space: nowrap;
 }
 
 .btn-category-select .cat-days {
-    font-size: 0.625rem;
+    font-size: 0.65rem !important;
     font-weight: 700;
     color: var(--primary-color) !important;
     white-space: nowrap;
+}
+
+.btn-off-cute {
+    border-color: var(--offday-color);
+    background: #fdfdfd;
 }
 
 /* メインタブ */
@@ -388,27 +374,20 @@ h1 {
     min-width: 20px;
     border: none !important;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
-}
-
-.cal-tag {
-    color: #FFFFFF !important; /* すべての文字色を白に統一 */
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25); /* パステル背景でも白文字が読みやすいように */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 }
 
 .cal-tag.A { background-color: var(--cal-a); }
 .cal-tag.B { background-color: var(--cal-b); }
 .cal-tag.C { background-color: var(--cal-c); }
 .cal-tag.D { background-color: var(--cal-d); }
-
-/* 有酸素（E）は背景色をつけると走るマークの絵文字と衝突して見づらくなるため、透明背景＋枠線にする */
 .cal-tag.E {
     background-color: transparent !important;
     border: 1.5px solid var(--cal-e) !important;
     box-shadow: none;
     text-shadow: none;
 }
-.cal-tag.F { background-color: var(--cal-f) !important; color: #FFFFFF !important; } /* 「全」はグリーンに */
-
+.cal-tag.F { background-color: var(--cal-f) !important; color: #FFFFFF !important; }
 .cal-tag.ALL { background-color: var(--cal-f) !important; }
 .cal-tag.OFF { background-color: var(--offday-color) !important; color: #FFFFFF !important; }
 
@@ -437,7 +416,6 @@ h1 {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    transition: background-color 0.2s ease;
 }
 
 .history-month-summary .arrow-icon {
@@ -507,13 +485,6 @@ h1 {
 .table-section {
     margin-top: 24px;
     margin-bottom: 24px;
-}
-
-.table-wrapper {
-    background-color: transparent;
-    border: none;
-    border-radius: 0;
-    overflow-x: visible;
 }
 
 .menu-table {
@@ -615,10 +586,10 @@ h1 {
 }
 
 /* InBody */
-.inbody-action-row {
+.ib-header {
     display: flex;
     gap: 8px;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
 }
 
 .btn-inbody-add {
@@ -631,12 +602,6 @@ h1 {
     font-size: 0.8125rem !important;
     font-weight: 900 !important;
     cursor: pointer !important;
-    transition: all 0.15s ease !important;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02) !important;
-}
-
-.btn-inbody-add:hover {
-    background-color: var(--primary-soft) !important;
 }
 
 .btn-inbody-json {
@@ -649,56 +614,92 @@ h1 {
     font-size: 0.8125rem !important;
     font-weight: 900 !important;
     cursor: pointer !important;
-    transition: all 0.15s ease !important;
 }
 
-.btn-inbody-json:hover {
-    background-color: var(--bg-color) !important;
-    color: var(--text-main) !important;
+.ib-empty-state {
+    text-align: center;
+    padding: 48px 20px;
+    color: var(--text-sub);
 }
 
-.inbody-chart-card {
+.ib-hero-card {
+    background: linear-gradient(135deg, var(--banner-grad-1), var(--banner-grad-3));
+    border-radius: 20px;
+    padding: 16px 18px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 14px rgba(62, 72, 82, 0.08);
+}
+
+.ib-hero-date {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: var(--text-main);
+    opacity: 0.65;
+    margin-bottom: 8px;
+}
+
+.ib-hero-main {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.ib-hero-weight-value {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--text-main);
+    font-family: "Zen Maru Gothic", sans-serif;
+    line-height: 1;
+}
+
+.ib-hero-sub-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.ib-sub-stat {
+    background-color: rgba(255, 255, 255, 0.75);
+    border: 1.5px solid rgba(255, 255, 255, 0.9);
+    border-radius: 12px;
+    padding: 8px 6px;
+    text-align: center;
+}
+
+.ib-sub-stat-label {
+    font-size: 0.64rem;
+    font-weight: 800;
+    color: var(--text-sub);
+}
+
+.ib-sub-stat-value {
+    font-size: 0.9rem;
+    font-weight: 900;
+    color: var(--text-main);
+    font-family: "Zen Maru Gothic", sans-serif;
+    margin-bottom: 2px;
+}
+
+.ib-chart-card {
     background-color: var(--card-bg);
     border: 1.5px solid var(--border-color);
     border-radius: 20px;
-    padding: 14px;
+    padding: 16px 14px;
     margin-bottom: 16px;
-    box-shadow: 0 4px 14px rgba(62, 72, 82, 0.03);
 }
 
-.inbody-metric-tabs {
+.ib-metric-select-row {
     display: flex;
-    gap: 6px;
-    overflow-x: auto;
-    padding-bottom: 10px;
-    margin-bottom: 8px;
-    border-bottom: 1.5px solid var(--border-color);
-    -webkit-overflow-scrolling: touch;
+    gap: 8px;
+    margin-bottom: 12px;
 }
 
-.inbody-metric-tab {
-    flex: 0 0 auto;
-    background-color: var(--bg-color);
-    border: 1.5px solid var(--border-color);
-    color: var(--text-sub);
-    padding: 6px 12px;
-    border-radius: 12px;
-    font-size: 0.75rem;
-    font-weight: 900;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: all 0.15s ease;
-}
-
-.inbody-metric-tab.active {
-    background-color: var(--primary-color);
-    color: #ffffff;
-    border-color: var(--primary-color);
-}
-
-#inbody-chart-canvas {
-    width: 100%;
-    display: block;
+.ib-metric-select-row .form-input {
+    margin-bottom: 0;
+    font-weight: 800;
+    font-size: 0.85rem;
 }
 
 .segmental-input-grid {
@@ -728,76 +729,95 @@ h1 {
     margin-bottom: 0;
 }
 
-.inbody-summary-card {
-    background: linear-gradient(135deg, var(--banner-grad-1), var(--banner-grad-3));
-    border-radius: 20px;
-    padding: 16px;
-    margin-bottom: 16px;
-    box-shadow: 0 4px 14px rgba(62, 72, 82, 0.05);
-}
-
-.inbody-summary-date {
-    font-size: 0.72rem;
-    font-weight: 900;
-    color: var(--text-sub);
-    margin-bottom: 10px;
-}
-
-.inbody-summary-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-}
-
-.inbody-stat-box {
-    background-color: rgba(255, 255, 255, 0.6);
-    border-radius: 14px;
-    padding: 10px 6px;
-    text-align: center;
-}
-
-.inbody-stat-label {
-    font-size: 0.68rem;
-    font-weight: 700;
-    color: var(--text-sub);
-    margin-bottom: 4px;
-}
-
-.inbody-stat-value {
-    font-size: 1.05rem;
+.ib-history-title {
+    font-size: 0.85rem;
     font-weight: 900;
     color: var(--text-main);
-    font-family: "Zen Maru Gothic", sans-serif;
+    margin: 4px 2px 10px;
 }
 
-.inbody-stat-diff {
-    font-size: 0.68rem;
-    font-weight: 900;
-    margin-top: 2px;
+.ib-history-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    margin-bottom: 10px;
+    overflow: hidden;
 }
 
-.inbody-stat-diff.up { color: #e0788a; }
-.inbody-stat-diff.down { color: #6bb3a0; }
-.inbody-stat-diff.flat { color: var(--text-sub); }
+.ib-history-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 11px 14px;
+    cursor: pointer;
+}
 
-.inbody-empty {
+.ib-history-date, .ib-history-weight {
+    font-size: 0.8rem;
+    font-weight: 700;
     color: var(--text-sub);
-    text-align: center;
-    padding: 24px;
-    font-size: 0.8125rem;
 }
 
-.inbody-list-metrics {
+.ib-history-chips {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
+    margin-bottom: 10px;
 }
+
+.ib-seg-container {
+    background-color: var(--bg-color);
+    border: 1.5px solid var(--border-color);
+    border-radius: 14px;
+    padding: 8px 12px;
+    font-size: 0.8rem;
+}
+
+.ib-seg-header, .ib-seg-row {
+    display: flex;
+    align-items: center;
+    padding: 7px 4px;
+}
+
+.ib-seg-header {
+    font-weight: 900;
+    color: var(--text-sub);
+    border-bottom: 1.5px solid var(--border-color);
+    font-size: 0.74rem;
+    padding-bottom: 8px;
+    margin-bottom: 2px;
+}
+
+.ib-seg-row {
+    border-bottom: 1px dashed var(--border-color);
+}
+
+.ib-seg-cell {
+    flex: 1;
+    text-align: center;
+}
+
+.ib-seg-cell.label {
+    flex: 0 0 56px;
+    text-align: left;
+    font-weight: 900;
+    color: var(--text-main);
+}
+
+.ib-seg-cell.val {
+    font-weight: 800;
+    font-size: 0.82rem;
+}
+
+.ib-seg-cell.val.muscle { color: var(--primary-color); }
+.ib-seg-cell.val.fat { color: var(--accent-color); }
 
 .inbody-metric-chip {
     background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
     border-radius: 10px;
-    padding: 4px 10px;
-    font-size: 0.72rem;
+    padding: 5px 11px;
+    font-size: 0.75rem;
     font-weight: 700;
     color: var(--text-main);
 }
@@ -805,61 +825,8 @@ h1 {
 .inbody-metric-chip span {
     color: var(--primary-color);
     font-weight: 900;
-    margin-left: 3px;
+    margin-left: 4px;
 }
-
-.inbody-seg-container {
-    background-color: var(--bg-color);
-    border: 1.5px solid var(--border-color);
-    border-radius: 14px;
-    margin-top: 10px;
-    padding: 6px 10px;
-    font-size: 0.78rem;
-}
-
-.inbody-seg-header,
-.inbody-seg-row {
-    display: flex;
-    align-items: center;
-    padding: 5px 4px;
-}
-
-.inbody-seg-header {
-    font-weight: 900;
-    color: var(--text-sub);
-    border-bottom: 1.5px solid var(--border-color);
-    font-size: 0.72rem;
-    padding-bottom: 6px;
-    margin-bottom: 2px;
-}
-
-.inbody-seg-row {
-    border-bottom: 1px dashed var(--border-color);
-}
-
-.inbody-seg-row:last-child {
-    border-bottom: none;
-}
-
-.inbody-seg-cell {
-    flex: 1;
-    text-align: center;
-}
-
-.inbody-seg-cell.label {
-    flex: 0 0 60px;
-    text-align: left;
-    font-weight: 900;
-    color: var(--text-main);
-}
-
-.inbody-seg-cell.val {
-    font-weight: 700;
-    color: var(--text-main);
-}
-
-.inbody-seg-cell.val.muscle { color: var(--primary-color); }
-.inbody-seg-cell.val.fat { color: var(--accent-color); }
 
 /* アコーディオン */
 .date-accordion-item {
@@ -907,10 +874,10 @@ h1 {
 }
 
 .date-accordion-item.active .date-accordion-body {
-    padding: 0 14px 14px;
+    padding: 10px 14px;
 }
 
-/* ▼ BODYタブ：部位別／筋肉別 切り替え */
+/* BODYタブ切り替え */
 .body-map-mode-toggle {
     display: flex;
     gap: 8px;
@@ -928,7 +895,6 @@ h1 {
     font-size: 0.8rem;
     font-weight: 900;
     cursor: pointer;
-    transition: all 0.15s ease;
 }
 
 .body-map-mode-btn.active {
@@ -937,7 +903,6 @@ h1 {
     color: #FFFFFF;
 }
 
-/* ▼ BODYタブ：種目タップボタン（一覧→ポップアップ） */
 .exercise-tap-btn {
     width: 100%;
     display: flex;
@@ -954,27 +919,6 @@ h1 {
     color: var(--text-main);
     cursor: pointer;
     text-align: left;
-    transition: all 0.15s ease;
-}
-
-.exercise-tap-btn:hover,
-.exercise-tap-btn:active {
-    background-color: var(--primary-soft);
-    border-color: var(--primary-color);
-}
-
-.exercise-tap-btn .exercise-tap-arrow {
-    color: var(--primary-color);
-    font-size: 0.9rem;
-    flex-shrink: 0;
-    margin-left: 8px;
-}
-
-.exercise-detail-variation {
-    margin-top: 6px;
-    margin-bottom: 12px;
-    padding-left: 14px;
-    border-left: 3px solid var(--border-color);
 }
 
 /* モーダル */
@@ -991,7 +935,6 @@ h1 {
     align-items: center;
     padding: 8px;
     z-index: 100;
-    box-sizing: border-box;
 }
 
 .modal-overlay.active {
@@ -1001,7 +944,7 @@ h1 {
 .modal-content {
     background-color: var(--card-bg);
     border-radius: 22px;
-    width: 92%; /* スマホの画面幅に合わせて少しマージンを持たせる */
+    width: 92%;
     max-width: 460px;
     max-height: 90vh;
     display: flex;
@@ -1009,8 +952,7 @@ h1 {
     overflow: hidden;
     box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
     border: 2px solid #FFFFFF;
-    box-sizing: border-box;
-    margin: 0 auto; /* 画面中央に綺麗に配置 */
+    margin: 0 auto;
 }
 
 .modal-header {
@@ -1028,7 +970,6 @@ h1 {
     color: var(--text-main);
 }
 
-/* ▼ モーダル閉じる（✕）ボタン */
 .btn-close {
     background: var(--primary-soft) !important;
     border: 1.5px solid var(--border-color) !important;
@@ -1041,27 +982,13 @@ h1 {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    line-height: 1 !important;
     font-weight: 900 !important;
-    transition: all 0.15s ease !important;
-}
-
-.btn-close:hover {
-    background-color: var(--primary-color) !important;
-    color: #FFFFFF !important;
-    border-color: var(--primary-color) !important;
 }
 
 .modal-body {
     padding: 14px 16px;
     overflow-y: auto !important;
-    overflow-x: hidden !important;
     flex-grow: 1;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain; /* ← ★この1行を追加！ */
-    width: 100%;
-    box-sizing: border-box;
-    overflow-y: scroll !important; 
     -webkit-overflow-scrolling: touch;
 }
 
@@ -1075,16 +1002,13 @@ h1 {
 
 .form-input {
     width: 100%;
-    max-width: 100%; /* 横幅がはみ出さないようにガード */
     padding: 10px 12px;
     border: 1.5px solid var(--border-color);
     border-radius: 14px;
     font-size: 16px !important;
     margin-bottom: 12px;
     background-color: var(--bg-color);
-    transition: all 0.15s;
     font-weight: 700;
-    box-sizing: border-box; /* パディングやボーダーを含めて幅を計算させる */
 }
 
 .form-input:focus {
@@ -1093,76 +1017,39 @@ h1 {
     background-color: #ffffff;
 }
 
-/* iOSでの日付入力欄の文字見切れ対策 */
-input[type="date"].form-input {
-    min-height: 44px; /* タップしやすい高さを強制 */
-    height: auto;     /* 高さを自動調整にして見切れを防ぐ */
-    appearance: none;
-    -webkit-appearance: none;
-    line-height: normal; /* 行間の衝突をリセット */
-    padding-top: 12px;   /* 上下のパディングを微調整して中央揃えに */
-    padding-bottom: 12px;
-}
-
-
-/* ▼ タイプ切り替え（メニューから／自由入力／オフ） */
-#workout-log-modal .rotation-mode-options {
+/* 記録タイプ切り替え（2つになったためすっきり） */
+.rotation-mode-options {
     display: flex;
-    flex-direction: row;
     gap: 6px;
     margin-bottom: 12px;
 }
 
-#workout-log-modal .rotation-mode-option {
+.rotation-mode-option {
     flex: 1;
     padding: 9px 6px;
     font-size: 0.8125rem;
     font-weight: 900;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    text-align: center !important;
-    line-height: 1 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border-radius: 14px;
     border: 1.5px solid var(--border-color);
     background-color: var(--card-bg);
     color: var(--text-sub);
     cursor: pointer;
-    transition: all 0.15s ease;
-    user-select: none;
 }
 
-#workout-log-modal .rotation-mode-option:has(input:checked) {
+.rotation-mode-option:has(input:checked) {
     border-color: var(--primary-color);
     background-color: var(--primary-soft);
     color: var(--primary-color);
-    box-shadow: 0 2px 6px rgba(130, 160, 194, 0.15);
 }
 
-#workout-log-modal .rotation-mode-option input[type="radio"] {
+.rotation-mode-option input[type="radio"] {
     display: none !important;
 }
 
-/* ▼ + 種目を追加 ボタン（テーマ連動） */
-.btn-add-extra {
-    background-color: #FFFFFF !important;
-    border: 1.5px dashed var(--primary-color) !important;
-    color: var(--primary-color) !important;
-    padding: 6px 14px !important;
-    border-radius: 14px !important;
-    font-size: 0.78rem !important;
-    font-weight: 900 !important;
-    font-family: "Zen Maru Gothic", sans-serif !important;
-    cursor: pointer !important;
-    transition: all 0.15s ease !important;
-    outline: none !important;
-}
-
-.btn-add-extra:hover {
-    background-color: var(--primary-soft) !important;
-}
-
-/* ▼ 種目候補リストのボタン群（灰色枠の完全排除） */
+/* ▼ 種目候補リストのボタン群（白い背景と丸みに修正） */
 .exercise-chip-list button.exercise-chip {
     background-color: #FFFFFF !important;
     border: 1.5px solid var(--border-color) !important;
@@ -1173,8 +1060,6 @@ input[type="date"].form-input {
     font-weight: 700 !important;
     font-family: "Zen Maru Gothic", sans-serif !important;
     cursor: pointer !important;
-    transition: all 0.15s ease !important;
-    outline: none !important;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02) !important;
 }
 
@@ -1183,87 +1068,81 @@ input[type="date"].form-input {
     border-color: var(--primary-color) !important;
 }
 
+.btn-add-extra {
+    background-color: #FFFFFF !important;
+    border: 1.5px dashed var(--primary-color) !important;
+    color: var(--primary-color) !important;
+    padding: 6px 14px !important;
+    border-radius: 14px !important;
+    font-size: 0.78rem !important;
+    font-weight: 900 !important;
+    cursor: pointer !important;
+}
+
 .extra-log-block, .exercise-row {
-    padding: 8px 8px !important;
+    padding: 8px !important;
     margin-bottom: 8px !important;
     border-radius: 14px !important;
     background-color: var(--card-bg) !important;
     border: 1.5px solid var(--border-color) !important;
     border-left: 4px solid var(--primary-color) !important;
     width: 100% !important;
-    box-sizing: border-box !important;
 }
 
-#workout-log-modal .set-input-row {
-    width: 100% !important;
-    box-sizing: border-box !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    gap: 4px !important;
-    padding: 3px 2px !important;
+.set-input-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    padding: 3px 2px;
 }
 
-#workout-log-modal .set-label {
-    font-size: 0.72rem !important;
-    font-weight: 900 !important;
-    min-width: 28px !important;
-    color: var(--primary-color) !important;
-    flex-shrink: 0 !important;
+.set-label {
+    font-size: 0.72rem;
+    font-weight: 900;
+    color: var(--primary-color);
+    min-width: 28px;
 }
 
-#workout-log-modal .set-field-group {
-    display: flex !important;
-    align-items: center !important;
-    gap: 3px !important;
-    flex: 1 !important;
-    justify-content: flex-end !important;
-    min-width: 0 !important;
+.set-field-group {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    flex: 1;
+    justify-content: flex-end;
 }
 
-#workout-log-modal .set-field-group input.form-input {
+.set-field-group input.form-input {
     width: 42px !important;
-    min-width: 32px !important;
     height: 28px !important;
-    padding: 0 2px !important;
-    font-size: 0.8125rem !important;
-    border-radius: 8px !important;
-    border: 1.5px solid var(--border-color) !important;
-    background-color: var(--bg-color) !important;
+    padding: 0 !important;
     text-align: center !important;
     margin-bottom: 0 !important;
 }
 
-#workout-log-modal .set-unit {
-    font-size: 0.7rem !important;
-    margin-right: 4px !important;
-    font-weight: 700 !important;
-    flex-shrink: 0 !important;
+.set-unit {
+    font-size: 0.7rem;
+    font-weight: 700;
+    margin-right: 4px;
 }
 
-#workout-log-modal .btn-add-set-row {
-    padding: 4px !important;
-    font-size: 0.72rem !important;
-    border-radius: 10px !important;
-    margin-top: 4px !important;
-    background: var(--card-bg) !important;
-    border: 1.5px dashed var(--primary-color) !important;
-    color: var(--primary-color) !important;
-    font-weight: 900 !important;
-    cursor: pointer !important;
-    width: 100% !important;
+.btn-add-set-row {
+    padding: 4px;
+    font-size: 0.72rem;
+    border-radius: 10px;
+    margin-top: 4px;
+    background: var(--card-bg);
+    border: 1.5px dashed var(--primary-color);
+    color: var(--primary-color);
+    font-weight: 900;
+    cursor: pointer;
+    width: 100%;
 }
 
-#workout-log-modal .btn-add-set-row:hover {
-    background-color: var(--primary-soft) !important;
-}
-
-/* ▼ ▲▼ 行移動ボタン */
 .move-btn-group {
     display: inline-flex;
     gap: 3px;
     align-items: center;
-    flex-shrink: 0;
 }
 
 .btn-move-row {
@@ -1275,19 +1154,7 @@ input[type="date"].form-input {
     border-radius: 8px !important;
     font-size: 0.65rem !important;
     font-weight: 900 !important;
-    line-height: 1 !important;
     cursor: pointer !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    padding: 0 !important;
-    transition: all 0.15s ease !important;
-}
-
-.btn-move-row:active {
-    background-color: var(--primary-color) !important;
-    color: #ffffff !important;
-    transform: scale(0.92);
 }
 
 .btn-remove-row {
@@ -1298,31 +1165,8 @@ input[type="date"].form-input {
     height: 26px !important;
     border-radius: 50% !important;
     font-size: 1rem !important;
-    line-height: 1 !important;
     cursor: pointer !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    transition: all 0.15s ease !important;
 }
-
-.btn-remove-row:hover {
-    background-color: var(--primary-color) !important;
-    color: #FFFFFF !important;
-}
-
-#workout-log-modal .btn-remove-set {
-    background: none !important;
-    border: none !important;
-    color: var(--text-sub) !important;
-    font-size: 1.1rem !important;
-    padding: 0 4px !important;
-    cursor: pointer !important;
-    line-height: 1 !important;
-    flex-shrink: 0 !important;
-}
-
-#workout-log-modal .btn-remove-set:hover { color: #ef4444 !important; }
 
 .btn-partial-toggle {
     background-color: var(--bg-color);
@@ -1333,9 +1177,6 @@ input[type="date"].form-input {
     padding: 3px 6px;
     border-radius: 8px;
     cursor: pointer;
-    transition: all 0.15s ease;
-    white-space: nowrap;
-    user-select: none;
 }
 
 .btn-partial-toggle.active {
@@ -1344,34 +1185,7 @@ input[type="date"].form-input {
     color: #FFFFFF;
 }
 
-/* ▼ メニュー編集：種目ごとの器具選択チップ行 */
-.menu-equip-select-row {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin: 4px 0 10px 0;
-    padding: 6px 8px;
-    background-color: var(--bg-color);
-    border-radius: 10px;
-    border: 1.5px dashed var(--border-color);
-}
-
-.menu-equip-select-row:empty {
-    display: none;
-    border: none;
-    padding: 0;
-    margin: 0;
-}
-
-.menu-equip-custom-input {
-    max-width: 100px;
-    font-size: 0.75rem;
-    padding: 4px 8px;
-}
-
-/* ▼ 器具選択チップ行（崩れ防止＆折り返し対応） */
-.equipment-select-row {
+.equipment-select-row, .menu-equip-select-row {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
@@ -1389,10 +1203,9 @@ input[type="date"].form-input {
     align-items: center;
     gap: 4px;
     flex: 1;
-    min-width: 0;
 }
 
-.equipment-chip-btn {
+.equipment-chip-btn, .variation-chip-btn {
     background-color: var(--card-bg);
     border: 1.5px solid var(--border-color);
     color: var(--text-main);
@@ -1401,51 +1214,16 @@ input[type="date"].form-input {
     padding: 3px 8px;
     border-radius: 8px;
     cursor: pointer;
-    transition: all 0.15s ease;
-    user-select: none;
     white-space: nowrap;
 }
 
-.equipment-chip-btn:hover { background-color: var(--primary-soft); }
-.equipment-chip-btn.active {
+.equipment-chip-btn.active, .variation-chip-btn.active {
     background-color: var(--primary-color) !important;
     border-color: var(--primary-color) !important;
     color: #FFFFFF !important;
     font-weight: 900;
 }
 
-/* ▼ 「その他」入力欄（幅固定・びよーん拡大完全防止） */
-input[type="text"].extra-equip-input {
-    font-size: 0.72rem !important;
-    font-weight: 700 !important;
-    height: 25px !important;
-    width: 64px !important;
-    flex-shrink: 0 !important;
-    padding: 0 4px !important;
-    margin-bottom: 0 !important;
-    border-radius: 8px !important;
-    border: 1.5px solid var(--border-color) !important;
-    background-color: var(--card-bg) !important;
-    color: var(--text-main) !important;
-    text-align: center !important;
-}
-
-input[type="text"].extra-equip-input::placeholder {
-    font-size: 0.65rem !important;
-    color: var(--text-sub) !important;
-    font-weight: 700 !important;
-    text-align: center !important;
-}
-
-input[type="text"].extra-equip-input:focus {
-    border-color: var(--primary-color) !important;
-    background-color: #FFFFFF !important;
-    width: 64px !important;
-    text-align: center !important;
-    outline: none !important;
-}
-
-/* ▼ 種目リスト管理モーダル内の部位選択タブ（灰色ボタンの完全排除） */
 .label-tab-row {
     display: flex;
     flex-wrap: wrap;
@@ -1462,12 +1240,6 @@ input[type="text"].extra-equip-input:focus {
     font-size: 0.75rem !important;
     font-weight: 700 !important;
     cursor: pointer !important;
-    transition: all 0.15s ease !important;
-}
-
-.label-tab:hover {
-    background-color: var(--primary-soft) !important;
-    color: var(--primary-color) !important;
 }
 
 .label-tab.active {
@@ -1475,32 +1247,16 @@ input[type="text"].extra-equip-input:focus {
     border-color: var(--primary-color) !important;
     color: #FFFFFF !important;
     font-weight: 900 !important;
-    box-shadow: 0 2px 6px rgba(130, 160, 194, 0.2) !important;
 }
 
-/* ▼ 種目リスト管理モーダル（種目ごとの器具管理カード） */
 .lib-exercise-item-card {
     background-color: var(--card-bg);
     border: 1.5px solid var(--border-color);
     border-radius: 14px;
     padding: 10px;
     margin-bottom: 8px;
-    width: 100%;
 }
 
-.lib-exercise-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 6px;
-}
-
-.lib-exercise-name {
-    font-size: 0.8125rem;
-    color: var(--text-main);
-}
-
-/* 削除アイコンボタン（灰色四角の排除） */
 .chip-remove-btn {
     background: var(--primary-soft) !important;
     border: 1px solid var(--border-color) !important;
@@ -1510,135 +1266,8 @@ input[type="text"].extra-equip-input:focus {
     border-radius: 50% !important;
     font-size: 0.9rem !important;
     cursor: pointer !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    padding: 0 !important;
-    transition: all 0.15s ease !important;
 }
 
-.chip-remove-btn:hover {
-    color: #ef4444 !important;
-    border-color: #ef4444 !important;
-    background-color: #fff !important;
-}
-
-.lib-exercise-equip-row {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    background-color: var(--bg-color);
-    padding: 6px 8px;
-    border-radius: 10px;
-}
-
-.lib-equip-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-}
-
-.lib-equip-chip {
-    background-color: var(--card-bg);
-    border: 1px solid var(--border-color);
-    color: var(--primary-color);
-    font-size: 0.68rem;
-    font-weight: 900;
-    padding: 2px 6px;
-    border-radius: 6px;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.lib-equip-chip button {
-    background: none;
-    border: none;
-    color: var(--text-sub);
-    cursor: pointer;
-    font-size: 0.8rem;
-    line-height: 1;
-}
-
-.lib-equip-chip button:hover { color: #ef4444; }
-
-.lib-equip-add-form {
-    display: flex;
-    gap: 4px;
-    align-items: center;
-}
-
-input.lib-new-equip-input {
-    font-size: 0.72rem !important;
-    height: 24px !important;
-    padding: 0 6px !important;
-    margin-bottom: 0 !important;
-    border-radius: 6px !important;
-    border: 1px solid var(--border-color) !important;
-    background-color: var(--card-bg) !important;
-    flex: 1;
-}
-
-.btn-lib-equip-add {
-    background-color: var(--primary-color) !important;
-    color: #fff !important;
-    border: none !important;
-    border-radius: 6px !important;
-    font-size: 0.68rem !important;
-    font-weight: 900 !important;
-    padding: 0 8px !important;
-    height: 24px !important;
-    cursor: pointer !important;
-    white-space: nowrap !important;
-    transition: opacity 0.15s ease !important;
-}
-
-.btn-lib-equip-add:hover { opacity: 0.9; }
-
-.btn-lib-equip-reset {
-    background-color: transparent !important;
-    color: var(--text-sub) !important;
-    border: 1px solid var(--border-color) !important;
-    border-radius: 6px !important;
-    font-size: 0.66rem !important;
-    font-weight: 700 !important;
-    padding: 3px 8px !important;
-    margin-top: 6px;
-    cursor: pointer !important;
-    white-space: nowrap !important;
-    align-self: flex-start;
-}
-
-.btn-lib-equip-reset:hover {
-    color: var(--primary-hover) !important;
-    border-color: var(--primary-color) !important;
-}
-
-/* ▼ 新規種目追加行 */
-.library-add-row {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-}
-
-.btn-library-add {
-    background-color: var(--primary-color) !important;
-    color: #ffffff !important;
-    border: none !important;
-    padding: 8px 14px !important;
-    border-radius: 12px !important;
-    font-size: 0.8125rem !important;
-    font-weight: 900 !important;
-    cursor: pointer !important;
-    white-space: nowrap !important;
-    box-shadow: 0 2px 6px rgba(130, 160, 194, 0.2) !important;
-}
-
-.btn-library-add:hover {
-    background-color: var(--primary-hover) !important;
-}
-
-/* 本日の記録サマリーカード */
 .today-summary-card {
     background-color: var(--card-bg);
     border: 1.5px solid var(--border-color);
@@ -1662,12 +1291,6 @@ input.lib-new-equip-input {
     color: var(--primary-color);
 }
 
-.today-summary-date {
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: var(--text-sub);
-}
-
 .today-summary-badge {
     font-size: 0.75rem;
     font-weight: 900;
@@ -1675,13 +1298,6 @@ input.lib-new-equip-input {
     background-color: var(--primary-soft);
     padding: 2px 8px;
     border-radius: 8px;
-}
-
-.today-summary-empty {
-    font-size: 0.78rem;
-    color: var(--text-sub);
-    text-align: center;
-    padding: 6px 0;
 }
 
 .today-summary-list {
@@ -1700,22 +1316,6 @@ input.lib-new-equip-input {
     font-size: 0.78rem;
     border-bottom: 1px dashed var(--border-color);
     padding-bottom: 4px;
-}
-
-.today-summary-item:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
-}
-
-.today-summary-ex-name {
-    font-weight: 700;
-    color: var(--text-main);
-}
-
-.today-summary-ex-val {
-    font-weight: 900;
-    color: var(--primary-color);
-    font-size: 0.72rem;
 }
 
 .modal-footer {
@@ -1740,14 +1340,6 @@ input.lib-new-equip-input {
     border-radius: 50%;
     padding: 4px;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: border-color 0.15s ease, transform 0.15s ease;
-}
-
-.btn-theme-option:hover {
-    transform: scale(1.08);
 }
 
 .btn-theme-option.active {
@@ -1785,18 +1377,6 @@ input.lib-new-equip-input {
     box-shadow: 0 3px 8px rgba(130, 160, 194, 0.25);
 }
 
-footer {
-    margin-top: 32px;
-    margin-bottom: 24px;
-    text-align: center;
-    font-size: 0.8125rem;
-    color: var(--text-sub);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-}
-
 .footer-tools {
     display: flex;
     gap: 10px;
@@ -1812,13 +1392,6 @@ footer {
     font-size: 0.75rem;
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.15s ease;
-}
-
-.btn-footer-tool:hover {
-    background-color: var(--primary-soft);
-    color: var(--primary-color);
-    border-color: var(--primary-color);
 }
 
 .btn-reset {
@@ -1831,162 +1404,777 @@ footer {
     font-weight: 700;
 }
 
-/* 有酸素（時間・カロリー）入力行の自動収まり＆スタイリッシュ化 */
-.direct-input-group[data-cardio="true"] {
-    display: flex !important;
-    gap: 12px !important;
-    align-items: center !important;
-    padding: 6px 4px !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-}
-
-.direct-input-group[data-cardio="true"] .direct-field {
-    display: flex !important;
-    align-items: center !important;
-    gap: 6px !important;
-    flex: 1 !important;
-}
-
-.direct-input-group[data-cardio="true"] .direct-field label {
-    font-size: 0.75rem !important;
-    font-weight: 700 !important;
-    color: var(--text-main) !important;
-    margin-bottom: 0 !important;
-    white-space: nowrap !important;
-}
-
-/* ▼ 時間・カロリーの入力枠を丸みのあるデザインへ統一 */
-.direct-input-group[data-cardio="true"] input.extra-minutes,
-.direct-input-group[data-cardio="true"] input.extra-calories {
-    width: 100% !important;
-    max-width: 64px !important;
-    height: 30px !important;
-    padding: 0 4px !important;
-    font-size: 0.8125rem !important;
-    font-weight: 700 !important;
-    font-family: "Zen Maru Gothic", sans-serif !important;
-    border-radius: 8px !important;
-    border: 1.5px solid var(--border-color) !important;
-    background-color: var(--bg-color) !important;
-    color: var(--text-main) !important;
-    text-align: center !important;
-    margin-bottom: 0 !important;
-    outline: none !important;
-    transition: border-color 0.15s ease !important;
-}
-
-.direct-input-group[data-cardio="true"] input.extra-minutes:focus,
-.direct-input-group[data-cardio="true"] input.extra-calories:focus {
-    border-color: var(--primary-color) !important;
+/* ▼ 入力欄やチップ追加フォームの背景を綺麗に白く統一する修正 */
+.form-input,
+input.lib-new-equip-input,
+.modal-body textarea,
+.modal-body select {
     background-color: #FFFFFF !important;
+    border: 1.5px solid var(--border-color) !important;
+    color: var(--text-main) !important;
 }
 
-/* ▼ スマホでの意図しない1文字改行を防ぐ設定 */
-
-/* 1. ヘッダーのサブタイトルやタブ、ボタン内のテキストを改行させない */
-.subtitle,
-.main-tab-btn,
-.btn-category-select .cat-label,
-.btn-category-select .cat-days,
-.recommendation-header {
-    white-space: nowrap;
+.form-input:focus,
+input.lib-new-equip-input:focus {
+    background-color: #FFFFFF !important;
+    border-color: var(--primary-color) !important;
 }
 
-/* 2. モーダルのタイトルやボタン名なども必要に応じて1行で収める */
-.modal-header h2,
-.rotation-mode-option span {
+/* 器具やバリエーション管理のカード内にある追加フォームの背景もすっきり白に */
+.lib-equip-add-form input,
+.library-add-row input {
+    background-color: #FFFFFF !important;
+    border: 1.5px solid var(--border-color) !important;
+}
+
+
+/* =========================================================
+   未定義UIクラスの補完
+   JSで動的生成される要素も、テーマ変数に統一して表示する
+   ========================================================= */
+
+/* --- 種目リスト・器具／バリエーション管理 --- */
+.library-add-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.library-add-row .form-input {
+    flex: 1;
+    min-width: 0;
+}
+.btn-library-add,
+.btn-lib-equip-add,
+.btn-add-eq,
+.btn-add-var {
+    appearance: none;
+    -webkit-appearance: none;
+    border: 1.5px solid var(--primary-color) !important;
+    background: var(--primary-soft) !important;
+    color: var(--primary-color) !important;
+    border-radius: 10px !important;
+    padding: 6px 11px !important;
+    font-size: 0.72rem !important;
+    font-weight: 900 !important;
+    line-height: 1.2;
     white-space: nowrap;
+    cursor: pointer;
+}
+.btn-library-add:hover,
+.btn-lib-equip-add:hover,
+.btn-add-eq:hover,
+.btn-add-var:hover {
+    background: var(--primary-color) !important;
+    color: #fff !important;
+}
+.lib-exercise-item-card {
+    background: var(--card-bg);
+    border: 1.5px solid var(--border-color);
+}
+.lib-exercise-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 9px;
+}
+.lib-exercise-name {
+    color: var(--text-main);
+    font-size: 0.82rem;
+    font-weight: 900;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+.lib-exercise-equip-row {
+    padding: 8px 0;
+    border-top: 1px solid var(--border-color);
+}
+.lib-equip-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    min-height: 24px;
+    align-items: center;
+}
+.lib-equip-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 7px;
+    border-radius: 9px;
+    background: var(--primary-soft);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+.lib-equip-chip .btn-remove-var,
+.lib-equip-chip .btn-remove-eq {
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: var(--text-sub);
+    padding: 0;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    line-height: 14px;
+    font-size: 0.78rem;
+    font-weight: 900;
+    cursor: pointer;
+}
+.lib-equip-chip .btn-remove-var:hover,
+.lib-equip-chip .btn-remove-eq:hover {
+    background: var(--primary-color);
+    color: #fff;
+}
+.lib-equip-add-form {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.lib-equip-add-form input {
+    flex: 1;
+    min-width: 0;
+}
+.lib-new-eq-input,
+.lib-new-var-input {
+    margin-bottom: 0 !important;
+}
+.btn-remove-lib-ex,
+.btn-remove-set,
+.btn-remove-var,
+.btn-remove-eq {
+    appearance: none;
+    cursor: pointer;
+}
+.exercise-chip-empty {
+    display: block;
+    padding: 20px 12px;
+    text-align: center;
+    color: var(--text-sub);
+    background: var(--bg-color);
+    border: 1.5px dashed var(--border-color);
+    border-radius: 14px;
+    font-size: 0.75rem;
+}
+
+/* --- 種目選択・追加種目 --- */
+.exercise-tap-arrow {
+    color: var(--text-sub);
+    font-size: 1.1rem;
+    font-weight: 900;
+}
+.extra-exercise-section {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1.5px solid var(--border-color);
+}
+.extra-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.extra-fields-container,
+.direct-input-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.direct-field {
+    flex: 1;
+    min-width: 90px;
+}
+.direct-field label,
+.extra-label-select-label {
+    display: block;
+    color: var(--text-sub);
+    font-size: 0.68rem;
+    font-weight: 800;
+    margin-bottom: 4px;
+}
+.extra-minutes,
+.extra-calories {
+    width: 100%;
+}
+.extra-chip-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.extra-label-select,
+.extra-name-select {
+    width: 100%;
+}
+.extra-name-input {
+    min-width: 0;
+}
+.variation-select-row,
+.menu-variation-select-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+/* --- セット入力 --- */
+.sets-container {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.set-weight,
+.set-reps {
+    width: 100%;
+}
+
+/* --- 種目詳細 --- */
+.exercise-detail-variation {
+    background: var(--primary-soft);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 9px 10px;
+    margin-bottom: 7px;
+}
+.input-detail {
+    width: 100%;
+}
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+.history-date-item {
+    background: var(--card-bg);
+    border: 1.5px solid var(--border-color);
+    border-radius: 14px;
+}
+
+/* --- TODAY'S LOG --- */
+.today-summary-date {
+    color: var(--text-sub);
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+.today-summary-empty {
+    color: var(--text-sub);
+    text-align: center;
+    padding: 14px 8px;
+    font-size: 0.75rem;
+}
+.today-summary-ex-name {
+    color: var(--text-main);
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
 }
-
-/* 3. カレンダーのタグや各種バッジの折り返し防止 */
-.cal-tag,
-.today-summary-badge,
-.inbody-metric-tab {
+.today-summary-ex-val {
+    color: var(--text-sub);
     white-space: nowrap;
+    flex-shrink: 0;
 }
 
-/* モーダル内のカードの余白調整 */
-#edit-modal .exercise-row {
-    border-left: none !important; /* メニュー編集用には左線を消す */
+/* --- メニュー編集 --- */
+.menu-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px 8px;
+    border-radius: 9px;
+    background: var(--primary-soft);
+    color: var(--primary-color);
+    font-size: 0.68rem;
+    font-weight: 900;
+}
+.menu-equipment-setting {
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 7px 9px;
+}
+.menu-exercises-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.menu-memo-input,
+.menu-title-input,
+.menu-new-ex-input {
+    width: 100%;
+}
+.menu-suggest-toggle {
+    color: var(--primary-color);
+    font-weight: 800;
+    cursor: pointer;
+}
+
+/* --- InBody --- */
+.ib-chart-empty,
+.ib-history-empty-chip {
+    color: var(--text-sub);
+    text-align: center;
+    font-size: 0.72rem;
+}
+.ib-chart-empty {
+    padding: 28px 12px;
+}
+.ib-history-empty-chip {
+    display: inline-block;
+    padding: 5px 8px;
+    border-radius: 8px;
+    background: var(--bg-color);
+}
+.ib-diff {
+    color: var(--primary-color);
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+.ib-hero-weight-label {
+    color: var(--text-sub);
+    font-size: 0.7rem;
+    font-weight: 800;
+}
+.ib-hero-weight-unit {
+    color: var(--text-sub);
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+.ib-history-card-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 8px;
+    margin-top: 8px;
+    border-top: 1px solid var(--border-color);
+}
+.ib-sub-stat-top {
+    color: var(--text-sub);
+    font-size: 0.68rem;
+    font-weight: 700;
+}
+.inbody-list-date {
+    color: var(--text-main);
+    font-size: 0.78rem;
+    font-weight: 900;
+}
+
+/* --- フォーム共通 --- */
+.form-textarea {
+    width: 100%;
+    resize: vertical;
+    min-height: 80px;
+}
+
+
+/* =========================================================
+   トレーニング記録モーダル
+   参考デザインに合わせた調整
+   ========================================================= */
+
+/* 種目カード */
+#workout-log-modal .extra-log-block,
+#workout-log-modal .exercise-row {
+    padding: 10px 10px 12px !important;
+    margin-bottom: 10px !important;
+    border-radius: 16px !important;
+    background: var(--card-bg) !important;
+    border: 1.5px solid var(--border-color) !important;
+    border-left: 5px solid var(--primary-color) !important;
+}
+
+/* 「前回」の表示 */
+#workout-log-modal .last-btn-holder {
+    padding-left: 2px !important;
+    margin: 0 0 6px !important;
+    color: var(--primary-color) !important;
+    font-size: 0.72rem !important;
+    font-weight: 800 !important;
+}
+
+/* 種目名・上下移動・削除ボタンの行 */
+#workout-log-modal .extra-title-row {
+    min-height: 44px;
+    margin-bottom: 8px !important;
+}
+
+/* 種目名入力欄 */
+#workout-log-modal .extra-name-input {
+    height: 44px !important;
+    padding: 8px 14px !important;
+    margin-bottom: 0 !important;
+    border-radius: 14px !important;
+    background: var(--primary-soft) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-main) !important;
+    font-size: 0.95rem !important;
+    font-weight: 900 !important;
+}
+
+/* ★ 記録モーダル内の種目削除「×」は円・背景・枠線なし */
+#workout-log-modal .btn-remove-row {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    width: 28px !important;
+    height: 36px !important;
+    min-width: 28px !important;
     padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    outline: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: var(--primary-color) !important;
+    font-family: Arial, sans-serif !important;
+    font-size: 1.45rem !important;
+    font-weight: 400 !important;
+    line-height: 1 !important;
+    cursor: pointer !important;
+}
+
+/* セット削除「×」も同じく単純な×にする */
+#workout-log-modal .btn-remove-set {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    width: 24px !important;
+    height: 30px !important;
+    min-width: 24px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    outline: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: var(--primary-color) !important;
+    font-family: Arial, sans-serif !important;
+    font-size: 1.35rem !important;
+    font-weight: 400 !important;
+    line-height: 1 !important;
+    cursor: pointer !important;
+}
+
+/* × のホバー時にも円を出さない */
+#workout-log-modal .btn-remove-row:hover,
+#workout-log-modal .btn-remove-set:hover {
     background: transparent !important;
     border: none !important;
+    color: var(--primary-hover) !important;
+    transform: none !important;
 }
 
-#edit-modal .lib-exercise-item-card {
+/* バリエーション／器具欄 */
+#workout-log-modal .variation-select-row,
+#workout-log-modal .equipment-select-row {
+    margin-bottom: 8px !important;
+    padding: 7px 9px !important;
+    border-radius: 14px !important;
+    background: var(--bg-color) !important;
     border: 1.5px solid var(--border-color) !important;
 }
 
-/* アコーディオンが閉じている時は余白も0にする */
-.date-accordion-item .date-accordion-body {
-    max-height: 0;
-    overflow: hidden;
-    padding: 0 14px; /* ここを0にする */
-    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), padding 0.35s ease;
+/* チップを参考画像くらいの大きさに */
+#workout-log-modal .variation-chip-btn,
+#workout-log-modal .equipment-chip-btn {
+    min-height: 38px;
+    padding: 6px 13px !important;
+    border-radius: 12px !important;
+    font-size: 0.78rem !important;
 }
 
-/* アコーディオンが開いている時だけ余白を持たせる */
-.date-accordion-item.active .date-accordion-body {
-    padding: 10px 14px; /* 開いた時は余白を入れる */
-}
-
-/* =========================================
-   ▼ バリエーション用のチップボタンスタイル追加 ▼
-========================================= */
-.variation-select-row {
-    margin-bottom: 4px;
-}
-.menu-variation-select-row {
-    margin-bottom: 4px;
-}
-
-.variation-chip-btn {
-    background-color: var(--card-bg);
-    border: 1.5px solid var(--border-color);
-    color: var(--text-main);
-    font-size: 0.72rem;
-    font-weight: 700;
-    padding: 3px 8px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    user-select: none;
-    white-space: nowrap;
-}
-
-.variation-chip-btn:hover {
-    background-color: var(--primary-soft);
-}
-
-.variation-chip-btn.active {
-    background-color: #A49BCE !important; /* ラベンダー色で器具チップと区別 */
-    border-color: #A49BCE !important;
-    color: #FFFFFF !important;
-    font-weight: 900;
-}
-
-/* ▼ バリエーション用のチップボタンスタイル */
-.variation-chip-btn {
-    background-color: var(--card-bg);
-    border: 1.5px solid var(--border-color);
-    color: var(--text-main);
-    font-size: 0.72rem;
-    font-weight: 700;
-    padding: 3px 8px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    user-select: none;
-    white-space: nowrap;
-}
-
-.variation-chip-btn:hover { background-color: var(--primary-soft); }
-.variation-chip-btn.active {
-    background-color: var(--primary-color) !important;
+/* 選択中チップ */
+#workout-log-modal .variation-chip-btn.active,
+#workout-log-modal .equipment-chip-btn.active {
+    background: var(--primary-color) !important;
     border-color: var(--primary-color) !important;
-    color: #FFFFFF !important;
+    color: #fff !important;
+}
+
+/* セット */
+#workout-log-modal .set-input-row {
+    min-height: 44px;
+    padding: 3px 0 !important;
+    gap: 5px;
+}
+
+#workout-log-modal .set-label {
+    min-width: 42px;
+    color: var(--primary-color);
+    font-size: 0.78rem;
     font-weight: 900;
+}
+
+#workout-log-modal .set-field-group {
+    gap: 4px !important;
+}
+
+#workout-log-modal .set-field-group input.form-input {
+    width: 70px !important;
+    height: 42px !important;
+    padding: 0 6px !important;
+    border-radius: 12px !important;
+    font-size: 0.9rem !important;
+    font-weight: 800 !important;
+}
+
+#workout-log-modal .set-unit {
+    font-size: 0.72rem !important;
+    font-weight: 800 !important;
+    margin-right: 4px;
+    color: var(--text-main);
+}
+
+/* Pボタン */
+#workout-log-modal .btn-partial-toggle {
+    width: 38px;
+    height: 38px;
+    padding: 0 !important;
+    border-radius: 11px !important;
+    background: var(--bg-color);
+    border: 1.5px solid var(--border-color);
+    color: var(--text-sub);
+    font-size: 0.72rem;
+    font-weight: 900;
+}
+
+#workout-log-modal .btn-partial-toggle.active {
+    background: #F59E0B;
+    border-color: #F59E0B;
+    color: #fff;
+}
+
+/* セット追加 */
+#workout-log-modal .btn-add-set-row {
+    min-height: 40px;
+    padding: 6px 10px !important;
+    margin-top: 6px !important;
+    border-radius: 13px !important;
+    background: transparent !important;
+    border: 1.5px dashed var(--primary-color) !important;
+    color: var(--primary-color) !important;
+    font-size: 0.78rem !important;
+    font-weight: 900 !important;
+}
+
+/* 上下移動ボタン */
+#workout-log-modal .btn-move-row {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 10px !important;
+    background: var(--bg-color) !important;
+    border: 1.5px solid var(--border-color) !important;
+    color: var(--primary-color) !important;
+    font-size: 0.72rem !important;
+}
+
+/* 追加種目ブロック */
+#workout-log-modal .extra-exercise-section {
+    margin-top: 12px;
+}
+
+/* 記録モーダルの下部ボタンを参考画像寄りに */
+#workout-log-modal .modal-footer {
+    padding: 12px 16px 16px;
+    border-top: 1.5px solid var(--border-color);
+    background: var(--card-bg);
+}
+
+
+/* =========================================================
+   種目リスト・器具管理
+   入力欄を「＋追加」ボタンと同じサイズ感に統一
+   ========================================================= */
+
+.lib-equip-add-form {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    margin-top: 6px !important;
+}
+
+/* 入力欄 */
+.lib-equip-add-form .lib-new-equip-input,
+.library-add-row .form-input {
+    flex: 1 1 auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    height: 44px !important;
+    box-sizing: border-box !important;
+    padding: 0 12px !important;
+    margin-bottom: 0 !important;
+    border-radius: 13px !important;
+    font-size: 0.78rem !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    background: #FFFFFF !important;
+    border: 1.5px solid var(--border-color) !important;
+    color: var(--text-main) !important;
+}
+
+/* ＋追加ボタン */
+.lib-equip-add-form .btn-lib-equip-add,
+.library-add-row .btn-library-add {
+    flex: 0 0 auto !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    box-sizing: border-box !important;
+    padding: 0 14px !important;
+    margin: 0 !important;
+    border-radius: 13px !important;
+    font-size: 0.78rem !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* フォーカス時も高さを変えない */
+.lib-equip-add-form .lib-new-equip-input:focus,
+.library-add-row .form-input:focus {
+    height: 44px !important;
+    padding: 0 12px !important;
+}
+
+/* プレースホルダーもボタン文字と同じくらいのサイズ */
+.lib-equip-add-form .lib-new-equip-input::placeholder,
+.library-add-row .form-input::placeholder {
+    font-size: 0.78rem !important;
+    font-weight: 700 !important;
+    color: var(--text-sub) !important;
+    opacity: 1;
+}
+
+
+/* =========================================================
+   全体の「アコーディオン」タイトルを軽くする
+   すっきりした見た目に統一
+   ========================================================= */
+
+/* HISTORY：月ごとのアコーディオン */
+.history-month-summary {
+    font-weight: 600 !important;
+}
+
+/* HISTORY：日付アコーディオン */
+.date-accordion-preview {
+    font-weight: 600 !important;
+}
+
+/* アコーディオン内のタイトルとして使われる見出しも
+   過度な太字にならないよう統一 */
+.date-accordion-header {
+    font-weight: 600 !important;
+}
+
+/* タイトルの文字を少しだけ細く・軽く見せる */
+.history-month-summary,
+.date-accordion-preview,
+.date-accordion-header {
+    letter-spacing: 0.01em;
+}
+
+
+/* =========================================================
+   すっきりした文字組み
+   「太い」よりも「軽く・読みやすく」を優先
+   ========================================================= */
+
+/* モーダルのタイトル */
+.modal-header h2 {
+    font-weight: 600 !important;
+}
+
+/* メニュー設定・管理モーダルのアコーディオンタイトル */
+#menu-settings-modal .date-accordion-header > span:first-child {
+    font-weight: 600 !important;
+}
+
+/* メニュー設定内の種目名 */
+#menu-settings-modal .lib-exercise-name,
+#menu-settings-modal .lib-exercise-name strong {
+    font-weight: 500 !important;
+}
+
+/* メニュー設定内の「バリエーション」「使うマシン・器具」 */
+#menu-settings-modal .menu-equipment-setting > span {
+    font-weight: 500 !important;
+}
+
+/* BODY：部位別・筋肉別のアコーディオン */
+#tab-content-body-map .date-accordion-header > span:first-child {
+    font-weight: 500 !important;
+}
+
+/* BODY：種目名 */
+#tab-content-body-map .exercise-tap-btn {
+    font-weight: 500 !important;
+}
+
+/* BODY：部位別／筋肉別タブ */
+#tab-content-body-map .body-map-mode-btn {
+    font-weight: 600 !important;
+}
+
+/* HISTORY：月・日付アコーディオン */
+.history-month-summary,
+.date-accordion-preview,
+.date-accordion-header {
+    font-weight: 500 !important;
+}
+
+/* HISTORY：種目名・記録値 */
+.history-ex-name {
+    font-weight: 500 !important;
+}
+.history-ex-val {
+    font-weight: 600 !important;
+}
+
+/* メニュー一覧 */
+.menu-table td[data-label="対象部位"] {
+    font-weight: 600 !important;
+}
+.table-ex-name {
+    font-weight: 500 !important;
+}
+
+/* InBody：履歴タイトル */
+.ib-history-title {
+    font-weight: 600 !important;
+}
+
+/* InBody：日付・体重 */
+.ib-history-date,
+.ib-history-weight {
+    font-weight: 500 !important;
+}
+
+/* InBody：数値チップ */
+.inbody-metric-chip {
+    font-weight: 500 !important;
+}
+.inbody-metric-chip span {
+    font-weight: 600 !important;
+}
+
+/* InBody：部位別表 */
+.ib-seg-header {
+    font-weight: 600 !important;
+}
+.ib-seg-cell.label {
+    font-weight: 600 !important;
+}
+.ib-seg-cell.val {
+    font-weight: 500 !important;
+}
+
+/* InBody入力・セレクト */
+.ib-metric-select-row .form-input {
+    font-weight: 500 !important;
+}
+.segmental-input-label {
+    font-weight: 500 !important;
+}
+
+/* 「編集する」などの小さな操作ボタンは本文より少しだけ強く */
+.btn-table-edit {
+    font-weight: 600 !important;
 }

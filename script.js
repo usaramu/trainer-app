@@ -2,7 +2,7 @@ let isEditingLogMode = false;
 const STORAGE_KEY = 'trainingRecords';
 const CURRENT_SCHEMA_VERSION = 'label-v5'; // スキーマバージョンを更新して自動同期
 
-// ▼ 新しい表示フォーマット：種目/バリエーション（マシン）
+// ▼ 新しい表示フォーマット：種目/タイプ（マシン）
 function formatExerciseName(name, variation, equipment) {
   let text = name;
   if (variation) text += `/${variation}`;
@@ -41,7 +41,7 @@ const initialDefaultMenus = [
       exercises: [
         { name: 'ヒップスラスト', detail: '15~20回 × 3セット', variation: 'ノーマル', equipment: 'グルートドライブ' },
         { name: 'レッグカール', detail: '15~20回 × 3セット', variation: 'シーテッド', equipment: 'マシン' },
-        { name: 'レッグプレス', detail: '足幅を広め・上位置に / 15~20回 × 3セット', variation: '足上', equipment: '45度リニア' },
+        { name: 'レッグプレス', detail: '足幅を広め・上位置に / 15~20回 × 3セット', variation: '足上', equipment: 'シーテッド' },
         { name: 'アブダクション', detail: '15~20回 × 3セット', variation: '骨盤後傾', equipment: 'マシン' },
       ]
     },
@@ -50,7 +50,7 @@ const initialDefaultMenus = [
       title: '下半身 B（代謝向上・フリーウェイト）',
       memo: '多関節種目でカロリー消費を高め、ヒップアップを狙う。',
       exercises: [
-        { name: 'デッドリフト', detail: '15~20回 × 3セット', variation: 'ルーマニアン', equipment: 'ダンベル' },
+        { name: 'ルーマニアンデッドリフト', detail: '15~20回 × 3セット', variation: 'ノーマル', equipment: 'ダンベル' },
         { name: 'スクワット', detail: '左右各12~15回 × 3セット', variation: 'ブルガリアン', equipment: 'ダンベル' },
         { name: 'グルートキックバック', detail: 'ケーブル使用 / 左右各15~20回 × 3セット', variation: 'ノーマル', equipment: 'ケーブル' },
         { name: 'アブダクション', detail: '15~20回 × 3セット', variation: '骨盤立て', equipment: 'マシン' },
@@ -90,7 +90,7 @@ const MENU_LABELS = {
   'OFF': '休'
 };
 
-// ★ バリエーション（やり方）のデフォルトパターン
+// ★ タイプ（やり方）のデフォルトパターン
 const DEFAULT_VARIATION_PATTERNS = {
   'チェストプレス': ['フラット', 'インクライン', 'デクライン'],
   'チェストフライ': ['フラット', 'インクライン'],
@@ -422,7 +422,7 @@ let state = {
   exerciseLabels: ['胸', '背中', '脚', '肩', '腕', 'お尻', '腹筋', '全身', '有酸素運動', 'その他'],
   exerciseLibrary: {},
   exerciseEquipment: {},
-  exerciseVariations: {}, // ★ バリエーションを追加
+  exerciseVariations: {}, // ★ タイプを追加
   inbodyLogs: [],
   inbodyMetric: 'weight',
   exerciseDetails: {}
@@ -451,16 +451,16 @@ function loadState() {
     // ★ 過去のデータを新仕様に自動変換する処理
     // ==========================================
     const migrateItem = (item, exName) => {
-      // 昔のデータで、器具欄に文字が入っているけどバリエーション欄が空の場合
+      // 昔のデータで、器具欄に文字が入っているけどタイプ欄が空の場合
       if (item.equipment && !item.variation) {
         const oldVal = item.equipment;
         const varPatterns = DEFAULT_VARIATION_PATTERNS[exName] || [];
         const equipPatterns = DEFAULT_EQUIPMENT_PATTERNS[exName] || [];
         
-        // 古い「器具」の文字が、新しい「バリエーション」に含まれているかチェック
+        // 古い「器具」の文字が、新しい「タイプ」に含まれているかチェック
         const matchedVar = varPatterns.find(v => v.includes(oldVal) || oldVal.includes(v));
         if (matchedVar) {
-          item.variation = matchedVar; // バリエーションにお引越し
+          item.variation = matchedVar; // タイプにお引越し
           
           // 空になった器具には適当なデフォルトを入れる
           if (oldVal.includes('マググリップ') && equipPatterns.includes('ケーブル')) {
@@ -514,6 +514,7 @@ function loadState() {
         if (defaultMenu && savedMenu) {
           savedMenu.title = defaultMenu.title;
           savedMenu.memo = defaultMenu.memo;
+          savedMenu.exercises = JSON.parse(JSON.stringify(defaultMenu.exercises));
         }
       });
     } else {
@@ -651,18 +652,14 @@ function buildDefaultExerciseLibrary() {
   };
 }
 function renderRecommendation() {
-  const calcDaysAgo = (category) => {
+  const calcDaysAgo = (keyword, isMenuId = false) => {
     const catLogs = state.logs.filter(l => {
       if (l.menuId === 'OFF') return false;
       const menu = state.menus.find(m => m.id === l.menuId);
       const title = menu ? menu.title : '';
-      const isAll = l.menuId === 'ALL' || title.includes('全身');
 
-      if (category === '上半身') return title.includes('上半身');
-      if (category === '下半身') return title.includes('下半身');
-      if (category === '全身') return isAll;
-      if (category === '有酸素') return title.includes('有酸素') || title.includes('リカバリー') || l.menuId === 'F';
-      return false;
+      if (isMenuId) return l.menuId === keyword;
+      return title.includes(keyword);
     });
 
     if (catLogs.length === 0) return '未記録';
@@ -682,16 +679,21 @@ function renderRecommendation() {
     return `${diffDays}日前`;
   };
 
-  const upperEl = document.getElementById('days-upper');
-  const lowerEl = document.getElementById('days-lower');
+  const upperAEl = document.getElementById('days-upper-a');
+  const upperBEl = document.getElementById('days-upper-b');
+  const lowerAEl = document.getElementById('days-lower-a');
+  const lowerBEl = document.getElementById('days-lower-b');
   const fullEl = document.getElementById('days-full');
   const cardioEl = document.getElementById('days-cardio');
 
-  if (upperEl) upperEl.textContent = `前回: ${calcDaysAgo('上半身')}`;
-  if (lowerEl) lowerEl.textContent = `前回: ${calcDaysAgo('下半身')}`;
-  if (fullEl) fullEl.textContent = `前回: ${calcDaysAgo('全身')}`;
-  if (cardioEl) cardioEl.textContent = `前回: ${calcDaysAgo('有酸素')}`;
+  if (upperAEl) upperAEl.textContent = ` ${calcDaysAgo('A', true)}`;
+  if (upperBEl) upperBEl.textContent = ` ${calcDaysAgo('B', true)}`;
+  if (lowerAEl) lowerAEl.textContent = `${calcDaysAgo('C', true)}`;
+  if (lowerBEl) lowerBEl.textContent = `${calcDaysAgo('D', true)}`;
+  if (fullEl) fullEl.textContent = `${calcDaysAgo('全身')}`;
+  if (cardioEl) cardioEl.textContent = `${calcDaysAgo('有酸素')}`;
 }
+
 
 function renderTodaySummary() {
   const cardContainer = document.getElementById('today-summary-card');
@@ -725,7 +727,7 @@ function renderTodaySummary() {
 
   let exListHTML = '';
   if (todayLog.menuId === 'OFF') {
-    exListHTML = '<div class="today-summary-empty" style="padding:4px 0;">しっかり体を休めましょう！</div>';
+    exListHTML = '<div class="today-summary-empty" style="padding:4px 0;">おやすみ</div>';
   } else if (todayLog.exerciseLogs && Object.keys(todayLog.exerciseLogs).length > 0) {
     exListHTML = '<div class="today-summary-list">';
     for (const [exName, logVal] of Object.entries(todayLog.exerciseLogs)) {
@@ -943,16 +945,16 @@ function openDetailLogModal(logIndex) {
         const nameText = formatExerciseName(cleanName, item.variation, item.equipment);
         const formatted = formatSingleLogObj(item, false);
         html += `
-          <div style="display:flex; justify-content:space-between; border-bottom:1px dashed var(--border-color); padding-bottom:6px;">
-            <span style="font-weight:500; font-size:0.85rem;">${nameText}</span>
-            <span style="color:var(--text-sub); font-size:0.9rem;">${formatted}</span>
+          <div style="display:flex; justify-content:space-between; align-items:baseline; gap:6px; border-bottom:1px dashed var(--border-color); padding-bottom:6px; flex-wrap:nowrap;">
+            <span style="font-weight:500; font-size:0.72rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex-shrink:1; min-width:0;">${nameText}</span>
+            <span style="color:var(--text-sub); font-size:0.72rem; white-space:nowrap; flex-shrink:0;">${formatted}</span>
           </div>
         `;
       });
     }
     html += '</div>';
   } else {
-    html = '<p style="color:var(--text-sub);">各種目の詳細ログはありません。</p>';
+    html = '<p style="color:var(--text-sub);">おやすみしたね</p>';
   }
   bodyEl.innerHTML = html;
 
@@ -1010,7 +1012,7 @@ function fillSetsContainerFromItem(block, item) {
   });
 }
 
-// ▼ 新しい表示フォーマット：種目/バリエーション（マシン）
+// ▼ 新しい表示フォーマット：種目/タイプ（マシン）
 function formatExerciseName(name, variation, equipment) {
   let text = name;
   if (variation) text += `/${variation}`;
@@ -1138,7 +1140,7 @@ function recordOffDay() {
   renderCalendar();
 }
 
-// ★ バリエーション用の描画関数
+// ★ タイプ用の描画関数
 function renderVariationChips(blockEl, exerciseName, selectedVar = '') {
   const varContainer = blockEl.querySelector('.variation-select-row');
   if (!varContainer) return;
@@ -1150,9 +1152,10 @@ function renderVariationChips(blockEl, exerciseName, selectedVar = '') {
   }
 
   let patterns = state.exerciseVariations[exerciseName] || DEFAULT_VARIATION_PATTERNS[exerciseName];
-  if (!patterns || patterns.length === 0) {
+  const isOnlyNormal = patterns && patterns.length === 1 && patterns[0] === 'ノーマル';
+  if (!patterns || patterns.length === 0 || isOnlyNormal) {
     varContainer.style.display = 'none';
-    varContainer.dataset.selectedVariation = '';
+    varContainer.dataset.selectedVariation = isOnlyNormal ? patterns[0] : '';
     return;
   }
 
@@ -1164,7 +1167,7 @@ function renderVariationChips(blockEl, exerciseName, selectedVar = '') {
   }).join('');
 
   varContainer.innerHTML = `
-    <span style="font-size:0.72rem; color:var(--text-sub); font-weight:700; flex-shrink:0;">ﾊﾞﾘｴｰｼｮﾝ:</span>
+    <span style="font-size:0.72rem; color:var(--text-sub); font-weight:700; flex-shrink:0;">タイプ:</span>
     <div class="equipment-chips-list">
       ${chipsHTML}
     </div>
@@ -1190,7 +1193,7 @@ function selectVariationChip(btnEl, varName) {
 
 // 器具用の描画関数
 function renderEquipmentChips(blockEl, exerciseName, selectedEquip = '') {
-  // ★修正箇所：バリエーション行を誤って上書きしないように「:not(.variation-select-row)」を追加
+  // ★修正箇所：タイプ行を誤って上書きしないように「:not(.variation-select-row)」を追加
   const equipContainer = blockEl.querySelector('.equipment-select-row:not(.variation-select-row)');
   if (!equipContainer) return;
 
@@ -1214,7 +1217,7 @@ function renderEquipmentChips(blockEl, exerciseName, selectedEquip = '') {
   }).join('');
 
   equipContainer.innerHTML = `
-    <span style="font-size:0.72rem; color:var(--text-sub); font-weight:700; flex-shrink:0;">マシン・器具:</span>
+    <span style="font-size:0.72rem; color:var(--text-sub); font-weight:700; flex-shrink:0;">ツール:</span>
     <div class="equipment-chips-list">
       ${chipsHTML}
     </div>
@@ -1280,11 +1283,8 @@ function openWorkoutLogModal(defaultMenuId, presetDateISO, isEdit = false) {
   if (isEdit && existingLog) {
     if (existingLog.menuId === 'OFF') {
       document.getElementById('record-type-off').checked = true;
-    } else if (existingLog.recordType === 'menu') {
-      document.getElementById('record-type-menu').checked = true;
-      currentMenuId = existingLog.menuId;
     } else {
-      document.getElementById('record-type-free').checked = true;
+      document.getElementById('record-type-menu').checked = true;
       currentMenuId = existingLog.menuId;
     }
   } else {
@@ -1386,39 +1386,25 @@ function openWorkoutLogModal(defaultMenuId, presetDateISO, isEdit = false) {
 }
 
 function toggleRecordType() {
-  const isFree = document.getElementById('record-type-free').checked;
-  const isOff = document.getElementById('record-type-off').checked;
+  const isOff = document.getElementById('record-type-off') ? document.getElementById('record-type-off').checked : false;
 
   const selectMenuLabel = document.getElementById('select-log-menu-label');
   const selectMenu = document.getElementById('select-log-menu');
   const logInputs = document.getElementById('workout-log-inputs');
   const freeSection = document.getElementById('free-exercise-section');
-  const extraLabel = document.getElementById('extra-exercise-label');
-  const addExtraBtn = freeSection ? freeSection.querySelector('.btn-add-extra') : null;
 
   if (isOff) {
-    selectMenuLabel.style.display = 'none';
-    selectMenu.style.display = 'none';
-    logInputs.style.display = 'none';
-    freeSection.style.display = 'none';
-  } else if (isFree) {
-    selectMenuLabel.style.display = 'block';
-    selectMenu.style.display = 'block';
-    logInputs.style.display = 'none';
-    freeSection.style.display = 'block';
-
-    selectMenuLabel.textContent = '対象部位';
-    if (extraLabel) extraLabel.textContent = '実施した種目（▲▼ボタンで並び替え）';
-    if (addExtraBtn) addExtraBtn.style.display = 'inline-block';
+    if (selectMenuLabel) selectMenuLabel.style.display = 'none';
+    if (selectMenu) selectMenu.style.display = 'none';
+    if (logInputs) logInputs.style.display = 'none';
+    if (freeSection) freeSection.style.display = 'none';
   } else {
-    selectMenuLabel.style.display = 'block';
-    selectMenu.style.display = 'block';
-    logInputs.style.display = 'block';
-    freeSection.style.display = 'block';
+    if (selectMenuLabel) selectMenuLabel.style.display = 'block';
+    if (selectMenu) selectMenu.style.display = 'block';
+    if (logInputs) logInputs.style.display = 'block';
+    if (freeSection) freeSection.style.display = 'block';
 
-    selectMenuLabel.textContent = 'メニュー選択';
-    if (extraLabel) extraLabel.textContent = '';
-    if (addExtraBtn) addExtraBtn.style.display = 'none';
+    if (selectMenuLabel) selectMenuLabel.textContent = 'メニュー選択';
   }
 }
 
@@ -1787,7 +1773,6 @@ function closeWorkoutLogModal() {
 
 function submitWorkoutLog() {
   const isOff = document.getElementById('record-type-off').checked;
-  const isFree = document.getElementById('record-type-free').checked;
   const dateEl = document.getElementById('select-log-date');
   const selectedISO = (dateEl && dateEl.value) ? dateEl.value : getTodayISO();
 
@@ -1816,8 +1801,7 @@ function submitWorkoutLog() {
     finalExerciseLogs[key].push(dataObj);
   };
 
-  const containerId = isFree ? 'extra-exercise-container' : 'suggested-fields-container';
-  const blocks = document.querySelectorAll(`#${containerId} .extra-log-block`);
+  const blocks = document.querySelectorAll('#suggested-fields-container .extra-log-block');
 
   blocks.forEach(block => {
     const nameSelect = block.querySelector('.extra-name-select');
@@ -1831,18 +1815,8 @@ function submitWorkoutLog() {
     const variation = varRow ? (varRow.dataset.selectedVariation || '') : '';
 
     const equipRow = block.querySelector('.equipment-select-row:not(.variation-select-row)');
-    const equipInput = block.querySelector('.extra-equip-input');
     const equipFromDataset = equipRow ? (equipRow.dataset.selectedEquip || '') : '';
-    const equipment = equipFromDataset || (equipInput ? equipInput.value.trim() : '');
-
-    if (name && equipment) {
-      if (!state.exerciseEquipment[name]) {
-        state.exerciseEquipment[name] = [];
-      }
-      if (!state.exerciseEquipment[name].includes(equipment)) {
-        state.exerciseEquipment[name].push(equipment);
-      }
-    }
+    const equipment = equipFromDataset;
 
     if (name) {
       if (minInput) {
@@ -1883,7 +1857,7 @@ function submitWorkoutLog() {
   state.logs.push({
     date: selectedISO,
     menuId: selectedMenuId,
-    recordType: isFree ? 'free' : 'menu',
+    recordType: 'menu',
     exerciseLogs: finalExerciseLogs
   });
 
@@ -1927,21 +1901,21 @@ function openDetailLogModal(logIndex) {
       const valArray = Array.isArray(logVal) ? logVal : [logVal];
 
       valArray.forEach(item => {
-        // ★ 左側に「種目/バリエーション（マシン）」を合体させる
+        // ★ 左側に「種目/タイプ（マシン）」を合体させる
         const nameText = formatExerciseName(cleanName, item.variation, item.equipment);
         // ★ 右側のバッジを非表示にする (false)
         const formatted = formatSingleLogObj(item, false);
         html += `
-          <div style="display:flex; justify-content:space-between; border-bottom:1px dashed var(--border-color); padding-bottom:6px;">
-            <span style="font-weight:500; font-size:0.85rem;">${nameText}</span>
-            <span style="color:var(--text-sub); font-size:0.9rem; text-align:right; max-width:60%; word-break:break-all;">${formatted}</span>
+          <div style="display:flex; justify-content:space-between; align-items:baseline; gap:6px; border-bottom:1px dashed var(--border-color); padding-bottom:6px; flex-wrap:nowrap;">
+            <span style="font-weight:500; font-size:0.72rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex-shrink:1; min-width:0;">${nameText}</span>
+            <span style="color:var(--text-sub); font-size:0.72rem; text-align:right; white-space:nowrap; flex-shrink:0;">${formatted}</span>
           </div>
         `;
       });
     }
     html += '</div>';
   } else {
-    html = '<p style="color:var(--text-sub);">各種目の詳細ログはありません。</p>';
+    html = '<p style="color:var(--text-sub);">おやすみしたね</p>';
   }
   bodyEl.innerHTML = html;
 
@@ -2118,9 +2092,10 @@ function renderMenuVariationChips(rowEl, exerciseName, selectedVar = '') {
   }
 
   let patterns = state.exerciseVariations[trimmedName] || DEFAULT_VARIATION_PATTERNS[trimmedName];
-  if (!patterns || patterns.length === 0) {
+  const isOnlyNormal = patterns && patterns.length === 1 && patterns[0] === 'ノーマル';
+  if (!patterns || patterns.length === 0 || isOnlyNormal) {
     varContainer.innerHTML = '';
-    varContainer.dataset.selectedVariation = '';
+    varContainer.dataset.selectedVariation = isOnlyNormal ? patterns[0] : '';
     varContainer.style.display = 'none';
     return;
   }
@@ -2132,7 +2107,7 @@ function renderMenuVariationChips(rowEl, exerciseName, selectedVar = '') {
   }).join('');
 
   varContainer.innerHTML = `
-    <span style="font-size:0.72rem; color:var(--text-sub); font-weight:700; flex-shrink:0;">バリエーション:</span>
+    <span style="font-size:0.72rem; color:var(--text-sub); font-weight:700; flex-shrink:0;">タイプ:</span>
     <div class="equipment-chips-list">
       ${chipsHTML}
     </div>
@@ -2224,7 +2199,7 @@ function renderMenuEquipmentChips(rowEl, exerciseName, selectedEquip = '') {
   }).join('');
 
   equipContainer.innerHTML = `
-    <span style="font-size:0.72rem; color:var(--text-sub); font-weight:700; flex-shrink:0;">使うマシン・器具（任意）:</span>
+    <span style="font-size:0.72rem; color:var(--text-sub); font-weight:700; flex-shrink:0;">ツール:</span>
     <div class="equipment-chips-list">
       ${chipsHTML}
     </div>
@@ -2463,55 +2438,114 @@ function renderLibraryExerciseChips() {
   }
 
   container.innerHTML = names.map(name => {
-    // ▼ バリエーションのチップ生成（直接指定していた色を削除し、テーマカラーに連動させました）
     const vars = state.exerciseVariations[name] || DEFAULT_VARIATION_PATTERNS[name] || [];
     const varChipsHTML = vars.map(va => `
       <span class="lib-equip-chip">
-        ${va}<button type="button" onclick="removeExerciseVar('${name}', '${va}')">&times;</button>
+        ${va}<button type="button" class="btn-remove-var" data-ex="${name}" data-var="${va}">&times;</button>
       </span>
     `).join('');
 
-    // ▼ 器具のチップ生成
     const equips = state.exerciseEquipment[name] || DEFAULT_EQUIPMENT_PATTERNS[name] || [];
     const equipChipsHTML = equips.map(eq => `
       <span class="lib-equip-chip">
-        ${eq}<button type="button" onclick="removeExerciseEquip('${name}', '${eq}')">&times;</button>
+        ${eq}<button type="button" class="btn-remove-eq" data-ex="${name}" data-eq="${eq}">&times;</button>
       </span>
     `).join('');
 
     return `
-      <div class="lib-exercise-item-card">
+      <div class="lib-exercise-item-card" data-exercisename="${name}">
         <div class="lib-exercise-header">
           <span class="lib-exercise-name"><strong>${name}</strong></span>
-          <button type="button" class="chip-remove-btn" onclick="removeLibraryExercise('${name}')" title="種目を削除">&times;</button>
+          <button type="button" class="chip-remove-btn btn-remove-lib-ex" data-ex="${name}" title="種目を削除">&times;</button>
         </div>
         
-        <!-- バリエーション管理 -->
+        <!-- タイプ管理 -->
         <div class="lib-exercise-equip-row" style="margin-bottom: 8px;">
-          <div style="font-size:0.7rem; font-weight:700; color:var(--text-sub); margin-bottom:2px;">バリエーションの管理</div>
+          <div style="font-size:0.7rem; font-weight:700; color:var(--text-sub); margin-bottom:2px;">タイプの管理</div>
           <div class="lib-equip-list">${varChipsHTML}</div>
           <div class="lib-equip-add-form" style="margin-top:4px;">
-            <input type="text" class="form-input lib-new-equip-input" placeholder="新しいバリエーション">
-            <button type="button" class="btn-lib-equip-add" onclick="addExerciseVar('${name}', this)">+ 追加</button>
+            <input type="text" class="form-input lib-new-equip-input lib-new-var-input" ">
+            <button type="button" class="btn-lib-equip-add btn-add-var" data-ex="${name}">+ 追加</button>
           </div>
         </div>
 
         <!-- 器具・マシンの管理 -->
         <div class="lib-exercise-equip-row">
-          <div style="font-size:0.7rem; font-weight:700; color:var(--text-sub); margin-bottom:2px;">器具・マシンの管理</div>
+          <div style="font-size:0.7rem; font-weight:700; color:var(--text-sub); margin-bottom:2px;">ツールの管理</div>
           <div class="lib-equip-list">${equipChipsHTML}</div>
           <div class="lib-equip-add-form" style="margin-top:4px;">
-            <input type="text" class="form-input lib-new-equip-input" placeholder="新しい器具を追加">
-            <button type="button" class="btn-lib-equip-add" onclick="addExerciseEquip('${name}', this)">+ 追加</button>
+            <input type="text" class="form-input lib-new-equip-input lib-new-eq-input" ">
+            <button type="button" class="btn-lib-equip-add btn-add-eq" data-ex="${name}">+ 追加</button>
           </div>
         </div>
       </div>
     `;
   }).join('');
+
+  // ▼ イベントリスナーを安全に一括登録
+  container.querySelectorAll('.btn-add-var').forEach(btn => {
+    btn.onclick = () => {
+      const exName = btn.dataset.ex;
+      const input = btn.previousElementSibling;
+      if (!input) return;
+      const varName = input.value.trim();
+      if (!varName) return;
+
+      if (!state.exerciseVariations[exName]) {
+        state.exerciseVariations[exName] = [...(DEFAULT_VARIATION_PATTERNS[exName] || [])];
+      }
+      if (state.exerciseVariations[exName].includes(varName)) {
+        alert('既に登録されているタイプです');
+        return;
+      }
+      state.exerciseVariations[exName].push(varName);
+      saveState();
+      input.value = '';
+      renderLibraryExerciseChips();
+    };
+  });
+
+  container.querySelectorAll('.btn-add-eq').forEach(btn => {
+    btn.onclick = () => {
+      const exName = btn.dataset.ex;
+      const input = btn.previousElementSibling;
+      if (!input) return;
+      const equipName = input.value.trim();
+      if (!equipName) return;
+
+      if (!state.exerciseEquipment[exName]) {
+        state.exerciseEquipment[exName] = [...(DEFAULT_EQUIPMENT_PATTERNS[exName] || ['マシン', 'ダンベル', 'バーベル', 'ケーブル', '自重'])];
+      }
+      if (state.exerciseEquipment[exName].includes(equipName)) {
+        alert('既に登録されているツールです');
+        return;
+      }
+      state.exerciseEquipment[exName].push(equipName);
+      saveState();
+      input.value = '';
+      renderLibraryExerciseChips();
+    };
+  });
+
+  container.querySelectorAll('.btn-remove-var').forEach(btn => {
+    btn.onclick = () => removeExerciseVar(btn.dataset.ex, btn.dataset.var);
+  });
+
+  container.querySelectorAll('.btn-remove-eq').forEach(btn => {
+    btn.onclick = () => removeExerciseEquip(btn.dataset.ex, btn.dataset.eq);
+  });
+
+  container.querySelectorAll('.btn-remove-lib-ex').forEach(btn => {
+    btn.onclick = () => removeLibraryExercise(btn.dataset.ex);
+  });
 }
 
 function addExerciseVar(exName, btnEl) {
-  const input = btnEl.previousElementSibling;
+  // すぐ前ではなく、同じフォーム内にあるinputを確実に取得する
+  const formBlock = btnEl.closest('.lib-equip-add-form');
+  const input = formBlock ? formBlock.querySelector('.lib-new-equip-input') : null;
+  
+  if (!input) return;
   const varName = input.value.trim();
   if (!varName) return;
 
@@ -2520,11 +2554,35 @@ function addExerciseVar(exName, btnEl) {
   }
 
   if (state.exerciseVariations[exName].includes(varName)) {
-    alert('既に登録されているバリエーションです');
+    alert('既に登録されているタイプです');
     return;
   }
 
   state.exerciseVariations[exName].push(varName);
+  saveState();
+  input.value = '';
+  renderLibraryExerciseChips();
+}
+
+function addExerciseEquip(exName, btnEl) {
+  // すぐ前ではなく、同じフォーム内にあるinputを確実に取得する
+  const formBlock = btnEl.closest('.lib-equip-add-form');
+  const input = formBlock ? formBlock.querySelector('.lib-new-equip-input') : null;
+
+  if (!input) return;
+  const equipName = input.value.trim();
+  if (!equipName) return;
+
+  if (!state.exerciseEquipment[exName]) {
+    state.exerciseEquipment[exName] = [...(DEFAULT_EQUIPMENT_PATTERNS[exName] || ['マシン', 'ダンベル', 'バーベル', 'ケーブル', '自重'])];
+  }
+
+  if (state.exerciseEquipment[exName].includes(equipName)) {
+    alert('既に登録されているツールです');
+    return;
+  }
+
+  state.exerciseEquipment[exName].push(equipName);
   saveState();
   input.value = '';
   renderLibraryExerciseChips();
@@ -2549,25 +2607,6 @@ function removeLibraryExercise(name) {
   }
 }
 
-function addExerciseEquip(exName, btnEl) {
-  const input = btnEl.previousElementSibling;
-  const equipName = input.value.trim();
-  if (!equipName) return;
-
-  if (!state.exerciseEquipment[exName]) {
-    state.exerciseEquipment[exName] = [...(DEFAULT_EQUIPMENT_PATTERNS[exName] || ['マシン', 'ダンベル', 'バーベル', 'ケーブル', '自重'])];
-  }
-
-  if (state.exerciseEquipment[exName].includes(equipName)) {
-    alert('既に登録されている器具です');
-    return;
-  }
-
-  state.exerciseEquipment[exName].push(equipName);
-  saveState();
-  input.value = '';
-  renderLibraryExerciseChips();
-}
 
 function removeExerciseEquip(exName, equipName) {
   if (!state.exerciseEquipment[exName]) {
@@ -2634,6 +2673,7 @@ function switchMainTab(tabName) {
   } else if (tabName === 'inbody') {
     buttons[3].classList.add('active');
     document.getElementById('tab-content-inbody').classList.add('active');
+    renderInbodyTab();
   } else if (tabName === 'menu-list') {
     document.getElementById('tab-content-menu-list').classList.add('active');
   }
@@ -2754,7 +2794,7 @@ function renderBodyMapByMuscle(container) {
     return `
       <div class="date-accordion-item" style="margin-bottom: 14px; border-radius: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
         <div class="date-accordion-header" onclick="toggleBodyMapAccordion(this)" style="padding: 14px 16px;">
-          <span style="font-size: 0.95rem; font-weight: 900; color: var(--text-main);">💪 ${muscle}</span>
+          <span style="font-size: 0.95rem; font-weight: 900; color: var(--text-main);">${muscle}</span>
           <span class="arrow-icon" style="font-size: 1rem; color: var(--text-sub);">▾</span>
         </div>
         <div class="date-accordion-body">
@@ -2792,7 +2832,7 @@ function openExerciseDetailModal(exName) {
           <div><span style="color:var(--text-main); font-weight:700;">${v.target}</span></div>
         </div>
         <div style="font-size:0.75rem; line-height:1.5; display:flex; align-items:flex-start; gap:6px;">
-          <span style="flex-shrink:0;">⚠️</span>
+          <span style="flex-shrink:0;"></span>
           <div><span style="color:var(--text-sub);">${v.tips}</span></div>
         </div>
       </div>
@@ -2871,13 +2911,13 @@ function addDictVariation(name = '', target = '', tips = '') {
   block.innerHTML = `
     <button type="button" class="chip-remove-btn" style="position:absolute; top:8px; right:8px;" onclick="this.closest('.lib-exercise-item-card').remove()">&times;</button>
     
-    <label style="font-size:0.7rem; font-weight:700; color:var(--primary-color);">▍ バリエーション名</label>
+    <label style="font-size:0.7rem; font-weight:700; color:var(--primary-color);">▍ タイプ名</label>
     <input type="text" class="form-input var-name" value="${name}" style="font-size:0.8rem !important; padding:8px 10px; margin-bottom:8px;">
     
     <label style="font-size:0.7rem; font-weight:700; color:var(--primary-color);">🎯 効く部位</label>
     <input type="text" class="form-input var-target" value="${target}" style="font-size:0.8rem !important; padding:8px 10px; margin-bottom:8px;">
     
-    <label style="font-size:0.7rem; font-weight:700; color:var(--primary-color);">⚠️ コツ</label>
+    <label style="font-size:0.7rem; font-weight:700; color:var(--primary-color);">コツ</label>
     <textarea class="form-input form-textarea var-tips" style="font-size:0.8rem !important; padding:8px 10px; height:60px; margin-bottom:0;">${tips}</textarea>
   `;
 
@@ -2917,70 +2957,81 @@ function saveDictEdit() {
 }
 
 function renderInbodyTab() {
-  const summaryContainer = document.getElementById('inbody-latest-summary');
+  const emptyState = document.getElementById('inbody-empty-state');
+  const contentWrap = document.getElementById('inbody-content-wrap');
+  const heroCard = document.getElementById('ib-hero-card');
   const listContainer = document.getElementById('inbody-list-container');
-  if (!summaryContainer || !listContainer) return;
-
-  summaryContainer.innerHTML = '';
-  listContainer.innerHTML = '';
+  if (!contentWrap || !heroCard || !listContainer) return;
 
   if (!state.inbodyLogs || state.inbodyLogs.length === 0) {
-    listContainer.innerHTML = '<div class="inbody-empty">まだ測定記録がありません。「＋ 測定結果を追加」から記録しましょう。</div>';
-    const chartCard = document.getElementById('inbody-chart-card');
-    if (chartCard) chartCard.style.display = 'none';
+    if (emptyState) emptyState.style.display = 'block';
+    contentWrap.style.display = 'none';
     return;
   }
-
-  const chartCard = document.getElementById('inbody-chart-card');
-  if (chartCard) chartCard.style.display = 'block';
-  document.querySelectorAll('.inbody-metric-tab').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.metric === state.inbodyMetric);
-  });
-  const segRow = document.getElementById('inbody-segmental-select-row');
-  if (state.inbodyMetric === 'segmental') {
-    segRow.style.display = 'block';
-    onSegmentalSelectChange();
-  } else {
-    segRow.style.display = 'none';
-    drawInbodyChart(state.inbodyMetric);
-  }
+  if (emptyState) emptyState.style.display = 'none';
+  contentWrap.style.display = 'block';
 
   const sorted = [...state.inbodyLogs].sort((a, b) => a.date.localeCompare(b.date));
   const latest = sorted[sorted.length - 1];
   const prev = sorted.length > 1 ? sorted[sorted.length - 2] : null;
 
+  // --- ヒーローカード（最新の体重を大きく表示 + サブ指標） ---
   const fmtDiff = (curr, prevVal, unit) => {
-    if (curr === null || curr === undefined || curr === '' || !prevVal && prevVal !== 0) return '';
+    if (curr === null || curr === undefined || curr === '' || (!prevVal && prevVal !== 0)) return '<span class="ib-diff flat">-</span>';
     const diff = Math.round((curr - prevVal) * 10) / 10;
-    if (diff === 0) return `<span class="inbody-stat-diff flat">±0${unit}</span>`;
+    if (diff === 0) return `<span class="ib-diff flat">±0${unit}</span>`;
     const cls = diff > 0 ? 'up' : 'down';
+    const arrow = diff > 0 ? '▲' : '▼';
     const sign = diff > 0 ? '+' : '';
-    return `<span class="inbody-stat-diff ${cls}">${sign}${diff}${unit}</span>`;
+    return `<span class="ib-diff ${cls}">${arrow} ${sign}${diff}${unit}</span>`;
   };
 
-  const statBox = (label, value, unit, diffHtml) => `
-    <div class="inbody-stat-box">
-      <div class="inbody-stat-label">${label}</div>
-      <div class="inbody-stat-value">${(value === null || value === undefined || value === '') ? '-' : value + unit}</div>
-      ${diffHtml || ''}
-    </div>
-  `;
-
   const [y, m, d] = latest.date.split('-');
-  const summaryEl = document.createElement('div');
-  summaryEl.className = 'inbody-summary-card';
-  summaryEl.innerHTML = `
-    <div class="inbody-summary-date">📊 最新測定: ${y}/${parseInt(m, 10)}/${parseInt(d, 10)}</div>
-    <div class="inbody-summary-grid">
-      ${statBox('体重', latest.weight, 'kg', prev ? fmtDiff(latest.weight, prev.weight, 'kg') : '')}
-      ${statBox('骨格筋量', latest.muscle, 'kg', prev ? fmtDiff(latest.muscle, prev.muscle, 'kg') : '')}
-      ${statBox('体脂肪率', latest.fatPercent, '%', prev ? fmtDiff(latest.fatPercent, prev.fatPercent, '%') : '')}
+  const dateObj0 = new Date(parseInt(y, 10), parseInt(m, 10) - 1, parseInt(d, 10));
+  const dow0 = ['日', '月', '火', '水', '木', '金', '土'][dateObj0.getDay()];
+
+  const subStat = (label, value, unit, diffHtml) => `
+    <div class="ib-sub-stat">
+      <div class="ib-sub-stat-top"><span class="ib-sub-stat-label">${label}</span></div>
+      <div class="ib-sub-stat-value">${(value === null || value === undefined || value === '') ? '-' : value + unit}</div>
+      ${diffHtml}
     </div>
   `;
-  summaryContainer.appendChild(summaryEl);
 
+  heroCard.innerHTML = `
+    <div class="ib-hero-card">
+      <div class="ib-hero-date">${y}/${parseInt(m, 10)}/${parseInt(d, 10)} (${dow0}) の記録</div>
+      <div class="ib-hero-main">
+        <div class="ib-hero-weight-label">体重</div>
+        <div class="ib-hero-weight-value">${latest.weight !== null && latest.weight !== undefined ? latest.weight : '-'}<span class="ib-hero-weight-unit">kg</span></div>
+        ${prev ? fmtDiff(latest.weight, prev.weight, 'kg') : ''}
+      </div>
+      <div class="ib-hero-sub-grid">
+        ${subStat('骨格筋量', latest.muscle, 'kg', prev ? fmtDiff(latest.muscle, prev.muscle, 'kg') : '')}
+        ${subStat('体脂肪率', latest.fatPercent, '%', prev ? fmtDiff(latest.fatPercent, prev.fatPercent, '%') : '')}
+        ${subStat('BMI', latest.bmi, '', prev ? fmtDiff(latest.bmi, prev.bmi, '') : '')}
+      </div>
+    </div>
+  `;
+
+  // --- グラフ ---
+  const metricSelect = document.getElementById('inbody-metric-select');
+  const segSelect = document.getElementById('inbody-segmental-select');
+  if (metricSelect) metricSelect.value = state.inbodyMetric || 'weight';
+
+  if (state.inbodyMetric === 'segmental') {
+    if (segSelect) segSelect.style.display = 'block';
+    onSegmentalSelectChange();
+  } else {
+    if (segSelect) segSelect.style.display = 'none';
+    drawInbodyChart(state.inbodyMetric || 'weight');
+  }
+
+  // --- 履歴リスト ---
+  listContainer.innerHTML = '';
   const listSorted = [...sorted].reverse();
-  listSorted.forEach((log, index) => {
+
+  listSorted.forEach((log) => {
     const [ly, lm, ld] = log.date.split('-');
     const dateObj = new Date(parseInt(ly, 10), parseInt(lm, 10) - 1, parseInt(ld, 10));
     const dayOfWeek = ['日', '月', '火', '水', '木', '金', '土'][dateObj.getDay()];
@@ -3003,7 +3054,6 @@ function renderInbodyTab() {
       { key: 'rightLeg', label: '右脚' },
       { key: 'leftLeg',  label: '左脚' }
     ];
-
     const hasSegData = segKeys.some(s => ms[s.key] != null || fs[s.key] != null);
 
     let segTableHTML = '';
@@ -3012,20 +3062,20 @@ function renderInbodyTab() {
         const mVal = ms[s.key] != null ? `${ms[s.key]}%` : '-';
         const fVal = fs[s.key] != null ? `${fs[s.key]}%` : '-';
         return `
-          <div class="inbody-seg-row">
-            <span class="inbody-seg-cell label">${s.label}</span>
-            <span class="inbody-seg-cell val muscle">${mVal}</span>
-            <span class="inbody-seg-cell val fat">${fVal}</span>
+          <div class="ib-seg-row">
+            <span class="ib-seg-cell label">${s.label}</span>
+            <span class="ib-seg-cell val muscle">${mVal}</span>
+            <span class="ib-seg-cell val fat">${fVal}</span>
           </div>
         `;
       }).join('');
 
       segTableHTML = `
-        <div class="inbody-seg-container">
-          <div class="inbody-seg-header">
-            <span class="inbody-seg-cell label">部位</span>
-            <span class="inbody-seg-cell val muscle">筋肉量(%)</span>
-            <span class="inbody-seg-cell val fat">脂肪量(%)</span>
+        <div class="ib-seg-container">
+          <div class="ib-seg-header">
+            <span class="ib-seg-cell label">部位</span>
+            <span class="ib-seg-cell val muscle">筋肉量(%)</span>
+            <span class="ib-seg-cell val fat">脂肪量(%)</span>
           </div>
           ${rowsHTML}
         </div>
@@ -3033,24 +3083,23 @@ function renderInbodyTab() {
     }
 
     const item = document.createElement('div');
-    item.className = 'date-accordion-item';
+    item.className = 'date-accordion-item ib-history-card';
 
     const header = document.createElement('div');
-    header.className = 'date-accordion-header';
+    header.className = 'date-accordion-header ib-history-card-top';
     header.innerHTML = `
-      <span class="inbody-list-date">${formattedDate}</span>
-      <span class="date-accordion-preview">${log.weight !== null && log.weight !== undefined ? `${log.weight}kg` : ''}</span>
-      <span class="arrow-icon">▾</span>
+      <span class="ib-history-date">${formattedDate}</span>
+      <span class="ib-history-weight">${log.weight !== null && log.weight !== undefined ? `${log.weight}kg` : '-'}<span class="arrow-icon" style="margin-left:8px;">▾</span></span>
     `;
 
     const body = document.createElement('div');
     body.className = 'date-accordion-body';
     body.innerHTML = `
-      <div class="inbody-list-metrics">
-        ${chips.map(c => `<span class="inbody-metric-chip">${c}</span>`).join('')}
+      <div class="ib-history-chips">
+        ${chips.map(c => `<span class="inbody-metric-chip">${c}</span>`).join('') || '<span class="ib-history-empty-chip">詳細データなし</span>'}
       </div>
       ${segTableHTML}
-      <div style="display:flex; justify-content:flex-end; margin-top:10px;">
+      <div class="ib-history-card-footer">
         <button type="button" class="btn-table-edit">編集する</button>
       </div>
     `;
@@ -3060,9 +3109,6 @@ function renderInbodyTab() {
       openInbodyModal(log.id);
     };
 
-    item.appendChild(header);
-    item.appendChild(body);
-
     header.onclick = () => {
       const isActive = item.classList.contains('active');
       if (isActive) {
@@ -3070,33 +3116,35 @@ function renderInbodyTab() {
         item.classList.remove('active');
       } else {
         item.classList.add('active');
-        body.style.maxHeight = body.scrollHeight + 20 + 'px';
+        body.style.maxHeight = body.scrollHeight + 40 + 'px';
       }
     };
 
+    item.appendChild(header);
+    item.appendChild(body);
     listContainer.appendChild(item);
-
-    if (index === 0) {
-      setTimeout(() => {
-        item.classList.add('active');
-        body.style.maxHeight = body.scrollHeight + 20 + 'px';
-      }, 50);
-    }
   });
+
+  const firstItem = listContainer.querySelector('.date-accordion-item');
+  if (firstItem) {
+    const firstBody = firstItem.querySelector('.date-accordion-body');
+    setTimeout(() => {
+      firstItem.classList.add('active');
+      firstBody.style.maxHeight = firstBody.scrollHeight + 40 + 'px';
+    }, 50);
+  }
 }
 
 function switchInbodyMetric(metric) {
   state.inbodyMetric = metric;
-  document.querySelectorAll('.inbody-metric-tab').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.metric === metric);
-  });
+  saveState();
 
-  const segRow = document.getElementById('inbody-segmental-select-row');
+  const segSelect = document.getElementById('inbody-segmental-select');
   if (metric === 'segmental') {
-    segRow.style.display = 'block';
+    if (segSelect) segSelect.style.display = 'block';
     onSegmentalSelectChange();
   } else {
-    segRow.style.display = 'none';
+    if (segSelect) segSelect.style.display = 'none';
     drawInbodyChart(metric);
   }
 }
@@ -3385,6 +3433,17 @@ function saveInbodyLog() {
   renderInbodyTab();
 }
 
+function deleteInbodyLog() {
+  const editingId = document.getElementById('inbody-editing-id').value;
+  if (!editingId) return;
+  if (!confirm('この測定記録を削除しますか？')) return;
+
+  state.inbodyLogs = state.inbodyLogs.filter(l => l.id !== editingId);
+  saveState();
+  closeInbodyModal();
+  renderInbodyTab();
+}
+
 function openInbodyImportModal() {
   const textarea = document.getElementById('inbody-import-textarea');
   if (textarea) {
@@ -3633,18 +3692,20 @@ function renderHistoryLogs() {
 }
 
 function openCategoryWorkout(category) {
-  const matchedMenus = state.menus.filter(m => {
-    if (category === '上半身') return m.title.includes('上半身');
-    if (category === '下半身') return m.title.includes('下半身');
-    if (category === '全身') return m.title.includes('全身') || m.id === 'F';
-    if (category === '有酸素') return m.title.includes('有酸素') || m.title.includes('リカバリー');
-    return false;
-  });
+  let targetMenuId = 'A';
+  
+  if (category === '上半身A') targetMenuId = 'A';
+  else if (category === '上半身B') targetMenuId = 'B';
+  else if (category === '下半身A') targetMenuId = 'C';
+  else if (category === '下半身B') targetMenuId = 'D';
+  else if (category === '有酸素') targetMenuId = 'E';
+  else if (category === '全身') targetMenuId = 'F';
 
-  if (matchedMenus.length > 0) {
-    openWorkoutLogModal(matchedMenus[0].id);
+  const menu = state.menus.find(m => m.id === targetMenuId);
+  if (menu) {
+    openWorkoutLogModal(menu.id);
   } else {
-    openWorkoutLogModal('ALL');
+    openWorkoutLogModal('A');
   }
 }
 
@@ -3722,17 +3783,18 @@ function renderMenuSettingsAccordion(openMenuId = null) {
 
     const exercisesHTML = menu.exercises.map((e, idx) => {
 
-      // ★ バリエーションの描画
+      // ★ タイプの描画
       let varPatterns = state.exerciseVariations[e.name] || DEFAULT_VARIATION_PATTERNS[e.name];
       if (!varPatterns) {
         const matchedKey = Object.keys(DEFAULT_VARIATION_PATTERNS).find(key => e.name.includes(key) || key.includes(e.name));
         varPatterns = matchedKey ? DEFAULT_VARIATION_PATTERNS[matchedKey] : [];
       }
       const selectedVariation = e.variation || '';
+      const varIsOnlyNormal = varPatterns.length === 1 && varPatterns[0] === 'ノーマル';
       
-      const variationHTML = varPatterns.length > 0 ? `
+      const variationHTML = (varPatterns.length > 0 && !varIsOnlyNormal) ? `
         <div class="menu-equipment-setting" style="display:flex; flex-wrap:wrap; align-items:center; gap:5px; margin-top:4px; padding-top:2px;">
-          <span style="font-size:0.7rem; color:var(--text-sub); font-weight:700; width:100%; margin-bottom:1px;">バリエーション</span>
+          <span style="font-size:0.7rem; color:var(--text-sub); font-weight:700; width:100%; margin-bottom:1px;">タイプ</span>
           <div class="equipment-chips-list" style="display:flex; flex-wrap:wrap; gap:4px;">
             ${varPatterns.map(va => {
               const active = selectedVariation === va ? 'active' : '';
@@ -3766,7 +3828,7 @@ function renderMenuSettingsAccordion(openMenuId = null) {
           ${variationHTML}
 
           <div class="menu-equipment-setting" style="display:flex; flex-wrap:wrap; align-items:center; gap:5px; margin-top:4px; padding-top:2px;">
-            <span style="font-size:0.7rem; color:var(--text-sub); font-weight:700; width:100%; margin-bottom:1px;">使うマシン・器具</span>
+            <span style="font-size:0.7rem; color:var(--text-sub); font-weight:700; width:100%; margin-bottom:1px;">ツール</span>
             <div class="equipment-chips-list" style="display:flex; flex-wrap:wrap; gap:4px;">
               ${equipmentHTML}
             </div>
@@ -3791,7 +3853,7 @@ function renderMenuSettingsAccordion(openMenuId = null) {
           <label class="form-label">種目一覧</label>
           <div class="menu-exercises-container" style="margin-bottom:8px;">${exercisesHTML}</div>
           <div style="display:flex; gap:6px;">
-            <input type="text" class="form-input menu-new-ex-input" placeholder="新しい種目名" style="margin-bottom:0; font-size:0.75rem;">
+            <input type="text" class="form-input menu-new-ex-input"  style="margin-bottom:0; font-size:0.75rem;">
             <button type="button" class="btn-library-add" onclick="addMenuAccordionExercise('${menu.id}', this); event.stopPropagation();">+ 追加</button>
           </div>
         </div>

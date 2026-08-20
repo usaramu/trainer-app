@@ -6,9 +6,9 @@
     <title>うさトレ</title>
     
     <!-- ▼ まる文字フォント（Zen Maru Gothic） -->
-    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;600;700;900&display=swap" rel="stylesheet">
     <!-- バージョン更新: v=20260820_01 -->
-    <link rel="stylesheet" href="style.css?v=20260820_04">
+    <link rel="stylesheet" href="style.css?v=20260820_07">
 </head>
 <body>
 
@@ -29,31 +29,32 @@
     <div id="tab-content-record" class="main-tab-content active">
         <div class="recommendation-card">
             <div class="recommendation-header">SELECT WORKOUT</div>
-            
             <div class="category-select-grid">
-                <button type="button" class="btn-category-select" onclick="openCategoryWorkout('上半身')">
-                    <span class="cat-label">上半身</span>
-                    <span class="cat-days" id="days-upper">前回: -日目</span>
+                <button type="button" class="btn-category-select" onclick="openCategoryWorkout('上半身A')">
+                    <span class="cat-label">上半身A</span>
                 </button>
-                <button type="button" class="btn-category-select" onclick="openCategoryWorkout('下半身')">
-                    <span class="cat-label">下半身</span>
-                    <span class="cat-days" id="days-lower">前回: -日目</span>
+                <button type="button" class="btn-category-select" onclick="openCategoryWorkout('上半身B')">
+                    <span class="cat-label">上半身B</span>
                 </button>
+                <button type="button" class="btn-category-select" onclick="openCategoryWorkout('下半身A')">
+                    <span class="cat-label">下半身A</span>
+                </button>
+                <button type="button" class="btn-category-select" onclick="openCategoryWorkout('下半身B')">
+                    <span class="cat-label">下半身B</span>
+                </button>
+                
                 <button type="button" class="btn-category-select" onclick="openCategoryWorkout('全身')">
                     <span class="cat-label">全身</span>
-                    <span class="cat-days" id="days-full">前回: -日目</span>
                 </button>
                 <button type="button" class="btn-category-select" onclick="openCategoryWorkout('有酸素')">
                     <span class="cat-label">有酸素</span>
-                    <span class="cat-days" id="days-cardio">前回: -日目</span>
+                </button>
+                <button type="button" class="btn-category-select btn-off-cute" onclick="recordOffDay()">
+                    <span class="cat-label">オフ</span>
                 </button>
             </div>
-
-            <div class="banner-actions" style="margin-top: 12px;">
-                <button class="btn-offday" onclick="recordOffDay()" style="width: 100%;">今日はオフ</button>
-            </div>
+            
         </div>
-
         <div id="today-summary-card" class="today-summary-card">
             <!-- JSで動的生成 -->
         </div>
@@ -81,26 +82,31 @@
 
     <!-- ▼ 4. InBody（体組成）タブ用コンテンツ -->
     <div id="tab-content-inbody" class="main-tab-content">
-        <div class="inbody-action-row">
-            <button class="btn-inbody-add" onclick="openInbodyModal()">＋ 測定結果を追加</button>
-            <button class="btn-inbody-json" onclick="openInbodyImportModal()">📥 JSON</button>
+        <div class="ib-header">
+            <button class="btn-inbody-add" onclick="openInbodyModal()">＋ 記録を追加</button>
+            <button class="btn-inbody-json" onclick="openInbodyImportModal()">JSON</button>
         </div>
 
-        <section class="log-section" style="margin-top: 12px;">
-            <div id="inbody-latest-summary"></div>
+        <div id="inbody-empty-state" class="ib-empty-state" style="display:none;">
+            <p>まだ測定記録がありません</p>
+            <span>「＋ 記録を追加」から最初の記録をつけましょう</span>
+        </div>
 
-            <div class="inbody-chart-card" id="inbody-chart-card">
-                <div class="inbody-metric-tabs" id="inbody-metric-tabs">
-                    <button type="button" class="inbody-metric-tab active" data-metric="weight" onclick="switchInbodyMetric('weight')">体重</button>
-                    <button type="button" class="inbody-metric-tab" data-metric="muscle" onclick="switchInbodyMetric('muscle')">骨格筋量</button>
-                    <button type="button" class="inbody-metric-tab" data-metric="fatPercent" onclick="switchInbodyMetric('fatPercent')">体脂肪率</button>
-                    <button type="button" class="inbody-metric-tab" data-metric="fatMass" onclick="switchInbodyMetric('fatMass')">体脂肪量</button>
-                    <button type="button" class="inbody-metric-tab" data-metric="visceral" onclick="switchInbodyMetric('visceral')">内臓脂肪</button>
-                    <button type="button" class="inbody-metric-tab" data-metric="bmi" onclick="switchInbodyMetric('bmi')">BMI</button>
-                    <button type="button" class="inbody-metric-tab" data-metric="segmental" onclick="switchInbodyMetric('segmental')">部位別</button>
-                </div>
-                <div id="inbody-segmental-select-row" style="display:none; margin-bottom:10px;">
-                    <select id="inbody-segmental-select" class="form-input" style="margin-bottom:0;" onchange="onSegmentalSelectChange()">
+        <div id="inbody-content-wrap">
+            <div id="ib-hero-card"></div>
+
+            <div class="ib-chart-card">
+                <div class="ib-metric-select-row">
+                    <select id="inbody-metric-select" class="form-input" onchange="switchInbodyMetric(this.value)">
+                        <option value="weight">体重</option>
+                        <option value="muscle">骨格筋量</option>
+                        <option value="fatPercent">体脂肪率</option>
+                        <option value="fatMass">体脂肪量</option>
+                        <option value="visceral">内臓脂肪レベル</option>
+                        <option value="bmi">BMI</option>
+                        <option value="segmental">部位別</option>
+                    </select>
+                    <select id="inbody-segmental-select" class="form-input" style="display:none;" onchange="onSegmentalSelectChange()">
                         <optgroup label="筋肉量">
                             <option value="muscleSegments.leftArm">左腕</option>
                             <option value="muscleSegments.rightArm">右腕</option>
@@ -117,13 +123,15 @@
                         </optgroup>
                     </select>
                 </div>
-                <canvas id="inbody-chart-canvas" height="200"></canvas>
-                <div id="inbody-chart-empty" class="inbody-empty" style="display:none;">このグラフを表示するには2件以上のデータが必要です。</div>
+                <canvas id="inbody-chart-canvas" height="180"></canvas>
+                <div id="inbody-chart-empty" class="ib-chart-empty" style="display:none;">2件以上のデータがあるとグラフが表示されます</div>
             </div>
 
+            <div class="ib-history-title">記録履歴</div>
             <div id="inbody-list-container"></div>
-        </section>
+        </div>
     </div>
+
 
     <!-- ▼ 3. メニュー一覧タブ用コンテンツ -->
     <div id="tab-content-menu-list" class="main-tab-content">
@@ -208,10 +216,6 @@
                         <span>メニューから</span>
                     </label>
                     <label class="rotation-mode-option">
-                        <input type="radio" name="record-type" id="record-type-free" onchange="toggleRecordType()">
-                        <span>自由入力</span>
-                    </label>
-                    <label class="rotation-mode-option">
                         <input type="radio" name="record-type" id="record-type-off" onchange="toggleRecordType()">
                         <span>オフ</span>
                     </label>
@@ -247,11 +251,11 @@
     <div class="modal-overlay" id="detail-log-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>記録の詳細 (<span id="detail-log-date"></span>)</h2>
+                <h2>LOG (<span id="detail-log-date"></span>)</h2>
                 <button class="btn-close" onclick="closeDetailLogModal()">&times;</button>
             </div>
             <div class="modal-body">
-                <div style="font-size: 1.1rem; font-weight: bold; margin-bottom: 12px; color: var(--primary-color);" id="detail-log-title"></div>
+                <div style="font-size: 0.95rem; font-weight: bold; margin-bottom: 12px; color: var(--primary-color); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" id="detail-log-title"></div>
                 <div id="detail-log-body">
                     <!-- JSで詳細内容を表示 -->
                 </div>
@@ -409,7 +413,7 @@
                 <label class="form-label">全体のポイント・概要</label>
                 <textarea id="dict-edit-general" class="form-input form-textarea" style="height: 80px;" placeholder="種目の基本的な説明など"></textarea>
 
-                <label class="form-label" style="margin-top: 10px;">▍ やり方・バリエーション</label>
+                <label class="form-label" style="margin-top: 10px;">▍ やり方</label>
                 <div id="dict-variations-container" style="display:flex; flex-direction:column; gap:12px;">
                     <!-- JSで動的生成されます -->
                 </div>
@@ -473,7 +477,7 @@
     <div class="modal-overlay" id="inbody-import-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>📥 InBody JSONインポート</h2>
+                <h2>InBody JSONインポート</h2>
                 <button class="btn-close" onclick="closeInbodyImportModal()">&times;</button>
             </div>
             <div class="modal-body">
@@ -516,12 +520,11 @@
     </div>
 
     <div class="footer-tools">
-        <button type="button" class="btn-footer-tool" onclick="openMenuSettingsModal()">⚙️</button>
         <button type="button" class="btn-footer-tool" id="btn-open-exercise-library" onclick="openExerciseLibraryModal()">📋</button>
         <button type="button" class="btn-footer-tool" onclick="openThemeSettingsModal()">🎨</button>
         <button type="button" class="btn-footer-tool" onclick="importPastLogs()">📥</button>
     </div> 
 
-    <script src="script.js?v=20260820_04"></script>
+    <script src="script.js?v=20260820_07"></script>
 </body>
 </html>
