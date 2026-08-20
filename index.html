@@ -7,8 +7,8 @@
     
     <!-- ▼ まる文字フォント（Zen Maru Gothic） -->
     <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700;900&display=swap" rel="stylesheet">
-    <!-- バージョン更新: v=20260814_10 -->
-    <link rel="stylesheet" href="style.css?v=20260819_04">
+    <!-- バージョン更新: v=20260820_01 -->
+    <link rel="stylesheet" href="style.css?v=20260820_01">
 </head>
 <body>
 
@@ -148,9 +148,13 @@
     </div>
 
     <div id="tab-content-body-map" class="main-tab-content">
+        <div class="body-map-mode-toggle" id="body-map-mode-toggle">
+            <button type="button" class="body-map-mode-btn active" data-mode="area" onclick="switchBodyMapMode('area')">部位別</button>
+            <button type="button" class="body-map-mode-btn" data-mode="muscle" onclick="switchBodyMapMode('muscle')">筋肉別</button>
+        </div>
         <section class="table-section">
             <div id="body-map-list" style="padding: 10px;">
-                <!-- ここにJSで部位別種目リストが表示される -->
+                <!-- ここにJSで部位別/筋肉別種目リストが表示される -->
             </div>
         </section>
     </div>
@@ -419,6 +423,24 @@
         </div>
     </div>
 
+    <!-- 種目タップ時のポップアップ（効く部位・やり方） -->
+    <div class="modal-overlay" id="exercise-detail-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="exercise-detail-name">種目名</h2>
+                <button class="btn-close" onclick="closeExerciseDetailModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="exercise-detail-body">
+                <!-- JSで動的生成 -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeExerciseDetailModal(); openDictEditModal(document.getElementById('exercise-detail-basename').value);">⚙️ 編集する</button>
+                <button class="btn-save" onclick="closeExerciseDetailModal()">閉じる</button>
+            </div>
+            <input type="hidden" id="exercise-detail-basename">
+        </div>
+    </div>
+
     <!-- 種目リスト管理モーダル -->
     <div class="modal-overlay" id="exercise-library-modal">
         <div class="modal-content">
@@ -498,8 +520,9 @@
         <button type="button" class="btn-footer-tool" id="btn-open-exercise-library" onclick="openExerciseLibraryModal()">📋</button>
         <button type="button" class="btn-footer-tool" onclick="openThemeSettingsModal()">🎨</button>
         <button type="button" class="btn-footer-tool" onclick="importPastLogs()">📥</button>
+        <button type="button" class="btn-footer-tool" onclick="navigator.clipboard.writeText(localStorage.getItem('workout_tracker_state')).then(()=>alert('コピー完了！ここに貼り付けてください'))" style="background:#ef4444; color:#fff; border:none; border-radius:12px; padding:6px 12px; font-weight:bold;">📤 コピー</button>
     </div> 
 
-    <script src="script.js?v=20260819_04"></script>
+    <script src="script.js?v=20260820_01"></script>
 </body>
 </html>

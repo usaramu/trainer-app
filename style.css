@@ -910,6 +910,73 @@ h1 {
     padding: 0 14px 14px;
 }
 
+/* ▼ BODYタブ：部位別／筋肉別 切り替え */
+.body-map-mode-toggle {
+    display: flex;
+    gap: 8px;
+    padding: 10px 10px 0;
+}
+
+.body-map-mode-btn {
+    flex: 1;
+    padding: 10px 0;
+    border: 1.5px solid var(--border-color);
+    border-radius: 12px;
+    background-color: var(--card-bg);
+    color: var(--text-sub);
+    font-family: "Zen Maru Gothic", sans-serif;
+    font-size: 0.8rem;
+    font-weight: 900;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.body-map-mode-btn.active {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: #FFFFFF;
+}
+
+/* ▼ BODYタブ：種目タップボタン（一覧→ポップアップ） */
+.exercise-tap-btn {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 13px 14px;
+    margin-bottom: 10px;
+    font-family: "Zen Maru Gothic", sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-main);
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s ease;
+}
+
+.exercise-tap-btn:hover,
+.exercise-tap-btn:active {
+    background-color: var(--primary-soft);
+    border-color: var(--primary-color);
+}
+
+.exercise-tap-btn .exercise-tap-arrow {
+    color: var(--primary-color);
+    font-size: 0.9rem;
+    flex-shrink: 0;
+    margin-left: 8px;
+}
+
+.exercise-detail-variation {
+    margin-top: 6px;
+    margin-bottom: 12px;
+    padding-left: 14px;
+    border-left: 3px solid var(--border-color);
+}
+
 /* モーダル */
 .modal-overlay {
     position: fixed;
@@ -1864,4 +1931,62 @@ footer {
 /* アコーディオンが開いている時だけ余白を持たせる */
 .date-accordion-item.active .date-accordion-body {
     padding: 10px 14px; /* 開いた時は余白を入れる */
+}
+
+/* =========================================
+   ▼ バリエーション用のチップボタンスタイル追加 ▼
+========================================= */
+.variation-select-row {
+    margin-bottom: 4px;
+}
+.menu-variation-select-row {
+    margin-bottom: 4px;
+}
+
+.variation-chip-btn {
+    background-color: var(--card-bg);
+    border: 1.5px solid var(--border-color);
+    color: var(--text-main);
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.variation-chip-btn:hover {
+    background-color: var(--primary-soft);
+}
+
+.variation-chip-btn.active {
+    background-color: #A49BCE !important; /* ラベンダー色で器具チップと区別 */
+    border-color: #A49BCE !important;
+    color: #FFFFFF !important;
+    font-weight: 900;
+}
+
+/* ▼ バリエーション用のチップボタンスタイル */
+.variation-chip-btn {
+    background-color: var(--card-bg);
+    border: 1.5px solid var(--border-color);
+    color: var(--text-main);
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.variation-chip-btn:hover { background-color: var(--primary-soft); }
+.variation-chip-btn.active {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: #FFFFFF !important;
+    font-weight: 900;
 }
