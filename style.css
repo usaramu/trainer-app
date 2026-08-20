@@ -2178,3 +2178,59 @@ input.lib-new-equip-input:focus {
 .btn-table-edit {
     font-weight: 600 !important;
 }
+
+/* モーダル内の横スクロールを完全に禁止 */
+.modal-overlay {
+    overflow-x: hidden;
+}
+
+.modal-content {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+.modal-body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+/* モーダル内の要素が横にはみ出して画面幅を押し広げるのを防ぐ */
+.modal-body * {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* モーダル内の横方向のガタつき防止 */
+.modal-body,
+.modal-body > *,
+.modal-body input,
+.modal-body textarea,
+.modal-body select,
+.modal-body button {
+    min-width: 0;
+}
+
+.modal-body {
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+#workout-log-modal input[type="date"],
+#inbody-modal input[type="date"] {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+@media (max-width: 600px) {
+    #workout-log-modal input[type="date"],
+    #inbody-modal input[type="date"] {
+        font-size: 0.8rem;
+        padding: 8px 10px;
+        height: 38px;
+        line-height: 1.2;
+        box-sizing: border-box;
+        width: 100%;
+        max-width: 100%;
+    }
+}
