@@ -2,6 +2,14 @@ let isEditingLogMode = false;
 const STORAGE_KEY = 'trainingRecords';
 const CURRENT_SCHEMA_VERSION = 'label-v5'; // スキーマバージョンを更新して自動同期
 
+// ▼ 新しい表示フォーマット：種目/バリエーション（マシン）
+function formatExerciseName(name, variation, equipment) {
+  let text = name;
+  if (variation) text += `/${variation}`;
+  if (equipment) text += `（${equipment}）`;
+  return text;
+}
+
 const initialDefaultMenus = [
     {
       id: 'A',
@@ -9,9 +17,9 @@ const initialDefaultMenus = [
       memo: 'デコルテ、背中の広がり、二の腕のトーン調整に重点を置いた構成。',
       exercises: [
         { name: 'ラットプルダウン', detail: '15~20回 × 3セット', variation: 'マググリップ', equipment: 'ケーブル' },
-        { name: 'チェストプレス', detail: '15~20回 × 3セット', variation: 'インクライン（斜め上に押す/上部狙い）', equipment: 'アイソラテラル' },
+        { name: 'チェストプレス', detail: '15~20回 × 3セット', variation: 'インクライン', equipment: 'アイソラテラル' },
         { name: 'サイドレイズ', detail: '15~20回 × 3セット', variation: 'ノーマル', equipment: 'ダンベル' },
-        { name: 'ケーブル・プレスダウン（三頭筋）', detail: '15~20回 × 3セット', variation: 'ロープ（フィニッシュで外に開く）', equipment: 'ケーブル' },
+        { name: 'ケーブル・プレスダウン', detail: '15~20回 × 3セット', variation: 'ロープ', equipment: 'ケーブル' },
       ]
     },
     {
@@ -19,8 +27,8 @@ const initialDefaultMenus = [
       title: '上半身 B（マシン＆ローイング）',
       memo: '背中の厚みと姿勢改善、胸の追い込みに重点。',
       exercises: [
-        { name: 'ローイング', detail: '15~20回 × 3セット', variation: 'シーテッド（座って水平に引く/腰が安全）', equipment: 'マシン' },
-        { name: 'チェストプレス', detail: '15~20回 × 3セット', variation: 'フラット（前方に押す）', equipment: 'マシン' },
+        { name: 'ローイング', detail: '15~20回 × 3セット', variation: 'シーテッド', equipment: 'アイソラテラル' },
+        { name: 'チェストプレス', detail: '15~20回 × 3セット', variation: 'フラット', equipment: 'マシン' },
         { name: 'リアデルトイド', detail: '15~20回 × 3セット', variation: '手のひら内側', equipment: 'マシン' },
         { name: 'クランチ（上体起こし）', detail: '15~20回 × 3セット', variation: 'ノーマル', equipment: 'マシン' },
         { name: 'バックエクステンション', detail: '15回 × 3セット', variation: 'ノーマル', equipment: 'マシン' },
@@ -33,8 +41,8 @@ const initialDefaultMenus = [
       exercises: [
         { name: 'ヒップスラスト', detail: '15~20回 × 3セット', variation: 'ノーマル', equipment: 'グルートドライブ' },
         { name: 'レッグカール', detail: '15~20回 × 3セット', variation: 'シーテッド', equipment: 'マシン' },
-        { name: 'レッグプレス', detail: '足幅を広め・上位置に / 15~20回 × 3セット', variation: 'ノーマル（足位置：上/中/下）', equipment: '45度リニア' },
-        { name: 'ヒップアブダクション（お尻特化）', detail: '15~20回 × 3セット', variation: '骨盤後傾', equipment: 'マシン' },
+        { name: 'レッグプレス', detail: '足幅を広め・上位置に / 15~20回 × 3セット', variation: '足上', equipment: '45度リニア' },
+        { name: 'アブダクション', detail: '15~20回 × 3セット', variation: '骨盤後傾', equipment: 'マシン' },
       ]
     },
     {
@@ -43,9 +51,9 @@ const initialDefaultMenus = [
       memo: '多関節種目でカロリー消費を高め、ヒップアップを狙う。',
       exercises: [
         { name: 'デッドリフト', detail: '15~20回 × 3セット', variation: 'ルーマニアン', equipment: 'ダンベル' },
-        { name: 'スクワット', detail: '左右各12~15回 × 3セット', variation: 'ブルガリアン（片足）', equipment: 'ダンベル' },
+        { name: 'スクワット', detail: '左右各12~15回 × 3セット', variation: 'ブルガリアン', equipment: 'ダンベル' },
         { name: 'グルートキックバック', detail: 'ケーブル使用 / 左右各15~20回 × 3セット', variation: 'ノーマル', equipment: 'ケーブル' },
-        { name: 'ヒップアブダクション（お尻特化）', detail: '15~20回 × 3セット', variation: '骨盤立て', equipment: 'マシン' },
+        { name: 'アブダクション', detail: '15~20回 × 3セット', variation: '骨盤立て', equipment: 'マシン' },
       ]
     },
     {
@@ -53,7 +61,7 @@ const initialDefaultMenus = [
       title: 'リカバリー・有酸素',
       memo: '疲労を抜きつつ、脂肪燃焼を促進。',
       exercises: [
-        { name: 'トレッドミル（ランニングマシン）', detail: '30〜40分 (傾斜5〜8%、時速4.0〜4.5km)', variation: '傾斜ウォーキング', equipment: 'マシン' },
+        { name: 'トレッドミル', detail: '30〜40分 (傾斜5〜8%、時速4.0〜4.5km)', variation: 'ノーマル', equipment: 'マシン' },
       ]
     },
     {
@@ -61,12 +69,12 @@ const initialDefaultMenus = [
       title: '全身',
       memo: '1週間空いた時や旅行後など、1回で全身をバランスよく刺激したい時に。',
       exercises: [
-        { name: 'スクワット', detail: '左右各10回 × 3セット', variation: 'ブルガリアン（片足）', equipment: 'ダンベル' },
+        { name: 'スクワット', detail: '左右各10回 × 3セット', variation: 'ブルガリアン', equipment: 'ダンベル' },
         { name: 'ラットプルダウン', detail: '10回 × 3セット', variation: 'マググリップ', equipment: 'ケーブル' },
-        { name: 'チェストプレス', detail: '10回 × 3セット', variation: 'フラット（前方に押す）', equipment: 'マシン' },
+        { name: 'チェストプレス', detail: '10回 × 3セット', variation: 'フラット', equipment: 'マシン' },
         { name: 'サイドレイズ', detail: '15回 × 2〜3セット', variation: 'ノーマル', equipment: 'ダンベル' },
         { name: 'クランチ（上体起こし）', detail: '10回 × 3セット', variation: 'ノーマル', equipment: '自重' },
-        { name: 'トレッドミル（ランニングマシン）', detail: '30分', variation: '通常ラン・ウォーク', equipment: 'マシン' },
+        { name: 'トレッドミル', detail: '30分', variation: 'ノーマル', equipment: 'マシン' },
       ]
     }
 ];
@@ -84,40 +92,41 @@ const MENU_LABELS = {
 
 // ★ バリエーション（やり方）のデフォルトパターン
 const DEFAULT_VARIATION_PATTERNS = {
-  'チェストプレス': ['フラット（前方に押す）', 'インクライン（斜め上に押す/上部狙い）', 'デクライン（斜め下に押す/下部狙い）'],
+  'チェストプレス': ['フラット', 'インクライン', 'デクライン'],
   'チェストフライ': ['フラット', 'インクライン'],
   'ディップス': ['ノーマル'],
-  'ラットプルダウン': ['ワイド（通常の広い手幅）', 'ナロー（狭い逆手）', 'マググリップ'],
+  'ラットプルダウン': ['ワイド', 'ナロー（逆手）', 'マググリップ'],
   'チンニング（懸垂）': ['順手（ワイド）', '逆手（ナロー）'],
-  'ローイング': ['シーテッド（座って水平に引く/腰が安全）', 'アイソラテラル（座って左右別々に引く）', 'ベントオーバー（立ったまま前傾して引く/体幹も使う）', 'インバート（自重で斜め懸垂のように引く）'],
-  'デッドリフト': ['床引き', 'トップサイド（ハーフ）', 'ルーマニアン', 'スモウ'],
+  'ローイング': ['シーテッド', 'ベントオーバー', 'インバート'],
+  'デッドリフト': ['床引き', 'トップサイド（ハーフ）', 'スモウ'],
   'バックエクステンション': ['ノーマル'],
   'リアデルトイド': ['手のひら内側', '手のひら下向き'],
-  'スクワット': ['バイラテラル（両足）', 'ブルガリアン（片足）', 'ランジ', 'ゴブレット（胸の前で抱える）'],
-  'レッグプレス': ['ノーマル（足位置：上/中/下）'],
+  'スクワット': ['バイラテラル', 'ブルガリアン', 'ランジ', 'ゴブレット'],
+  'レッグプレス': ['足上','足中','足下'],
   'レッグエクステンション': ['ノーマル'],
   'レッグカール': ['シーテッド', 'ライイング'],
   'グッドモーニング': ['ノーマル'],
-  'アダクション/アブダクション': ['内もも（アダクション）', 'お尻（アブダクション）'],
+  'アダクション': ['ノーマル'],
   'ショルダープレス': ['ノーマル', 'パラレル（縦握り）'],
   'サイドレイズ': ['ノーマル'],
   'フロントレイズ': ['ノーマル'],
   'フェイスプル': ['ノーマル'],
-  'アームカール（二頭筋）': ['ノーマル（手のひら上）', 'インクライン（ベンチ傾斜）', 'ハンマー（縦握り）'],
-  'ケーブル・プレスダウン（三頭筋）': ['ストレートバー（手のひら下）', 'ロープ（フィニッシュで外に開く）', '逆手（アンダーグリップ）'],
-  'トライセプス・エクステンション（三頭筋）': ['ライイング（寝て行う）', 'オーバーヘッド（頭の後ろから上へ）'],
-  'キックバック（三頭筋）': ['ノーマル（前傾姿勢で後ろに伸ばす）'],
-  'ナロー/リバースプッシュアップ': ['脇締め（ナロー）', '逆手ベンチ（リバース）'],
-  'ヒップアブダクション（お尻特化）': ['骨盤前傾', '骨盤立て', '骨盤後傾'],
+  'アームカール': ['手のひら上', 'ハンマー（縦握り）', 'インクライン', 'プリーチャー'],
+  'ケーブル・プレスダウン': ['ストレートバー', 'ロープ', '逆手'],
+  'トライセプス・エクステンション': ['ライイング', 'オーバーヘッド'],
+  'キックバック': ['ノーマル'],
+  'プッシュアップ': ['ナロー', 'リバース'],
+  'アブダクション': ['骨盤前傾', '骨盤立て', '骨盤後傾'],
   'ヒップスラスト': ['ノーマル'],
+  'ルーマニアンデッドリフト': ['ノーマル'],
   'グルートキックバック': ['ノーマル'],
-  'クランチ（上体起こし）': ['ノーマル', 'ひねり（ツイスト）'],
+  'クランチ（上体起こし）': ['ノーマル', 'ツイスト'],
   'トーソローテーション': ['ノーマル'],
-  'レッグレイズ': ['マット（床）', 'ハンギング（ぶら下がり）'],
+  'レッグレイズ': ['マット', 'ハンギング'],
   'プランク': ['ノーマル'],
   'クリーン/スナッチ': ['クリーン', 'スナッチ'],
   'バーピー': ['ノーマル'],
-  'トレッドミル（ランニングマシン）': ['通常ラン・ウォーク', '傾斜ウォーキング']
+  'トレッドミル': ['ノーマル']
 };
 
 // ★ 器具のデフォルトパターン
@@ -127,7 +136,7 @@ const DEFAULT_EQUIPMENT_PATTERNS = {
   'ディップス': ['自重', 'アシストマシン', 'ウェイト付加'],
   'ラットプルダウン': ['マシン', 'ケーブル'],
   'チンニング（懸垂）': ['自重', 'アシストマシン', 'ウェイト付加'],
-  'ローイング': ['マシン', 'アイソラテラル', 'バーベル', 'ダンベル', 'スミス', 'ケーブル'],
+  'ローイング': [ 'アイソラテラル', 'バーベル', 'ダンベル', 'スミス', 'ケーブル'],
   'デッドリフト': ['バーベル', 'ダンベル', 'トラップバー'],
   'バックエクステンション': ['自重', 'マシン'],
   'リアデルトイド': ['マシン', 'ダンベル', 'ケーブル'],
@@ -136,17 +145,17 @@ const DEFAULT_EQUIPMENT_PATTERNS = {
   'レッグエクステンション': ['マシン'],
   'レッグカール': ['マシン', '自重'],
   'グッドモーニング': ['バーベル', 'ダンベル'],
-  'アダクション/アブダクション': ['マシン', 'バンド'],
+  'アダクション': ['マシン', 'バンド'],
   'ショルダープレス': ['MTSマシン', 'ダンベル', 'バーベル', 'スミス'],
   'サイドレイズ': ['ダンベル', 'ケーブル'],
   'フロントレイズ': ['ダンベル', 'ケーブル', 'バーベル'],
   'フェイスプル': ['ケーブル'],
-  'アームカール（二頭筋）': ['シーテッド台', 'ダンベル', 'バーベル', 'ケーブル'],
-  'ケーブル・プレスダウン（三頭筋）': ['ケーブル'],
-  'トライセプス・エクステンション（三頭筋）': ['ダンベル', 'バーベル', 'ケーブル'],
-  'キックバック（三頭筋）': ['ダンベル', 'ケーブル'],
-  'ナロー/リバースプッシュアップ': ['自重'],
-  'ヒップアブダクション（お尻特化）': ['マシン', 'バンド'],
+  'アームカール': [ 'ダンベル', 'バーベル', 'ケーブル'],
+  'ケーブル・プレスダウン': ['ケーブル'],
+  'トライセプス・エクステンション': ['ダンベル', 'バーベル', 'ケーブル'],
+  'キックバック': ['ダンベル', 'ケーブル'],
+  'プッシュアップ': ['自重'],
+  'アブダクション': ['マシン', 'バンド'],
   'ヒップスラスト': ['グルートドライブ', 'バーベル', 'スミス'],
   'グルートキックバック': ['ケーブル', 'マシン', 'バンド'],
   'クランチ（上体起こし）': ['自重', 'マシン'],
@@ -155,261 +164,249 @@ const DEFAULT_EQUIPMENT_PATTERNS = {
   'プランク': ['自重'],
   'クリーン/スナッチ': ['バーベル', 'ダンベル'],
   'バーピー': ['自重'],
-  'トレッドミル（ランニングマシン）': ['マシン']
+  'トレッドミル': ['マシン']
 };
 
 const INITIAL_EXERCISE_DETAILS = {
-  // =========================
-  // 胸 (CHEST)
-  // =========================
   'チェストプレス': {
     generalTips: '大胸筋を鍛える基本のプレス種目。ベンチ角度で狙う部位が変わる。',
     variations: [
-      { name: 'フラット', target: '大胸筋全体、上腕三頭筋', tips: '大胸筋全体にまんべんなく効かせる基本の角度。バーベルはみぞおちのやや上へ下ろす。' },
+      { name: 'フラット', target: '大胸筋全体、上腕三頭筋', tips: '大胸筋全体にまんべんなく効かせる基本の角度。' },
       { name: 'インクライン', target: '大胸筋上部', tips: 'ベンチ角度30〜45度で上部を狙う。デコルテラインの形成に。' },
       { name: 'デクライン', target: '大胸筋下部', tips: 'ベンチを下向きに傾け、下部の輪郭を強調する。' }
     ]
   },
   'チェストフライ': {
-    generalTips: '大胸筋を単関節で鍛え、胸の輪郭や谷間を作る種目。腕の力ではなく胸で挟む意識を持つ。',
+    generalTips: '大胸筋を単関節で鍛え、胸の輪郭や谷間を作る種目。',
     variations: [
-      { name: 'フラット', target: '大胸筋全体（内側）', tips: '胸の中央で挟み込むように寄せる。トップでダンベル同士をぶつけない。' },
-      { name: 'インクライン', target: '大胸筋上部', tips: '上部の絞り込みに効果的。ベンチ角度は30〜45度が目安。' }
+      { name: 'フラット', target: '大胸筋全体（内側）', tips: '胸の中央で挟み込むように寄せる。' },
+      { name: 'インクライン', target: '大胸筋上部', tips: '上部の絞り込みに効果的。' }
     ]
   },
   'ディップス': {
-    generalTips: '上半身のスクワットと呼ばれる強力な種目。上体の傾きで効く部位が変わる。',
+    generalTips: '上半身のスクワットと呼ばれる強力な種目。',
     variations: [
-      { name: 'ノーマル', target: '大胸筋下部、上腕三頭筋', tips: '上体を前に倒すと胸に、直立させると腕に効きやすい。肩をすくめすぎない。' }
+      { name: 'ノーマル', target: '大胸筋下部、上腕三頭筋', tips: '上体を前に倒すと胸に、直立させると腕に効きやすい。' }
     ]
   },
-
-  // =========================
-  // 背中 (BACK)
-  // =========================
   'ラットプルダウン': {
-    generalTips: '背中の広がりや厚みを作る種目。肩甲骨の動きを意識する。',
+    generalTips: '背中の広がりや厚みを作る種目。',
     variations: [
-      { name: 'ワイド', target: '広背筋（上部・外側）、大円筋', tips: '肩幅の1.5倍で握り、鎖骨に向かって引く。背中の「広がり」を作る。' },
-      { name: 'ナロー', target: '広背筋（下部）、上腕二頭筋', tips: '脇を締め、みぞおちに引く。腕の関与が大きくなる。' },
-      { name: 'マググリップ', target: '広背筋（中部〜下部）', tips: '手首の負担が少なく、自然な軌道で肩甲骨を寄せやすい。' }
+      { name: 'ワイド', target: '広背筋（上部・外側）', tips: '肩幅の1.5倍で握る。' },
+      { name: 'ナロー（逆手）', target: '広背筋（下部）、上腕二頭筋', tips: '脇を締め、みぞおちに引く。' },
+      { name: 'マググリップ', target: '広背筋（中部〜下部）', tips: '手首の負担が少なく引きやすい。' }
     ]
   },
   'チンニング（懸垂）': {
     generalTips: '自重で背中全体を強烈に鍛える種目。',
     variations: [
-      { name: '順手（ワイド）', target: '広背筋（上部・外側）', tips: '胸をバーに近づけるイメージで引く。反動を使わない。' },
-      { name: '逆手（ナロー）', target: '広背筋（下部）、上腕二頭筋', tips: '腕の力も使いやすく、初心者でも比較的取り組みやすい。' }
+      { name: '順手（ワイド）', target: '広背筋（上部・外側）', tips: '胸をバーに近づけるイメージで引く。' },
+      { name: '逆手（ナロー）', target: '広背筋（下部）、上腕二頭筋', tips: '腕の力も使いやすい。' }
     ]
   },
   'ローイング': {
-    generalTips: '前から後ろへ引く動作で、背中の「厚み」を作る種目。',
+    generalTips: '前から後ろへ引く動作で、背中の厚みを作る種目。',
     variations: [
-      { name: 'シーテッド', target: '広背筋（下部）、僧帽筋中部', tips: '脇を締めて引く。肩甲骨を寄せる意識を持ちやすい。' },
-      { name: 'アイソラテラル', target: '広背筋', tips: '片手ずつ交互に引いて左右差をなくすのに有効。' },
-      { name: 'ベントオーバー', target: '広背筋、脊柱起立筋', tips: '前傾姿勢を維持するため、体幹部や腰回りも同時に鍛えられる。' },
-      { name: 'インバート（斜め懸垂）', target: '広背筋、僧帽筋', tips: '自重で行える背中の基本種目。バーの高さで負荷を調整できる。' }
+      { name: 'シーテッド', target: '広背筋、僧帽筋中部', tips: '座って水平に引く。' },
+      { name: 'ベントオーバー', target: '広背筋、脊柱起立筋', tips: '立ったまま前傾して引く。' },
+      { name: 'インバート', target: '広背筋、僧帽筋', tips: '自重で斜め懸垂のように引く。' }
     ]
   },
   'デッドリフト': {
-    generalTips: '背面全体を鍛えるビッグ3の一つ。背中が丸まると腰を痛めるためフォーム重視で。',
+    generalTips: '背面全体を鍛えるビッグ3の一つ。',
     variations: [
-      { name: '床引き', target: '脊柱起立筋、広背筋、大臀筋、ハムストリングス', tips: '腰幅に脚を開き、肩幅でバーを握る。床から引き上げる基本形。' },
-      { name: 'トップサイド（ハーフ）', target: '脊柱起立筋、大臀筋', tips: '膝上の高さからスタートし、高重量を扱いやすい。' },
-      { name: 'ルーマニアン', target: 'ハムストリングス、大臀筋', tips: '膝はほとんど曲げず、お尻を後ろに突き出してもも裏を強くストレッチする。' },
-      { name: 'スモウ', target: '大腿四頭筋、内転筋', tips: '脚を大きく広げ、内ももの内側でバーを握る。脚全体に効きやすい。' }
+      { name: '床引き', target: '背面全体', tips: '床から引き上げる基本形。' },
+      { name: 'トップサイド（ハーフ）', target: '脊柱起立筋', tips: '膝上の高さからスタート。' },
+      { name: 'ルーマニアン', target: 'ハムストリングス、大臀筋', tips: '膝をあまり曲げずに下ろす。' },
+      { name: 'スモウ', target: '大腿四頭筋、内転筋', tips: '脚を大きく広げて行う。' }
     ]
   },
   'バックエクステンション': {
-    generalTips: '腰（脊柱起立筋）を中心に鍛える種目。',
+    generalTips: '腰を中心に鍛える種目。',
     variations: [
-      { name: 'ノーマル', target: '脊柱起立筋', tips: '背中を丸めながら下ろし、背筋の力で反り上がる。腰を過剰に反らせない。' }
+      { name: 'ノーマル', target: '脊柱起立筋', tips: '腰を過剰に反らせない。' }
     ]
   },
   'リアデルトイド': {
-    generalTips: '肩の後ろと背中の上部を鍛え、姿勢改善や立体的な肩を作る種目。',
+    generalTips: '肩の後ろを鍛え、立体的な肩を作る種目。',
     variations: [
-      { name: '手のひら内側', target: '三角筋後部、僧帽筋', tips: '手のひらを向かい合わせて開く。可動域を大きく取れる。' },
-      { name: '手のひら下向き', target: '三角筋後部', tips: '手のひらを下に向けて開く。三角筋後部を集中的に狙える。' }
+      { name: '手のひら内側', target: '三角筋後部、僧帽筋', tips: '手のひらを向かい合わせて開く。' },
+      { name: '手のひら下向き', target: '三角筋後部', tips: '三角筋後部を集中的に狙う。' }
     ]
   },
-
-  // =========================
-  // 脚 (LEGS)
-  // =========================
   'スクワット': {
-    generalTips: '下半身全体を鍛えるトレーニングの王様。股関節と膝関節を連動させる。',
+    generalTips: '下半身全体を鍛えるトレーニングの王様。',
     variations: [
-      { name: 'バイラテラル（両足）', target: '大腿四頭筋、大臀筋', tips: '基本の両足スクワット。全種目のフォームの土台になる。' },
-      { name: 'ブルガリアン（片足）', target: '大臀筋、ハムストリングス', tips: '片脚で行うためバランスが求められ、強い負荷をかけられる。' },
-      { name: 'ランジ', target: '大腿四頭筋、大臀筋', tips: '前後に大きく踏み込む。左右差の改善にも有効。' },
-      { name: 'ゴブレット', target: '大腿四頭筋', tips: '胸の前にダンベルを持ち、上体を立ててしゃがむ初心者向けの型。' }
+      { name: 'バイラテラル', target: '下半身全体', tips: '基本の両足スクワット。' },
+      { name: 'ブルガリアン', target: '大臀筋、ハムストリングス', tips: '片脚で行う。' },
+      { name: 'ランジ', target: '大腿四頭筋、大臀筋', tips: '前後に大きく踏み込む。' },
+      { name: 'ゴブレット', target: '大腿四頭筋', tips: '胸の前で重りを持つ。' }
     ]
   },
   'レッグプレス': {
-    generalTips: '足の置く位置（スタンス）によって、ターゲットとなる部位を細かく調整できるマシン。',
+    generalTips: '足の置く位置によってターゲットを変えられる。',
     variations: [
-      { name: 'ノーマル', target: '大腿四頭筋、大臀筋、ハムストリングス', tips: '足を上に置くとお尻・裏もも、下に置くと前ももに効きやすい。' }
+      { name: '足上', target: '大臀筋、ハムストリングス', tips: 'プレートの上方に足を置く。' },
+      { name: '足中', target: '下半身全体', tips: 'プレートの中央に足を置く。' },
+      { name: '足下', target: '大腿四頭筋', tips: 'プレートの下方に足を置く。' }
     ]
   },
   'レッグエクステンション': {
-    generalTips: '前ももを単独で鍛え、脚のカット（溝）を出す種目。',
+    generalTips: '前ももを単独で鍛える。',
     variations: [
-      { name: 'ノーマル', target: '大腿四頭筋', tips: '蹴り上げたトップで1秒キープすると収縮が強まる。反動を使わない。' }
+      { name: 'ノーマル', target: '大腿四頭筋', tips: '蹴り上げたトップで1秒キープ。' }
     ]
   },
   'レッグカール': {
-    generalTips: '裏ももを単独で鍛える種目。肉離れ予防にも重要。',
+    generalTips: '裏ももを単独で鍛える。',
     variations: [
-      { name: 'シーテッド', target: 'ハムストリングス', tips: '座って行う。股関節が曲がった状態のため、もも裏がストレッチされやすい。' },
-      { name: 'ライイング', target: 'ハムストリングス', tips: 'うつ伏せで行う。お尻が浮かないように骨盤をパッドに押し付ける。' }
+      { name: 'シーテッド', target: 'ハムストリングス', tips: '座って行う。' },
+      { name: 'ライイング', target: 'ハムストリングス', tips: 'うつ伏せで行う。' }
     ]
   },
   'グッドモーニング': {
-    generalTips: 'お辞儀の動作で背面を鍛える種目。',
+    generalTips: 'お辞儀の動作で背面を鍛える。',
     variations: [
-      { name: 'ノーマル', target: 'ハムストリングス、脊柱起立筋', tips: 'バーを担ぎ、背筋を伸ばしたまま股関節から上体を前傾させる。' }
+      { name: 'ノーマル', target: 'ハムストリングス、脊柱起立筋', tips: '背筋を伸ばしたまま前傾する。' }
     ]
   },
-  'アダクション/アブダクション': {
-    generalTips: '脚の内側・外側を個別に鍛え、内ももの引き締めやヒップの丸みを作る種目。',
+  'アダクション': {
+    generalTips: '内ももを鍛える種目。',
     variations: [
-      { name: '内もも（アダクション）', target: '内転筋', tips: '反動を使わず、内ももの付け根から脚を閉じる意識で行う。' },
-      { name: 'お尻（アブダクション）', target: '中臀筋、大臀筋', tips: '骨盤を安定させたまま脚を外に開く。座る姿勢で狙いが変わる。' }
+      { name: 'ノーマル', target: '内転筋', tips: '反動を使わず脚を閉じる。' }
     ]
   },
-
-  // =========================
-  // 肩 (SHOULDERS)
-  // =========================
   'ショルダープレス': {
-    generalTips: '肩全体（特に前部〜中部）を鍛え、肩幅を広げるプレス種目。',
+    generalTips: '肩全体を鍛えるプレス種目。',
     variations: [
-      { name: 'ノーマル', target: '三角筋前部・中部', tips: '耳の横まで下ろし、頭の上で弧を描くように上げる。腰を反りすぎない。' },
-      { name: 'パラレル（縦握り）', target: '三角筋前部', tips: '手のひらを向かい合わせて押す。肩関節への負担が少ない。' }
+      { name: 'ノーマル', target: '三角筋前部・中部', tips: '耳の横まで下ろす。' },
+      { name: 'パラレル（縦握り）', target: '三角筋前部', tips: '手のひらを向かい合わせて押す。' }
     ]
   },
   'サイドレイズ': {
-    generalTips: '肩の横の張り出しを作り、逆三角形や小顔効果を狙う種目。',
+    generalTips: '肩の横の張り出しを作る。',
     variations: [
-      { name: 'ノーマル', target: '三角筋中部', tips: '小指側から上げるイメージで、遠くに放り投げるように。肩がすくまないよう注意。' }
+      { name: 'ノーマル', target: '三角筋中部', tips: '小指側から上げるイメージ。' }
     ]
   },
   'フロントレイズ': {
-    generalTips: '肩の前面を単独で鍛える種目。',
+    generalTips: '肩の前面を鍛える。',
     variations: [
-      { name: 'ノーマル', target: '三角筋前部', tips: '反動を使わず、目の高さまで持ち上げる。' }
+      { name: 'ノーマル', target: '三角筋前部', tips: '目の高さまで持ち上げる。' }
     ]
   },
   'フェイスプル': {
-    generalTips: '肩の後ろと背中上部を鍛え、姿勢改善や立体的な肩を作る種目。',
+    generalTips: '肩の後ろと背中上部を鍛える。',
     variations: [
-      { name: 'ノーマル', target: '三角筋後部、僧帽筋', tips: 'ロープを顔（目線の高さ）に向かって引く。引く時に手首を外側に開く（外旋）。' }
+      { name: 'ノーマル', target: '三角筋後部、僧帽筋', tips: '顔に向かって引く。' }
     ]
   },
-
-  // =========================
-  // 腕 (ARMS)
-  // =========================
-  'アームカール（二頭筋）': {
-    generalTips: '力こぶ（上腕二頭筋）を作る種目。肘の位置を固定することが重要。',
+  'アームカール': {
+    generalTips: '力こぶを作る種目。',
     variations: [
-      { name: 'ノーマル', target: '上腕二頭筋', tips: '手首を外側に捻りながら（回外）上げるとより強く収縮する。' },
-      { name: 'インクライン（ベンチ傾斜）', target: '上腕二頭筋（長頭）', tips: '腕を後方に垂らすことで可動域が広がり、ストレッチが強くかかる。' },
-      { name: 'ハンマー（縦握り）', target: '上腕二頭筋、腕橈骨筋', tips: '縦握りで前腕も同時に鍛えられる。' }
+      { name: '手のひら上', target: '上腕二頭筋', tips: '基本のカール。' },
+      { name: 'ハンマー（縦握り）', target: '上腕二頭筋、腕橈骨筋', tips: '縦握りで行う。' },
+      { name: 'インクライン', target: '上腕二頭筋（長頭）', tips: 'ベンチを傾けて行う。' },
+      { name: 'プリーチャー', target: '上腕二頭筋（短頭）', tips: '台に腕を固定して行う。' }
     ]
   },
-  'トライセプス・エクステンション（三頭筋）': {
-    generalTips: '二の腕（上腕三頭筋）を引き締める種目。',
+  'ケーブル・プレスダウン': {
+    generalTips: '二の腕を引き締める。',
     variations: [
-      { name: 'プレスダウン（上から押す）', target: '上腕三頭筋（外側頭）', tips: '肘を体側で固定し、下ろした時にしっかり伸ばし切る。' },
-      { name: 'オーバーヘッド（頭上から引く）', target: '上腕三頭筋（長頭）', tips: '頭の後ろから前に伸ばすことで長頭がストレッチされる。' },
-      { name: 'キックバック（後ろに伸ばす）', target: '上腕三頭筋', tips: '上体を前傾させ、肘を固定したまま後方に伸ばし切る。' }
+      { name: 'ストレートバー', target: '上腕三頭筋', tips: 'バーを押し下げる。' },
+      { name: 'ロープ', target: '上腕三頭筋', tips: 'フィニッシュで外に開く。' },
+      { name: '逆手', target: '上腕三頭筋', tips: 'アンダーグリップで行う。' }
     ]
   },
-  'ナロー/リバースプッシュアップ': {
-    generalTips: '自重で二の腕を集中的に鍛える種目。',
+  'トライセプス・エクステンション': {
+    generalTips: '二の腕を鍛える。',
     variations: [
-      { name: '脇締め（ナロー）', target: '上腕三頭筋', tips: '脇を締めて手幅を狭くし、肘の曲げ伸ばしで三頭筋に効かせる。' },
-      { name: '逆手ベンチ（リバース）', target: '上腕三頭筋', tips: 'ベンチに手を逆手でつき、腰を落として伸ばす。' }
+      { name: 'ライイング', target: '上腕三頭筋', tips: '寝て行う。' },
+      { name: 'オーバーヘッド', target: '上腕三頭筋', tips: '頭の後ろから上へ伸ばす。' }
     ]
   },
-
-  // =========================
-  // お尻 (GLUTES)
-  // =========================
-  'ヒップアブダクション（お尻特化）': {
-    generalTips: 'お尻の筋肉を角度別に鍛え分け、ヒップの丸みや引き締めを作る種目。',
+  'キックバック': {
+    generalTips: '二の腕の仕上げ種目。',
     variations: [
-      { name: '骨盤前傾', target: '大臀筋（上部）', tips: '背筋を伸ばしたまま前傾。お尻全体のボリュームアップに。' },
-      { name: '骨盤立て', target: '中臀筋・小臀筋', tips: '背もたれにしっかり背中をつけ、背筋をまっすぐ立てて座る。' },
-      { name: '骨盤後傾', target: '大臀筋の下部・外側', tips: '浅く座って背もたれに寄りかかり、お尻の下部を狙う。' }
+      { name: 'ノーマル', target: '上腕三頭筋', tips: '前傾姿勢で後ろに伸ばす。' }
+    ]
+  },
+  'プッシュアップ': {
+    generalTips: '自重で腕や胸を鍛える。',
+    variations: [
+      { name: 'ナロー', target: '上腕三頭筋', tips: '脇を締めて行う。' },
+      { name: 'リバース', target: '上腕三頭筋', tips: '逆手ベンチで行う。' }
+    ]
+  },
+  'アブダクション': {
+    generalTips: 'お尻を鍛える種目。',
+    variations: [
+      { name: '骨盤前傾', target: '大臀筋（上部）', tips: '前傾姿勢で行う。' },
+      { name: '骨盤立て', target: '中臀筋・小臀筋', tips: 'まっすぐ座って行う。' },
+      { name: '骨盤後傾', target: '大臀筋の下部・外側', tips: '浅く座って寄りかかる。' }
     ]
   },
   'ヒップスラスト': {
-    generalTips: 'お尻の筋肉を最大収縮させる、ヒップアップの代表種目。',
+    generalTips: 'お尻を最大収縮させる。',
     variations: [
-      { name: 'ノーマル', target: '大臀筋', tips: '肩甲骨下部をベンチに乗せて骨盤を持ち上げる。トップでお尻をキュッと締める。腰を反りすぎない。' }
+      { name: 'ノーマル', target: '大臀筋', tips: '骨盤を持ち上げる。' }
     ]
   },
   'グルートキックバック': {
-    generalTips: '脚を後ろに蹴り出し、お尻の上部をピンポイントで鍛える種目。',
+    generalTips: 'お尻の上部をピンポイントで鍛える。',
     variations: [
-      { name: 'ノーマル', target: '大臀筋', tips: '骨盤を動かさずにお尻の筋肉だけで後ろに蹴る。戻す時も負荷を抜かない。' }
+      { name: 'ノーマル', target: '大臀筋', tips: '後ろに蹴り出す。' }
     ]
   },
-
-  // =========================
-  // 腹筋・体幹 (ABS & CORE)
-  // =========================
-  'クランチ（上体起こし）': {
-    generalTips: 'いわゆる腹筋運動。お腹を引き締める基本種目。',
+  'ルーマニアンデッドリフト': {
+    generalTips: 'お尻と裏ももを強烈にストレッチさせる種目。',
     variations: [
-      { name: 'ノーマル', target: '腹直筋', tips: '完全に起き上がる手前で止めると負荷が逃げない。腰を痛めないようマット等を敷く。' },
-      { name: 'ひねり（ツイスト）', target: '腹斜筋', tips: '体を捻りながら起こし、脇腹を絞り込む。' }
+      { name: 'ノーマル', target: '大臀筋、ハムストリングス', tips: '膝をあまり曲げずにお尻を後ろに引く。' }
+    ]
+  },
+  'クランチ（上体起こし）': {
+    generalTips: 'お腹を引き締める。',
+    variations: [
+      { name: 'ノーマル', target: '腹直筋', tips: '完全に起き上がる手前で止める。' },
+      { name: 'ツイスト', target: '腹斜筋', tips: '体を捻りながら起こす。' }
     ]
   },
   'トーソローテーション': {
-    generalTips: 'お腹の横（腹斜筋）を鍛え、くびれを作るマシン。',
+    generalTips: 'お腹の横を鍛える。',
     variations: [
-      { name: 'ノーマル', target: '腹斜筋', tips: '反動を使わず、お腹の力で胴体を捻る。' }
+      { name: 'ノーマル', target: '腹斜筋', tips: '胴体を捻る。' }
     ]
   },
   'レッグレイズ': {
-    generalTips: '下腹部を強力に鍛える種目。',
+    generalTips: '下腹部を鍛える。',
     variations: [
-      { name: 'マット（床）', target: '腹直筋下部', tips: '腰が反らないよう、床と腰の間の隙間をなくして行う。' },
-      { name: 'ハンギング（ぶら下がり）', target: '腹直筋下部', tips: 'ぶら下がった状態から骨盤を丸め込むように脚を上げる。反動でブラブラしない。' }
+      { name: 'マット', target: '腹直筋下部', tips: '床で行う。' },
+      { name: 'ハンギング', target: '腹直筋下部', tips: 'ぶら下がって行う。' }
     ]
   },
   'プランク': {
-    generalTips: '体幹全体を固定するアイソメトリック（等尺性）種目。',
+    generalTips: '体幹を固定する。',
     variations: [
-      { name: 'ノーマル', target: '腹横筋、体幹', tips: 'お尻が上がったり腰が反ったりしないよう、頭からかかとまで一直線をキープ。' }
+      { name: 'ノーマル', target: '腹横筋、体幹', tips: '一直線をキープする。' }
     ]
   },
-
-  // =========================
-  // 全身・有酸素 (FULL BODY & CARDIO)
-  // =========================
   'クリーン/スナッチ': {
-    generalTips: '下半身の爆発力でウェイトを引き上げる全身運動。',
+    generalTips: '全身の爆発力を鍛える。',
     variations: [
-      { name: 'クリーン', target: '全身（瞬発力）', tips: 'フォームが難しいため、軽い重量で股関節の伸び（トリプルエクステンション）を習得する。' },
-      { name: 'スナッチ', target: '全身（瞬発力）', tips: '床から一気に頭上まで引き上げる。高度な連動性と肩周りの柔軟性が求められる。' }
+      { name: 'クリーン', target: '全身', tips: '肩まで引き上げる。' },
+      { name: 'スナッチ', target: '全身', tips: '頭上まで引き上げる。' }
     ]
   },
   'バーピー': {
-    generalTips: '全身の筋肉を使い、心拍数を一気に上げるHIITに最適な種目。',
+    generalTips: '全身の筋肉を使うHIIT。',
     variations: [
-      { name: 'ノーマル', target: '全身、心肺機能', tips: 'しゃがむ→脚を後ろに蹴り出す→腕立て伏せ→脚を戻す→ジャンプ、を素早く連続で行う。' }
+      { name: 'ノーマル', target: '全身、心肺機能', tips: '素早く連続で行う。' }
     ]
   },
-  'トレッドミル（ランニングマシン）': {
-    generalTips: '定番の有酸素マシン。ペースと傾斜で狙いを調整できる。',
+  'トレッドミル': {
+    generalTips: '定番の有酸素マシン。',
     variations: [
-      { name: '通常ラン・ウォーク', target: '心肺機能、脂肪燃焼', tips: '軽く息が弾む程度のペース（心拍数120〜130程度）が脂肪燃焼に効果的。' },
-      { name: '傾斜ウォーキング', target: '大臀筋、ふくらはぎ、脂肪燃焼', tips: '傾斜を5〜15%程度つけ、手すりを持たずに腕を振って歩く。お尻の筋肉も動員される。' }
+      { name: 'ノーマル', target: '心肺機能', tips: '走るか歩く。' }
     ]
   }
 };
@@ -643,17 +640,16 @@ function buildDefaultExerciseLibrary() {
   return {
     '胸': ['チェストプレス', 'チェストフライ', 'ディップス'],
     '背中': ['ラットプルダウン', 'チンニング（懸垂）', 'ローイング', 'デッドリフト', 'バックエクステンション', 'リアデルトイド'],
-    '脚': ['スクワット', 'レッグプレス', 'レッグエクステンション', 'レッグカール', 'グッドモーニング', 'アダクション/アブダクション'],
+    '脚': ['スクワット', 'レッグプレス', 'レッグエクステンション', 'レッグカール', 'グッドモーニング', 'アダクション'],
     '肩': ['ショルダープレス', 'サイドレイズ', 'フロントレイズ', 'フェイスプル'],
-    '腕': ['アームカール（二頭筋）', 'ケーブル・プレスダウン（三頭筋）', 'トライセプス・エクステンション（三頭筋）', 'キックバック（三頭筋）', 'ナロー/リバースプッシュアップ'],
-    'お尻': ['ヒップアブダクション（お尻特化）', 'ヒップスラスト', 'グルートキックバック'],
+    '腕': ['アームカール', 'ケーブル・プレスダウン', 'トライセプス・エクステンション', 'キックバック', 'プッシュアップ'],
+    'お尻': ['アブダクション', 'ヒップスラスト', 'グルートキックバック', 'ルーマニアンデッドリフト'], // ★ここに追加
     '腹筋': ['クランチ（上体起こし）', 'トーソローテーション', 'レッグレイズ', 'プランク'],
     '全身': ['クリーン/スナッチ', 'バーピー'],
-    '有酸素運動': ['トレッドミル（ランニングマシン）'],
+    '有酸素運動': ['トレッドミル'],
     'その他': []
   };
 }
-
 function renderRecommendation() {
   const calcDaysAgo = (category) => {
     const catLogs = state.logs.filter(l => {
@@ -737,10 +733,11 @@ function renderTodaySummary() {
       const valArray = Array.isArray(logVal) ? logVal : [logVal];
 
       valArray.forEach(item => {
-        const formatted = formatSingleLogObj(item);
+        const nameText = formatExerciseName(cleanName, item.variation, item.equipment);
+        const formatted = formatSingleLogObj(item, false); 
         exListHTML += `
           <div class="today-summary-item">
-            <span class="today-summary-ex-name">• ${cleanName}</span>
+            <span class="today-summary-ex-name">• ${nameText}</span>
             <span class="today-summary-ex-val">${formatted}</span>
           </div>
         `;
@@ -761,6 +758,221 @@ function renderTodaySummary() {
     </div>
     ${exListHTML}
   `;
+}
+function renderHistoryLogs() {
+  const container = document.getElementById('history-log-container');
+  if (!container) return;
+
+  container.innerHTML = '';
+
+  if (!state.logs || state.logs.length === 0) {
+    container.innerHTML = '<p style="color:var(--text-sub); text-align:center; padding:24px; font-size:0.8125rem;">まだ記録がありません。</p>';
+    return;
+  }
+
+  const sortedLogs = [...state.logs].sort((a, b) => a.date.localeCompare(b.date));
+
+  const groupedByMonth = {};
+  sortedLogs.forEach(log => {
+    const [y, m] = log.date.split('-');
+    const monthKey = `${y}年 ${parseInt(m, 10)}月`;
+    if (!groupedByMonth[monthKey]) {
+      groupedByMonth[monthKey] = [];
+    }
+    groupedByMonth[monthKey].push(log);
+  });
+
+  const monthKeys = Object.keys(groupedByMonth);
+  const latestMonthKey = monthKeys[monthKeys.length - 1];
+
+  monthKeys.forEach(monthKey => {
+    const monthLogs = groupedByMonth[monthKey];
+
+    const groupEl = document.createElement('div');
+    groupEl.className = 'history-month-group';
+
+    const summaryEl = document.createElement('div');
+    summaryEl.className = 'history-month-summary';
+    const countExOff = monthLogs.filter(l => l.menuId !== 'OFF').length;
+    summaryEl.innerHTML = `<span>📅 ${monthKey} (${countExOff}回)</span><span class="arrow-icon">▾</span>`;
+
+    const bodyEl = document.createElement('div');
+    bodyEl.className = 'history-month-body';
+
+    monthLogs.forEach(log => {
+      const [y, m, d] = log.date.split('-');
+      const dateObj = new Date(parseInt(y, 10), parseInt(m, 10) - 1, parseInt(d, 10));
+      const dayOfWeek = ['日', '月', '火', '水', '木', '金', '土'][dateObj.getDay()];
+      const formattedDate = `${y}/${parseInt(m, 10)}/${parseInt(d, 10)} (${dayOfWeek})`;
+
+      let titleText = '';
+      if (log.menuId === 'OFF') {
+        titleText = 'OFF';
+      } else if (log.menuId === 'ALL') {
+        titleText = '全身の日';
+      } else {
+        const menu = state.menus.find(m => m.id === log.menuId);
+        titleText = menu ? menu.title : log.menuId;
+      }
+
+      let exHTML = '';
+      if (log.menuId === 'OFF') {
+        exHTML = '<div class="history-ex-empty">☕ やすみもだいじ</div>';
+      } else if (log.exerciseLogs && Object.keys(log.exerciseLogs).length > 0) {
+        exHTML = '<div class="history-ex-list">';
+        for (const [exName, logVal] of Object.entries(log.exerciseLogs)) {
+          const cleanName = exName.replace('【追加】', '');
+          const valArray = Array.isArray(logVal) ? logVal : [logVal];
+
+          valArray.forEach(item => {
+            const nameText = formatExerciseName(cleanName, item.variation, item.equipment);
+            const formatted = formatSingleLogObj(item, false);
+            exHTML += `
+              <div class="history-ex-item">
+                <span class="history-ex-name">• ${nameText}</span>
+                <span class="history-ex-val" style="text-align:right; max-width:60%; word-break:break-all;">${formatted}</span>
+              </div>
+            `;
+          });
+        }
+        exHTML += '</div>';
+      } else {
+        exHTML = '<div class="history-ex-empty">詳細ログはありません</div>';
+      }
+
+      const dayItem = document.createElement('div');
+      dayItem.className = 'date-accordion-item history-date-item';
+
+      const dayHeader = document.createElement('div');
+      dayHeader.className = 'date-accordion-header';
+      dayHeader.innerHTML = `
+        <span class="inbody-list-date">${formattedDate}</span>
+        <span class="date-accordion-preview">${titleText}</span>
+        <span class="arrow-icon">▾</span>
+      `;
+
+      const dayBody = document.createElement('div');
+      dayBody.className = 'date-accordion-body';
+      dayBody.innerHTML = exHTML;
+
+      dayHeader.onclick = () => {
+        const isActive = dayItem.classList.contains('active');
+        if (isActive) {
+          dayBody.style.maxHeight = '0px';
+          dayItem.classList.remove('active');
+        } else {
+          dayItem.classList.add('active');
+          dayBody.style.maxHeight = (dayBody.scrollHeight + 100) + 'px';
+          
+          setTimeout(() => {
+            if (dayItem.classList.contains('active')) {
+              dayBody.style.maxHeight = 'none';
+            }
+          }, 350);
+
+          setTimeout(() => {
+            dayItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }, 100);
+        }
+        
+        if (groupEl.classList.contains('active')) {
+          bodyEl.style.maxHeight = 'none';
+        }
+      };
+
+      dayItem.appendChild(dayHeader);
+      dayItem.appendChild(dayBody);
+      bodyEl.appendChild(dayItem);
+    });
+
+    groupEl.appendChild(summaryEl);
+    groupEl.appendChild(bodyEl);
+
+    summaryEl.onclick = () => {
+      const isActive = groupEl.classList.contains('active');
+      if (isActive) {
+        bodyEl.style.maxHeight = '0px';
+        groupEl.classList.remove('active');
+      } else {
+        groupEl.classList.add('active');
+        bodyEl.style.maxHeight = 'none';
+      }
+    };
+
+    container.appendChild(groupEl);
+
+    if (monthKey === latestMonthKey) {
+      setTimeout(() => {
+        groupEl.classList.add('active');
+        bodyEl.style.maxHeight = 'none';
+      }, 50);
+    }
+  });
+}
+
+// 【記録の詳細確認モーダルの表示】
+function openDetailLogModal(logIndex) {
+  const log = state.logs[logIndex];
+  if (!log) return;
+
+  document.getElementById('detail-log-date').textContent = log.date;
+
+  const titleEl = document.getElementById('detail-log-title');
+  const bodyEl = document.getElementById('detail-log-body');
+
+  if (log.menuId === 'OFF') {
+    titleEl.textContent = 'OFF';
+    bodyEl.innerHTML = '<p style="color:var(--text-sub);">この日はオフとして記録されています。</p>';
+  } else if (log.menuId === 'ALL') {
+    titleEl.textContent = '全身の日';
+  } else {
+    const menu = state.menus.find(m => m.id === log.menuId);
+    const menuTitle = menu ? menu.title : '';
+    const freeBadge = log.recordType === 'free' ? ' <span style="font-size:0.75rem; font-weight:700; color:var(--lavender); background:var(--lavender-soft); padding:2px 8px; border-radius:8px; vertical-align:middle;">自由入力</span>' : '';
+    titleEl.innerHTML = `${menuTitle}${freeBadge}`;
+  }
+
+  let html = '';
+  if (log.exerciseLogs && Object.keys(log.exerciseLogs).length > 0) {
+    html += '<div style="display:flex; flex-direction:column; gap:8px;">';
+    for (const [exName, logVal] of Object.entries(log.exerciseLogs)) {
+      const cleanName = exName.replace('【追加】', ''); 
+      const valArray = Array.isArray(logVal) ? logVal : [logVal];
+
+      valArray.forEach(item => {
+        const nameText = formatExerciseName(cleanName, item.variation, item.equipment);
+        const formatted = formatSingleLogObj(item, false);
+        html += `
+          <div style="display:flex; justify-content:space-between; border-bottom:1px dashed var(--border-color); padding-bottom:6px;">
+            <span style="font-weight:500; font-size:0.85rem;">${nameText}</span>
+            <span style="color:var(--text-sub); font-size:0.9rem;">${formatted}</span>
+          </div>
+        `;
+      });
+    }
+    html += '</div>';
+  } else {
+    html = '<p style="color:var(--text-sub);">各種目の詳細ログはありません。</p>';
+  }
+  bodyEl.innerHTML = html;
+
+  const deleteBtn = document.getElementById('btn-delete-detail-log');
+  deleteBtn.onclick = () => {
+    if (confirm(`${log.date} の記録を削除しますか？`)) {
+      deleteLogByIndex(logIndex);
+      closeDetailLogModal();
+    }
+  };
+
+  const editBtn = document.getElementById('btn-edit-detail-log');
+  if (editBtn) {
+    editBtn.onclick = () => {
+      closeDetailLogModal();
+      openWorkoutLogModal(log.menuId, log.date, true);
+    };
+  }
+
+  document.getElementById('detail-log-modal').classList.add('active');
 }
 
 function getLastExerciseLogObj(exerciseName) {
@@ -798,14 +1010,27 @@ function fillSetsContainerFromItem(block, item) {
   });
 }
 
-// ★ バリエーションと器具の両方を表示するように更新
+// ▼ 新しい表示フォーマット：種目/バリエーション（マシン）
+function formatExerciseName(name, variation, equipment) {
+  let text = name;
+  if (variation) text += `/${variation}`;
+  if (equipment) text += `（${equipment}）`;
+  return text;
+}
+
 function formatSingleLogObj(logObj, showEquipBadge = true) {
   if (!logObj) return '';
 
-  let badgeParts = [];
-  if (logObj.variation) badgeParts.push(logObj.variation);
-  if (showEquipBadge && logObj.equipment) badgeParts.push(logObj.equipment);
-  const equipBadge = badgeParts.length > 0 ? ` [${badgeParts.join(' / ')}]` : '';
+  let equipBadge = '';
+  if (showEquipBadge) {
+    if (logObj.variation && logObj.equipment) {
+      equipBadge = ` [${logObj.variation}（${logObj.equipment}）]`;
+    } else if (logObj.variation) {
+      equipBadge = ` [${logObj.variation}]`;
+    } else if (logObj.equipment) {
+      equipBadge = ` [（${logObj.equipment}）]`;
+    }
+  }
 
   if (logObj.isCardio || logObj.minutes !== undefined || logObj.calories !== undefined) {
     const parts = [];
@@ -881,11 +1106,7 @@ function renderMenuTable() {
     const tr = document.createElement('tr');
 
     let exListHTML = menu.exercises.map(e => {
-        let badgeParts = [];
-        if (e.variation) badgeParts.push(e.variation);
-        if (e.equipment) badgeParts.push(e.equipment);
-        const nameText = badgeParts.length > 0 ? `${e.name} [${badgeParts.join(' / ')}]` : e.name;
-        
+        const nameText = formatExerciseName(e.name, e.variation, e.equipment);
         return `
           <div class="table-ex-item">
             <span class="table-ex-name">• ${nameText}</span> 
@@ -1244,10 +1465,8 @@ function renderWorkoutLogInputs(menuId) {
     btn.type = 'button';
     btn.className = 'exercise-chip';
     
-    let parts = [];
-    if (e.variation) parts.push(e.variation);
-    if (e.equipment) parts.push(e.equipment);
-    btn.textContent = parts.length > 0 ? `+ ${e.name}（${parts.join('/')}）` : `+ ${e.name}`;
+    const nameText = formatExerciseName(e.name, e.variation, e.equipment);
+    btn.textContent = `+ ${nameText}`;
     
     btn.onclick = () => {
       addSuggestedExerciseInput(e.name, e.detail, menuId, null, e.equipment || '', e.variation || '');
@@ -1265,7 +1484,6 @@ function renderWorkoutLogInputs(menuId) {
 
   makeSortable(fieldsContainer);
 }
-
 function addSuggestedExerciseInput(exerciseName, detailStr = '', menuId = '', forceCardio = null, initEquip = '', initVar = '') {
   const container = document.getElementById('suggested-fields-container');
   const lastObj = getLastExerciseLogObj(exerciseName) || {};
@@ -1709,11 +1927,14 @@ function openDetailLogModal(logIndex) {
       const valArray = Array.isArray(logVal) ? logVal : [logVal];
 
       valArray.forEach(item => {
-        const formatted = formatSingleLogObj(item);
+        // ★ 左側に「種目/バリエーション（マシン）」を合体させる
+        const nameText = formatExerciseName(cleanName, item.variation, item.equipment);
+        // ★ 右側のバッジを非表示にする (false)
+        const formatted = formatSingleLogObj(item, false);
         html += `
           <div style="display:flex; justify-content:space-between; border-bottom:1px dashed var(--border-color); padding-bottom:6px;">
-            <span style="font-weight:500;">${cleanName}</span>
-            <span style="color:var(--text-sub); font-size:0.9rem;">${formatted}</span>
+            <span style="font-weight:500; font-size:0.85rem;">${nameText}</span>
+            <span style="color:var(--text-sub); font-size:0.9rem; text-align:right; max-width:60%; word-break:break-all;">${formatted}</span>
           </div>
         `;
       });
@@ -2242,9 +2463,20 @@ function renderLibraryExerciseChips() {
   }
 
   container.innerHTML = names.map(name => {
+    // ▼ バリエーションのチップ生成（直接指定していた色を削除し、テーマカラーに連動させました）
+    const vars = state.exerciseVariations[name] || DEFAULT_VARIATION_PATTERNS[name] || [];
+    const varChipsHTML = vars.map(va => `
+      <span class="lib-equip-chip">
+        ${va}<button type="button" onclick="removeExerciseVar('${name}', '${va}')">&times;</button>
+      </span>
+    `).join('');
+
+    // ▼ 器具のチップ生成
     const equips = state.exerciseEquipment[name] || DEFAULT_EQUIPMENT_PATTERNS[name] || [];
     const equipChipsHTML = equips.map(eq => `
-      <span class="lib-equip-chip">${eq}<button type="button" onclick="removeExerciseEquip('${name}', '${eq}')">&times;</button></span>
+      <span class="lib-equip-chip">
+        ${eq}<button type="button" onclick="removeExerciseEquip('${name}', '${eq}')">&times;</button>
+      </span>
     `).join('');
 
     return `
@@ -2253,17 +2485,58 @@ function renderLibraryExerciseChips() {
           <span class="lib-exercise-name"><strong>${name}</strong></span>
           <button type="button" class="chip-remove-btn" onclick="removeLibraryExercise('${name}')" title="種目を削除">&times;</button>
         </div>
+        
+        <!-- バリエーション管理 -->
+        <div class="lib-exercise-equip-row" style="margin-bottom: 8px;">
+          <div style="font-size:0.7rem; font-weight:700; color:var(--text-sub); margin-bottom:2px;">バリエーションの管理</div>
+          <div class="lib-equip-list">${varChipsHTML}</div>
+          <div class="lib-equip-add-form" style="margin-top:4px;">
+            <input type="text" class="form-input lib-new-equip-input" placeholder="新しいバリエーション">
+            <button type="button" class="btn-lib-equip-add" onclick="addExerciseVar('${name}', this)">+ 追加</button>
+          </div>
+        </div>
+
+        <!-- 器具・マシンの管理 -->
         <div class="lib-exercise-equip-row">
           <div style="font-size:0.7rem; font-weight:700; color:var(--text-sub); margin-bottom:2px;">器具・マシンの管理</div>
           <div class="lib-equip-list">${equipChipsHTML}</div>
           <div class="lib-equip-add-form" style="margin-top:4px;">
-            <input type="text" class="form-input lib-new-equip-input" placeholder="新しい器具を追加" data-exname="${name}">
+            <input type="text" class="form-input lib-new-equip-input" placeholder="新しい器具を追加">
             <button type="button" class="btn-lib-equip-add" onclick="addExerciseEquip('${name}', this)">+ 追加</button>
           </div>
         </div>
       </div>
     `;
   }).join('');
+}
+
+function addExerciseVar(exName, btnEl) {
+  const input = btnEl.previousElementSibling;
+  const varName = input.value.trim();
+  if (!varName) return;
+
+  if (!state.exerciseVariations[exName]) {
+    state.exerciseVariations[exName] = [...(DEFAULT_VARIATION_PATTERNS[exName] || [])];
+  }
+
+  if (state.exerciseVariations[exName].includes(varName)) {
+    alert('既に登録されているバリエーションです');
+    return;
+  }
+
+  state.exerciseVariations[exName].push(varName);
+  saveState();
+  input.value = '';
+  renderLibraryExerciseChips();
+}
+
+function removeExerciseVar(exName, varName) {
+  if (!state.exerciseVariations[exName]) {
+    state.exerciseVariations[exName] = [...(DEFAULT_VARIATION_PATTERNS[exName] || [])];
+  }
+  state.exerciseVariations[exName] = state.exerciseVariations[exName].filter(v => v !== varName);
+  saveState();
+  renderLibraryExerciseChips();
 }
 
 function removeLibraryExercise(name) {
@@ -2321,6 +2594,7 @@ function addLibraryExercise() {
 
   state.exerciseLibrary[currentLibraryLabel].push(name);
   state.exerciseEquipment[name] = ['マシン', 'ダンベル', 'スミス'];
+  state.exerciseVariations[name] = ['ノーマル']; // ★ ここを追加
   saveState();
   input.value = '';
   renderLibraryExerciseChips();
@@ -3664,25 +3938,21 @@ document.addEventListener('touchmove', (e) => {
   }
 }, { passive: false });
 
-setTimeout(() => {
-    // 既に移行済みなら実行しないガード
-    if (localStorage.getItem('migrated_to_v5_final')) return;
+// ▼ 記録は残したまま、メニューと種目リストだけを最新に強制リセットする関数
+function forceUpdateMenusAndLibrary() {
+  if (confirm('メニューと種目リストを最新状態に上書きしますか？\n（★これまでのトレーニング記録は消えません！）')) {
+    // コード上の最新データでstateを上書き
+    state.menus = JSON.parse(JSON.stringify(initialDefaultMenus));
+    state.exerciseLabels = ['胸', '背中', '脚', '肩', '腕', 'お尻', '腹筋', '全身', '有酸素運動', 'その他'];
+    state.exerciseLibrary = buildDefaultExerciseLibrary();
+    state.exerciseEquipment = JSON.parse(JSON.stringify(DEFAULT_EQUIPMENT_PATTERNS));
+    state.exerciseVariations = JSON.parse(JSON.stringify(DEFAULT_VARIATION_PATTERNS));
+    state.exerciseDetails = JSON.parse(JSON.stringify(INITIAL_EXERCISE_DETAILS));
     
-    // ▼ 完成済みのメニューデータ
-    const newMenus = JSON.parse('[{"id":"A","title":"上半身 A（フリーウェイト＆ケーブル）","memo":"デコルテ、背中の広がり、二の腕のトーン調整に重点を置いた構成。","exercises":[{"name":"ラットプルダウン","detail":"15~20回 × 3セット","variation":"マググリップ","equipment":"ケーブル"},{"name":"チェストプレス","detail":"15~20回 × 3セット","variation":"インクライン（斜め上に押す/上部狙い）","equipment":"アイソラテラル"},{"name":"サイドレイズ","detail":"15~20回 × 3セット","variation":"ノーマル","equipment":"ダンベル"},{"name":"ケーブル・プレスダウン（三頭筋）","detail":"15~20回 × 3セット","variation":"ロープ（フィニッシュで外に開く）","equipment":"ケーブル"}]},{"id":"B","title":"上半身 B（マシン＆ローイング）","memo":"背中の厚みと姿勢改善、胸の追い込みに重点。","exercises":[{"name":"ローイング","detail":"15~20回 × 3セット","variation":"シーテッド（座って水平に引く/腰が安全）","equipment":"マシン"},{"name":"チェストプレス","detail":"15~20回 × 3セット","variation":"フラット（前方に押す）","equipment":"マシン"},{"name":"リアデルトイド","detail":"15~20回 × 3セット","variation":"手のひら内側","equipment":"マシン"},{"name":"クランチ（上体起こし）","detail":"15~20回 × 3セット","variation":"ノーマル","equipment":"マシン"},{"name":"バックエクステンション","detail":"15回 × 3セット","variation":"ノーマル","equipment":"マシン"}]},{"id":"C","title":"下半身 A（美尻・美脚マシン）","memo":"マシンを使用して、お尻と裏ももの境目をクリアに。","exercises":[{"name":"ヒップスラスト","detail":"15~20回 × 3セット","variation":"ノーマル","equipment":"グルートドライブ"},{"name":"レッグカール","detail":"15~20回 × 3セット","variation":"シーテッド","equipment":"マシン"},{"name":"レッグプレス","detail":"足幅を広め・上位置に / 15~20回 × 3セット","variation":"ノーマル（足位置：上/中/下）","equipment":"45度リニア"},{"name":"ヒップアブダクション（お尻特化）","detail":"15~20回 × 3セット","variation":"骨盤後傾","equipment":"マシン"}]},{"id":"D","title":"下半身 B（代謝向上・フリーウェイト）","memo":"多関節種目でカロリー消費を高め、ヒップアップを狙う。","exercises":[{"name":"デッドリフト","detail":"15~20回 × 3セット","variation":"ルーマニアン","equipment":"ダンベル"},{"name":"スクワット","detail":"左右各12~15回 × 3セット","variation":"ブルガリアン（片足）","equipment":"ダンベル"},{"name":"グルートキックバック","detail":"ケーブル使用 / 左右各15~20回 × 3セット","variation":"ノーマル","equipment":"ケーブル"},{"name":"ヒップアブダクション（お尻特化）","detail":"15~20回 × 3セット","variation":"骨盤立て","equipment":"マシン"}]},{"id":"E","title":"リカバリー・有酸素","memo":"疲労を抜きつつ、脂肪燃焼を促進。","exercises":[{"name":"トレッドミル（ランニングマシン）","detail":"30〜40分 (傾斜5〜8%、時速4.0〜4.5km)","variation":"傾斜ウォーキング","equipment":"マシン"}]},{"id":"F","title":"全身","memo":"1週間空いた時や旅行後など、1回で全身をバランスよく刺激したい時に。","exercises":[{"name":"スクワット","detail":"左右各10回 × 3セット","variation":"ブルガリアン（片足）","equipment":"ダンベル"},{"name":"ラットプルダウン","detail":"10回 × 3セット","variation":"マググリップ","equipment":"ケーブル"},{"name":"チェストプレス","detail":"10回 × 3セット","variation":"フラット（前方に押す）","equipment":"マシン"},{"name":"サイドレイズ","detail":"15回 × 2〜3セット","variation":"ノーマル","equipment":"ダンベル"},{"name":"クランチ（上体起こし）","detail":"10回 × 3セット","variation":"ノーマル","equipment":"自重"},{"name":"トレッドミル（ランニングマシン）","detail":"30分","variation":"通常ラン・ウォーク","equipment":"マシン"}]}]');
-
-    // ▼ 完成済みの過去ログデータ
-    const newLogs = JSON.parse('[{"date":"2026-08-01","menuId":"OFF","exerciseLogs":{}},{"date":"2026-08-02","menuId":"C","recordType":"free","exerciseLogs":{"トレッドミル（ランニングマシン）":[{"isCardio":true,"minutes":30,"calories":170,"variation":"通常ラン・ウォーク","equipment":"マシン"}],"クランチ（上体起こし）":[{"setsArray":[{"weight":15,"reps":10,"isPartial":false},{"weight":15,"reps":10,"isPartial":false},{"weight":15,"reps":10,"isPartial":false}],"variation":"ノーマル","equipment":"マシン"}],"ヒップスラスト":[{"setsArray":[{"weight":20,"reps":12,"isPartial":false},{"weight":20,"reps":12,"isPartial":false},{"weight":20,"reps":12,"isPartial":false}],"variation":"ノーマル","equipment":"グルートドライブ"}],"ラットプルダウン":[{"setsArray":[{"weight":19,"reps":10,"isPartial":false},{"weight":19,"reps":10,"isPartial":false},{"weight":19,"reps":10,"isPartial":false},{"weight":26,"reps":8,"isPartial":false}],"variation":"ワイド（通常の広い手幅）","equipment":"マシン"}],"レッグカール":[{"setsArray":[{"weight":30,"reps":10,"isPartial":false},{"weight":30,"reps":12,"isPartial":false},{"weight":30,"reps":12,"isPartial":false}],"variation":"シーテッド","equipment":"マシン"}],"スクワット":[{"setsArray":[{"weight":0,"reps":10,"isPartial":false},{"weight":8,"reps":10,"isPartial":false},{"weight":8,"reps":10,"isPartial":false}],"variation":"ブルガリアン（片足）","equipment":"ダンベル"}]}},{"date":"2026-08-03","menuId":"OFF","exerciseLogs":{}},{"date":"2026-08-04","menuId":"OFF","exerciseLogs":{}},{"date":"2026-08-05","menuId":"OFF","exerciseLogs":{}},{"date":"2026-08-06","menuId":"B","recordType":"free","exerciseLogs":{"トレッドミル（ランニングマシン）":[{"isCardio":true,"minutes":12,"calories":84,"variation":"通常ラン・ウォーク","equipment":"マシン"},{"isCardio":true,"minutes":31,"calories":187,"variation":"通常ラン・ウォーク","equipment":"マシン"}],"スクワット":[{"setsArray":[{"weight":5,"reps":10,"isPartial":false},{"weight":10,"reps":10,"isPartial":false},{"weight":10,"reps":10,"isPartial":false},{"weight":10,"reps":10,"isPartial":false},{"weight":15,"reps":10,"isPartial":false}],"variation":"バイラテラル（両足）","equipment":"スミス"},{"setsArray":[{"weight":0,"reps":10,"isPartial":false},{"weight":8,"reps":10,"isPartial":false},{"weight":8,"reps":10,"isPartial":false}],"variation":"ブルガリアン（片足）","equipment":"ダンベル"}],"アダクション/アブダクション":[{"setsArray":[{"weight":15,"reps":10,"isPartial":false},{"weight":15,"reps":10,"isPartial":false},{"weight":22.5,"reps":10,"isPartial":false}],"variation":"内もも（アダクション）","equipment":"マシン"}],"ヒップアブダクション（お尻特化）":[{"setsArray":[{"weight":25.75,"reps":15,"isPartial":false},{"weight":25.75,"reps":15,"isPartial":false},{"weight":25.75,"reps":15,"isPartial":false}],"variation":"骨盤後傾","equipment":"マシン"}],"ラットプルダウン":[{"setsArray":[{"weight":19,"reps":10,"isPartial":false},{"weight":19,"reps":10,"isPartial":false},{"weight":19,"reps":10,"isPartial":false},{"weight":26,"reps":8,"isPartial":false}],"variation":"ワイド（通常の広い手幅）","equipment":"マシン"}]}},{"date":"2026-08-07","menuId":"OFF","exerciseLogs":{}},{"date":"2026-08-08","menuId":"C","recordType":"free","exerciseLogs":{"アダクション/アブダクション":[{"setsArray":[{"weight":15,"reps":10,"isPartial":false},{"weight":15,"reps":10,"isPartial":false},{"weight":22.5,"reps":10,"isPartial":false}],"variation":"内もも（アダクション）","equipment":"マシン"}],"ヒップアブダクション（お尻特化）":[{"setsArray":[{"weight":25.75,"reps":15,"isPartial":false},{"weight":25.75,"reps":15,"isPartial":false},{"weight":25.75,"reps":15,"isPartial":false}],"variation":"骨盤前傾","equipment":"マシン"}],"ヒップスラスト":[{"setsArray":[{"weight":40,"reps":12,"isPartial":false},{"weight":40,"reps":12,"isPartial":false},{"weight":40,"reps":12,"isPartial":false}],"variation":"ノーマル","equipment":"グルートドライブ"}],"レッグプレス":[{"setsArray":[{"weight":15,"reps":15,"isPartial":false},{"weight":25,"reps":10,"isPartial":false},{"weight":25,"reps":10,"isPartial":false}],"variation":"ノーマル（足位置：上/中/下）","equipment":"シーテッド"}],"トレッドミル（ランニングマシン）":[{"isCardio":true,"minutes":40,"calories":200,"variation":"通常ラン・ウォーク","equipment":"マシン"}]}},{"date":"2026-08-09","menuId":"A","recordType":"free","exerciseLogs":{"ラットプルダウン":[{"setsArray":[{"weight":19,"reps":15,"isPartial":false},{"weight":19,"reps":15,"isPartial":false},{"weight":19,"reps":15,"isPartial":false},{"weight":19,"reps":15,"isPartial":false}],"variation":"マググリップ","equipment":"ケーブル"}],"トーソローテーション":[{"setsArray":[{"weight":15,"reps":20,"isPartial":false},{"weight":15,"reps":20,"isPartial":false},{"weight":15,"reps":20,"isPartial":false}],"variation":"ノーマル","equipment":"マシン"}],"ローイング":[{"setsArray":[{"weight":12,"reps":15,"isPartial":false},{"weight":12,"reps":15,"isPartial":false},{"weight":12,"reps":15,"isPartial":false}],"variation":"シーテッド（座って水平に引く/腰が安全）","equipment":"マシン"}],"クランチ（上体起こし）":[{"setsArray":[{"weight":15,"reps":10,"isPartial":false},{"weight":15,"reps":10,"isPartial":false},{"weight":15,"reps":10,"isPartial":false}],"variation":"ノーマル","equipment":"マシン"}],"トレッドミル（ランニングマシン）":[{"isCardio":true,"minutes":30,"calories":140,"variation":"通常ラン・ウォーク","equipment":"マシン"}]}},{"date":"2026-08-10","menuId":"OFF","exerciseLogs":{}},{"date":"2026-08-11","menuId":"B","recordType":"free","exerciseLogs":{"トレッドミル（ランニングマシン）":[{"isCardio":true,"minutes":10,"calories":52,"variation":"通常ラン・ウォーク","equipment":"マシン"},{"isCardio":true,"minutes":28,"calories":164,"variation":"通常ラン・ウォーク","equipment":"マシン"}],"スクワット":[{"setsArray":[{"weight":4,"reps":12,"isPartial":false},{"weight":4,"reps":12,"isPartial":false},{"weight":4,"reps":12,"isPartial":false},{"weight":4,"reps":12,"isPartial":false}],"variation":"ブルガリアン（片足）","equipment":"ダンベル"}],"アダクション/アブダクション":[{"setsArray":[{"weight":18.25,"reps":15,"isPartial":false},{"weight":18.25,"reps":15,"isPartial":false},{"weight":18.25,"reps":15,"isPartial":false}],"variation":"内もも（アダクション）","equipment":"マシン"}],"ヒップアブダクション（お尻特化）":[{"setsArray":[{"weight":25.75,"reps":15,"isPartial":false},{"weight":25.75,"reps":15,"isPartial":false},{"weight":25.75,"reps":15,"isPartial":false}],"variation":"骨盤前傾","equipment":"マシン"}],"レッグプレス":[{"setsArray":[{"weight":35,"reps":15,"isPartial":false},{"weight":35,"reps":15,"isPartial":false},{"weight":35,"reps":15,"isPartial":false},{"weight":35,"reps":15,"isPartial":false},{"weight":35,"reps":15,"isPartial":false}],"variation":"ノーマル（足位置：上/中/下）","equipment":"シーテッド"}]}},{"date":"2026-08-12","menuId":"A","recordType":"free","exerciseLogs":{"トレッドミル（ランニングマシン）":[{"isCardio":true,"minutes":120,"calories":259,"variation":"通常ラン・ウォーク","equipment":"マシン"}],"ラットプルダウン":[{"setsArray":[{"weight":19,"reps":12,"isPartial":false},{"weight":19,"reps":12,"isPartial":false},{"weight":19,"reps":12,"isPartial":false},{"weight":19,"reps":12,"isPartial":false}],"variation":"ワイド（通常の広い手幅）","equipment":"マシン"}],"チェストプレス":[{"setsArray":[{"weight":5,"reps":8,"isPartial":false},{"weight":5,"reps":8,"isPartial":false},{"weight":2.5,"reps":10,"isPartial":false},{"weight":2.5,"reps":10,"isPartial":false}],"variation":"インクライン（斜め上に押す/上部狙い）","equipment":"ダンベル"}],"ケーブル・プレスダウン（三頭筋）":[{"setsArray":[{"weight":6.25,"reps":10,"isPartial":false},{"weight":6.25,"reps":10,"isPartial":false},{"weight":6.25,"reps":10,"isPartial":false}],"variation":"ストレートバー（手のひら下）","equipment":"ケーブル"}],"ショルダープレス":[{"setsArray":[{"weight":5,"reps":10,"isPartial":false},{"weight":5,"reps":10,"isPartial":false},{"weight":5,"reps":10,"isPartial":false}],"variation":"ノーマル","equipment":"ダンベル"}],"ローイング":[{"setsArray":[{"weight":12,"reps":15,"isPartial":false},{"weight":12,"reps":15,"isPartial":false},{"weight":12,"reps":15,"isPartial":false}],"variation":"シーテッド（座って水平に引く/腰が安全）","equipment":"マシン"}]}},{"date":"2026-08-13","menuId":"F","recordType":"menu","exerciseLogs":{"ヒップスラスト":[{"setsArray":[{"weight":40,"reps":12,"isPartial":false},{"weight":40,"reps":12,"isPartial":false},{"weight":40,"reps":12,"isPartial":false},{"weight":40,"reps":15,"isPartial":false}],"variation":"ノーマル","equipment":"グルートドライブ"}],"スクワット":[{"setsArray":[{"weight":0,"reps":10,"isPartial":false},{"weight":0,"reps":10,"isPartial":false},{"weight":0,"reps":10,"isPartial":false},{"weight":0,"reps":5,"isPartial":false}],"variation":"バイラテラル（両足）","equipment":"ハック"}],"アダクション/アブダクション":[{"setsArray":[{"weight":18.25,"reps":15,"isPartial":false},{"weight":18.25,"reps":15,"isPartial":false},{"weight":18.25,"reps":15,"isPartial":false}],"variation":"内もも（アダクション）","equipment":"マシン"}],"ヒップアブダクション（お尻特化）":[{"setsArray":[{"weight":25.75,"reps":15,"isPartial":false},{"weight":25.75,"reps":15,"isPartial":false},{"weight":25.75,"reps":15,"isPartial":false}],"variation":"骨盤前傾","equipment":"マシン"},{"setsArray":[{"weight":25.75,"reps":15,"isPartial":false},{"weight":25.75,"reps":15,"isPartial":false},{"weight":25.75,"reps":15,"isPartial":false}],"variation":"骨盤後傾","equipment":"マシン"}],"チェストプレス":[{"setsArray":[{"weight":6.1,"reps":10,"isPartial":false},{"weight":6.1,"reps":10,"isPartial":false},{"weight":6.1,"reps":10,"isPartial":false},{"weight":6.1,"reps":10,"isPartial":false}],"variation":"インクライン（斜め上に押す/上部狙い）","equipment":"アイソラテラル"}],"レッグプレス":[{"setsArray":[{"weight":35,"reps":15,"isPartial":false},{"weight":35,"reps":15,"isPartial":false},{"weight":35,"reps":15,"isPartial":false},{"weight":35,"reps":15,"isPartial":false},{"weight":35,"reps":20,"isPartial":false}],"variation":"ノーマル（足位置：上/中/下）","equipment":"シーテッド"}],"トレッドミル（ランニングマシン）":[{"isCardio":true,"minutes":30,"calories":160,"variation":"通常ラン・ウォーク","equipment":"マシン"}]}},{"date":"2026-08-14","menuId":"E","recordType":"menu","exerciseLogs":{"クランチ（上体起こし）":[{"setsArray":[{"weight":15,"reps":10,"isPartial":false},{"weight":15,"reps":10,"isPartial":false},{"weight":15,"reps":10,"isPartial":false}],"variation":"ノーマル","equipment":"マシン"}],"ヒップアブダクション（お尻特化）":[{"setsArray":[{"weight":25.75,"reps":20,"isPartial":false},{"weight":25.75,"reps":15,"isPartial":false}],"variation":"骨盤立て","equipment":"マシン"}],"トレッドミル（ランニングマシン）":[{"isCardio":true,"minutes":25,"calories":150,"variation":"通常ラン・ウォーク","equipment":"マシン"}]}},{"date":"2026-08-15","menuId":"F","recordType":"free","exerciseLogs":{"チェストプレス":[{"setsArray":[{"weight":3.6,"reps":15,"isPartial":false},{"weight":3.6,"reps":15,"isPartial":false},{"weight":3.6,"reps":15,"isPartial":false},{"weight":3.6,"reps":15,"isPartial":false}],"variation":"インクライン（斜め上に押す/上部狙い）","equipment":"アイソラテラル"}],"スクワット":[{"setsArray":[{"weight":10,"reps":10,"isPartial":false},{"weight":10,"reps":10,"isPartial":false},{"weight":10,"reps":10,"isPartial":false},{"weight":10,"reps":10,"isPartial":false}],"variation":"バイラテラル（両足）","equipment":"スミス"}],"ヒップスラスト":[{"setsArray":[{"weight":40,"reps":12,"isPartial":false},{"weight":40,"reps":12,"isPartial":false},{"weight":40,"reps":12,"isPartial":false},{"weight":40,"reps":15,"isPartial":false}],"variation":"ノーマル","equipment":"グルートドライブ"}],"レッグプレス":[{"setsArray":[{"weight":35,"reps":15,"isPartial":false},{"weight":35,"reps":15,"isPartial":false},{"weight":35,"reps":15,"isPartial":false},{"weight":35,"reps":15,"isPartial":false}],"variation":"ノーマル（足位置：上/中/下）","equipment":"シーテッド"}],"トレッドミル（ランニングマシン）":[{"isCardio":true,"minutes":22,"calories":160,"variation":"通常ラン・ウォーク","equipment":"マシン"}]}},{"date":"2026-08-16","menuId":"A","recordType":"menu","exerciseLogs":{"ラットプルダウン":[{"setsArray":[{"weight":19,"reps":15,"isPartial":false},{"weight":19,"reps":15,"isPartial":false},{"weight":19,"reps":15,"isPartial":false}],"variation":"ワイド（通常の広い手幅）","equipment":"マシン"}],"チェストプレス":[{"setsArray":[{"weight":3.6,"reps":12,"isPartial":false},{"weight":3.6,"reps":12,"isPartial":false},{"weight":3.6,"reps":12,"isPartial":false},{"weight":3.6,"reps":12,"isPartial":false}],"variation":"インクライン（斜め上に押す/上部狙い）","equipment":"アイソラテラル"}],"チェストフライ":[{"setsArray":[{"weight":12,"reps":10,"isPartial":false},{"weight":12,"reps":10,"isPartial":false},{"weight":12,"reps":10,"isPartial":false}],"variation":"フラット","equipment":"マシン"}],"ショルダープレス":[{"setsArray":[{"weight":5,"reps":10,"isPartial":false},{"weight":5,"reps":10,"isPartial":false},{"weight":5,"reps":10,"isPartial":false}],"variation":"ノーマル","equipment":"MTSマシン"}],"トレッドミル（ランニングマシン）":[{"isCardio":true,"minutes":44,"calories":292,"variation":"通常ラン・ウォーク","equipment":"マシン"}]}},{"date":"2026-08-17","menuId":"OFF","exerciseLogs":{}},{"date":"2026-08-18","menuId":"A","recordType":"menu","exerciseLogs":{"ラットプルダウン":[{"setsArray":[{"weight":19,"reps":15,"isPartial":false},{"weight":19,"reps":15,"isPartial":false},{"weight":19,"reps":15,"isPartial":false},{"weight":19,"reps":15,"isPartial":false}],"variation":"ワイド（通常の広い手幅）","equipment":"マシン"}],"ローイング":[{"setsArray":[{"weight":3.6,"reps":12,"isPartial":false},{"weight":8.6,"reps":12,"isPartial":false},{"weight":8.6,"reps":12,"isPartial":false},{"weight":3.6,"reps":12,"isPartial":false}],"variation":"シーテッド（座って水平に引く/腰が安全）","equipment":"アイソラテラル"}],"チェストプレス":[{"setsArray":[{"weight":5,"reps":15,"isPartial":false},{"weight":5,"reps":15,"isPartial":false},{"weight":5,"reps":15,"isPartial":false},{"weight":5,"reps":15,"isPartial":false}],"variation":"フラット（前方に押す）","equipment":"マシン"}],"ショルダープレス":[{"setsArray":[{"weight":5,"reps":15,"isPartial":false},{"weight":5,"reps":15,"isPartial":false},{"weight":5,"reps":15,"isPartial":false}],"variation":"ノーマル","equipment":"MTSマシン"}],"レッグプレス":[{"setsArray":[{"weight":53,"reps":10,"isPartial":false},{"weight":53,"reps":10,"isPartial":false},{"weight":53,"reps":15,"isPartial":false},{"weight":53,"reps":15,"isPartial":false}],"variation":"ノーマル（足位置：上/中/下）","equipment":"45度リニア"}],"トライセプス・エクステンション（三頭筋）":[{"setsArray":[{"weight":7.5,"reps":8,"isPartial":false},{"weight":6.25,"reps":10,"isPartial":false},{"weight":6.25,"reps":10,"isPartial":false},{"weight":6.25,"reps":10,"isPartial":false}],"variation":"オーバーヘッド（頭の後ろから上へ）","equipment":"ケーブル"}]}},{"date":"2026-08-19","menuId":"C","recordType":"menu","exerciseLogs":{"ヒップスラスト":[{"setsArray":[{"weight":40,"reps":15,"isPartial":false},{"weight":40,"reps":15,"isPartial":false},{"weight":40,"reps":15,"isPartial":false},{"weight":40,"reps":15,"isPartial":false},{"weight":40,"reps":20,"isPartial":true}],"variation":"ノーマル","equipment":"グルートドライブ"}],"レッグカール":[{"setsArray":[{"weight":22.5,"reps":10,"isPartial":false},{"weight":22.5,"reps":10,"isPartial":false},{"weight":15,"reps":10,"isPartial":false},{"weight":12.5,"reps":10,"isPartial":false}],"variation":"ライイング","equipment":"マシン"}],"レッグプレス":[{"setsArray":[{"weight":53,"reps":10,"isPartial":false},{"weight":53,"reps":10,"isPartial":false},{"weight":53,"reps":15,"isPartial":false},{"weight":53,"reps":15,"isPartial":false}],"variation":"ノーマル（足位置：上/中/下）","equipment":"45度リニア"}],"アダクション/アブダクション":[{"setsArray":[{"weight":18.25,"reps":15,"isPartial":false},{"weight":18.25,"reps":15,"isPartial":false},{"weight":18.25,"reps":15,"isPartial":false},{"weight":18.25,"reps":15,"isPartial":false}],"variation":"内もも（アダクション）","equipment":"マシン"}],"ヒップアブダクション（お尻特化）":[{"setsArray":[{"weight":25.75,"reps":15,"isPartial":false},{"weight":25.75,"reps":15,"isPartial":false},{"weight":25.75,"reps":15,"isPartial":false},{"weight":25.75,"reps":15,"isPartial":false}],"variation":"骨盤前傾","equipment":"マシン"}]}}]');
-
-    // データを一気に上書き！
-    state.menus = newMenus;
-    state.logs = newLogs;
+    // ストレージに保存
     saveState();
     
-    // 二度と実行されないようにフラグを立てる
-    localStorage.setItem('migrated_to_v5_final', 'true');
-    
-    // アラートを出して自動でリロード
-    alert('🎉 データの完全アップデートが完了しました！\n新しい形式で表示されます。');
-    location.reload();
-}, 1500);
+    alert('🎉 メニューと種目リストを最新版に更新しました！');
+    location.reload(); // 画面を自動でリロード
+  }
+}

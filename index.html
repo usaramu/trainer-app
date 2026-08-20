@@ -8,7 +8,7 @@
     <!-- ▼ まる文字フォント（Zen Maru Gothic） -->
     <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700;900&display=swap" rel="stylesheet">
     <!-- バージョン更新: v=20260820_01 -->
-    <link rel="stylesheet" href="style.css?v=20260820_01">
+    <link rel="stylesheet" href="style.css?v=20260820_02">
 </head>
 <body>
 
@@ -520,9 +520,9 @@
         <button type="button" class="btn-footer-tool" id="btn-open-exercise-library" onclick="openExerciseLibraryModal()">📋</button>
         <button type="button" class="btn-footer-tool" onclick="openThemeSettingsModal()">🎨</button>
         <button type="button" class="btn-footer-tool" onclick="importPastLogs()">📥</button>
-        <button type="button" class="btn-footer-tool" onclick="navigator.clipboard.writeText(localStorage.getItem('workout_tracker_state')).then(()=>alert('コピー完了！ここに貼り付けてください'))" style="background:#ef4444; color:#fff; border:none; border-radius:12px; padding:6px 12px; font-weight:bold;">📤 コピー</button>
+        <button type="button" class="btn-footer-tool" onclick="forceUpdateMenusAndLibrary()" style="background:#10b981; color:#fff; border:none; border-radius:12px; padding:6px 12px; font-weight:bold;">🔄 メニュー最新化</button>
     </div> 
 
-    <script src="script.js?v=20260820_01"></script>
+    <script src="script.js?v=20260820_02"></script>
 </body>
 </html>
