@@ -2228,38 +2228,16 @@ input.lib-new-equip-input:focus {
 @media (max-width: 600px) {
     #workout-log-modal #select-log-date,
     #inbody-modal #inbody-date {
-        display: block;
-
-        /* メニュー選択などと同じ横幅 */
-        width: 100%;
-        max-width: 100%;
-        min-width: 0;
-
-        /* 枠・paddingを含めて幅を計算 */
-        box-sizing: border-box;
-
-        /* 他の入力欄と高さを統一 */
-        height: 44px;
-        min-height: 44px;
-
-        /* 左右の余白 */
-        padding: 0 14px;
-
-        /* 文字サイズ */
-        font-size: 0.85rem;
-        font-weight: 500;
-
-        /* 日付を中央に配置 */
-        text-align: center;
-
-        /* iPhoneの文字サイズ自動調整を防ぐ */
-        -webkit-text-size-adjust: 100%;
-    }
-
-    /* iPhone Safariの日付表示部分も中央配置 */
-    #workout-log-modal #select-log-date::-webkit-date-and-time-value,
-    #inbody-modal #inbody-date::-webkit-date-and-time-value {
-        text-align: center;
+        /* 幅を100%に固定し、はみ出し要因を強制リセット */
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        
+        /* 念のためパディングの左右を少し減らして余裕を持たせる */
+        padding-left: 8px !important;
+        padding-right: 8px !important;
     }
 }
 
@@ -2316,4 +2294,83 @@ input.lib-new-equip-input:focus {
     height: 32px !important;
     font-size: 0.65rem !important;
     border-radius: 8px !important;
+}
+
+/* =========================================================
+   枠をなくし、テキストのみで極限まで詰めるスタイル
+   ========================================================= */
+
+#workout-log-modal .variation-chip-btn,
+#workout-log-modal .equipment-chip-btn {
+    /* 枠・背景を消去し、余白を最小化 */
+    background: transparent !important;
+    border: none !important;
+    padding: 2px 4px !important;
+    min-height: auto !important;
+    box-shadow: none !important;
+    
+    /* 文字サイズをさらに縮小 */
+    font-size: 0.65rem !important; 
+    color: var(--text-sub) !important;
+    line-height: 1 !important;
+}
+
+/* 選択中（アクティブ）の表現 */
+#workout-log-modal .variation-chip-btn.active,
+#workout-log-modal .equipment-chip-btn.active {
+    background: transparent !important;
+    color: var(--primary-color) !important;
+    font-weight: 900 !important;
+    /* 枠がない代わりに下線で選択状態を明示 */
+    text-decoration: underline !important;
+    text-decoration-thickness: 2px !important;
+    text-underline-offset: 3px !important;
+}
+
+/* コンテナ全体の余白もさらに詰める */
+#workout-log-modal .variation-select-row,
+#workout-log-modal .equipment-select-row {
+    padding: 4px 6px !important;
+    margin-bottom: 4px !important;
+    gap: 4px !important; /* 要素間の隙間を縮小 */
+}
+
+/* =========================================================
+   重量・回数入力行の縦幅を極限まで圧縮するスタイル
+   ========================================================= */
+
+/* 行と行の間の隙間（gap）を縮小（元は5px） */
+#workout-log-modal .sets-container {
+    gap: 2px !important; 
+}
+
+/* 行自体の最小高さと余白を削減 */
+#workout-log-modal .set-input-row {
+    min-height: 28px !important; 
+    padding: 0 !important; 
+}
+
+/* 入力欄（重量・回数）の高さを圧縮 */
+#workout-log-modal .set-field-group input.form-input {
+    height: 28px !important; 
+    padding: 0 4px !important; 
+}
+
+/* P（パーシャル）ボタンの高さを入力欄に同期 */
+#workout-log-modal .btn-partial-toggle {
+    height: 28px !important;
+    width: 28px !important;
+    line-height: 1 !important;
+}
+
+/* 行削除ボタン（×）の高さを同期 */
+#workout-log-modal .btn-remove-set {
+    height: 28px !important;
+    line-height: 28px !important;
+}
+
+/* 「セットを追加」ボタンの余白も少し詰める */
+#workout-log-modal .btn-add-set-row {
+    min-height: 32px !important;
+    margin-top: 2px !important;
 }
