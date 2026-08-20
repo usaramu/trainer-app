@@ -977,21 +977,33 @@ function openDetailLogModal(logIndex) {
   document.getElementById('detail-log-modal').classList.add('active');
 }
 
-function getLastExerciseLogObj(exerciseName) {
+// =========================================================
+// 1. 拡張版：前回の記録取得ロジック
+// =========================================================
+function getLastExerciseLogObj(exerciseName, variation = null, equipment = null) {
   for (let i = state.logs.length - 1; i >= 0; i--) {
     const log = state.logs[i];
     if (log.exerciseLogs && log.exerciseLogs[exerciseName] !== undefined) {
       const val = log.exerciseLogs[exerciseName];
-      if (Array.isArray(val) && val.length > 0) {
-        return val[val.length - 1];
-      } else if (typeof val === 'object' && val !== null) {
-        return val;
+      const valArray = Array.isArray(val) ? val : [val];
+      
+      // 同じ日の中で複数ある場合を考慮し、配列の後ろ（新しいもの）から探す
+      for (let j = valArray.length - 1; j >= 0; j--) {
+        const item = valArray[j];
+        
+        let match = true;
+        // 指定されている場合のみ一致判定を行う（未選択時は条件を絞り込まない）
+        if (variation && item.variation !== variation) match = false;
+        if (equipment && item.equipment !== equipment) match = false;
+        
+        if (match) {
+          return item;
+        }
       }
     }
   }
   return null;
 }
-
 function fillSetsContainerFromItem(block, item) {
   const setsContainer = block.querySelector('.sets-container');
   if (!setsContainer || !item) return;
@@ -1176,6 +1188,10 @@ function renderVariationChips(blockEl, exerciseName, selectedVar = '') {
   varContainer.dataset.selectedVariation = selectedVar || '';
 }
 
+// =========================================================
+// 2. チップ選択関数の上書きと、表示更新関数の追加
+// =========================================================
+
 function selectVariationChip(btnEl, varName) {
   const row = btnEl.closest('.variation-select-row');
   const allBtns = row.querySelectorAll('.variation-chip-btn');
@@ -1189,6 +1205,61 @@ function selectVariationChip(btnEl, varName) {
     chosenVar = varName;
   }
   row.dataset.selectedVariation = chosenVar;
+  
+  // ★ チップが押されたら履歴表示を更新
+  updateLastLogDisplay(row.closest('.extra-log-block'));
+}
+
+function selectEquipmentChip(btnEl, equipName) {
+  const row = btnEl.closest('.equipment-select-row');
+  // ※バグ防止：.extra-log-block が取れない場合を考慮し、確実な親要素を取得
+  const block = btnEl.closest('.extra-log-block') || btnEl.closest('.exercise-row');
+  
+  const allBtns = row.querySelectorAll('.equipment-chip-btn');
+
+  let chosenEquip = '';
+  if (btnEl.classList.contains('active')) {
+    btnEl.classList.remove('active');
+  } else {
+    allBtns.forEach(b => b.classList.remove('active'));
+    btnEl.classList.add('active');
+    chosenEquip = equipName;
+  }
+  row.dataset.selectedEquip = chosenEquip;
+
+  // ★ チップが押されたら履歴表示を更新
+  if (block) updateLastLogDisplay(block);
+}
+
+// 履歴表示を動的に書き換える新関数
+function updateLastLogDisplay(blockEl) {
+  if (!blockEl) return;
+  
+  const nameSelect = blockEl.querySelector('.extra-name-select');
+  const nameInput = blockEl.querySelector('.extra-name-input');
+  const exName = nameSelect && nameSelect.value ? nameSelect.value : (nameInput ? nameInput.value : '');
+  
+  if (!exName) return;
+
+  const varRow = blockEl.querySelector('.variation-select-row');
+  const variation = varRow ? (varRow.dataset.selectedVariation || '') : '';
+  
+  const equipRow = blockEl.querySelector('.equipment-select-row:not(.variation-select-row)');
+  const equipment = equipRow ? (equipRow.dataset.selectedEquip || '') : '';
+
+  // 選択中の組み合わせに合致する過去の記録を取得
+  const lastObj = getLastExerciseLogObj(exName, variation, equipment);
+
+  const holder = blockEl.querySelector('.last-btn-holder');
+  if (holder) {
+    if (lastObj) {
+      // タイプの変更等による再描画時は、チップ名を省いた簡潔なフォーマットで表示
+      const formatted = formatSingleLogObj(lastObj, false); 
+      holder.innerHTML = `<div style="font-size:0.72rem; color:var(--primary-hover); font-weight:700; margin-bottom:4px; padding-left:2px;">前回: ${formatted}</div>`;
+    } else {
+      holder.innerHTML = '<div style="font-size:0.72rem; color:var(--text-sub); margin-bottom:4px; padding-left:2px;">前回: この組み合わせの記録なし</div>';
+    }
+  }
 }
 
 // 器具用の描画関数
@@ -1224,22 +1295,6 @@ function renderEquipmentChips(blockEl, exerciseName, selectedEquip = '') {
   `;
 
   equipContainer.dataset.selectedEquip = selectedEquip || '';
-}
-function selectEquipmentChip(btnEl, equipName) {
-  const block = btnEl.closest('.extra-log-block');
-  const row = btnEl.closest('.equipment-select-row');
-  const allBtns = row.querySelectorAll('.equipment-chip-btn');
-
-  let chosenEquip = '';
-  if (btnEl.classList.contains('active')) {
-    btnEl.classList.remove('active');
-    chosenEquip = '';
-  } else {
-    allBtns.forEach(b => b.classList.remove('active'));
-    btnEl.classList.add('active');
-    chosenEquip = equipName;
-  }
-  row.dataset.selectedEquip = chosenEquip;
 }
 
 

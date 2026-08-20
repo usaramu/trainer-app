@@ -2424,15 +2424,36 @@ input.lib-new-equip-input:focus {
     text-align: left !important;
 }
 
-/* 右側の要素（重量と回数） */
+/* =========================================================
+   詳細ログ（LOG）：種目を上段、記録を下段に固定する2段構成
+   ========================================================= */
+
+/* 親コンテナを縦並び（column）に強制変更 */
+#detail-log-body > div > div {
+    flex-direction: column !important;
+    align-items: flex-start !important; 
+    gap: 4px !important; /* 上下段の間隔 */
+}
+
+/* 上段：種目名 */
+#detail-log-body > div > div > span:first-child {
+    width: 100% !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    word-break: break-word !important;
+    text-align: left !important;
+}
+
+/* 下段：重量と回数 */
 #detail-log-body > div > div > span:last-child {
+    width: 100% !important;
     white-space: normal !important;
     overflow: visible !important;
     word-break: break-word !important;
     
-    /* 文字自体を右揃えにする */
+    /* 下段は右寄せにして視覚的なメリハリをつける */
     text-align: right !important; 
     
-    /* 改行（行落ち）が発生した場合、左側に余白を全振りして強制的に右端へ寄せる */
-    margin-left: auto !important; 
+    /* 上段と区別しやすくするため、文字色を少し強調するかサイズを調整（任意） */
+    font-size: 0.75rem !important; 
 }
