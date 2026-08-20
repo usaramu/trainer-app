@@ -4049,27 +4049,39 @@ function addMenuAccordionExercise(menuId, btnEl) {
   renderMenuSettingsAccordion(menuId);
 }
 
+// ▼▼▼ モーダルの背景スクロールを完全に防止するコード ▼▼▼
 const modalObserver = new MutationObserver(() => {
   const isModalOpen = document.querySelectorAll('.modal-overlay.active').length > 0;
   if (isModalOpen) {
-    document.body.style.overflow = 'hidden';
+    // 画面の現在位置を記憶して、背景をガチッと固定する
+    document.body.dataset.scrollY = window.scrollY;
+    document.body.style.top = `-${window.scrollY}px`;
+    document.body.classList.add('modal-open');
   } else {
-    document.body.style.overflow = '';
+    // モーダルが閉じたら固定を解除し、元のスクロール位置に戻す
+    const scrollY = document.body.dataset.scrollY;
+    document.body.classList.remove('modal-open');
+    document.body.style.top = '';
+    window.scrollTo(0, parseInt(scrollY || '0'));
   }
 });
 
+// すべてのモーダルの「表示/非表示（activeクラス）」を監視
 document.querySelectorAll('.modal-overlay').forEach(modal => {
   modalObserver.observe(modal, { attributes: true, attributeFilter: ['class'] });
 });
 
+// スマホ特有の「背景が引っ張られる（スクロール漏れ）」現象を防ぐ
 document.addEventListener('touchmove', (e) => {
   const activeModal = document.querySelector('.modal-overlay.active');
   if (activeModal) {
+    // スクロールしている場所が「モーダルの中身」以外なら、スワイプを無効化する
     if (!e.target.closest('.modal-body')) {
       e.preventDefault();
     }
   }
 }, { passive: false });
+
 
 // ▼ 記録は残したまま、メニューと種目リストだけを最新に強制リセットする関数
 function forceUpdateMenusAndLibrary() {
