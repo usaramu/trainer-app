@@ -1231,7 +1231,9 @@ function selectEquipmentChip(btnEl, equipName) {
   if (block) updateLastLogDisplay(block);
 }
 
-// 履歴表示を動的に書き換える新関数
+// =========================================================
+// 履歴の表示更新と、入力欄の自動上書き（プレフィル）
+// =========================================================
 function updateLastLogDisplay(blockEl) {
   if (!blockEl) return;
   
@@ -1253,15 +1255,28 @@ function updateLastLogDisplay(blockEl) {
   const holder = blockEl.querySelector('.last-btn-holder');
   if (holder) {
     if (lastObj) {
-      // タイプの変更等による再描画時は、チップ名を省いた簡潔なフォーマットで表示
       const formatted = formatSingleLogObj(lastObj, false); 
       holder.innerHTML = `<div style="font-size:0.72rem; color:var(--primary-hover); font-weight:700; margin-bottom:4px; padding-left:2px;">前回: ${formatted}</div>`;
     } else {
       holder.innerHTML = '<div style="font-size:0.72rem; color:var(--text-sub); margin-bottom:4px; padding-left:2px;">前回: この組み合わせの記録なし</div>';
     }
   }
-}
 
+  // ▼ 追加：入力欄（セット行・有酸素項目）の自動上書き
+  if (lastObj) {
+    const isCardio = lastObj.isCardio === true || (lastObj.weight === undefined && lastObj.reps === undefined && lastObj.minutes !== undefined);
+    
+    if (isCardio) {
+      const minInput = blockEl.querySelector('.extra-minutes');
+      const calInput = blockEl.querySelector('.extra-calories');
+      if (minInput && lastObj.minutes !== undefined) minInput.value = lastObj.minutes;
+      if (calInput && lastObj.calories !== undefined) calInput.value = lastObj.calories;
+    } else {
+      // 既存の入力欄を破棄し、前回の記録で再生成する
+      fillSetsContainerFromItem(blockEl, lastObj);
+    }
+  }
+}
 // 器具用の描画関数
 function renderEquipmentChips(blockEl, exerciseName, selectedEquip = '') {
   // ★修正箇所：タイプ行を誤って上書きしないように「:not(.variation-select-row)」を追加
