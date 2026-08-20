@@ -2405,3 +2405,34 @@ input.lib-new-equip-input:focus {
     /* 改行された際に読みやすくするため左揃えを優先 */
     text-align: left !important; 
 }
+
+/* =========================================================
+   詳細ログ（LOG）：重量と回数の右端強制配置
+   ========================================================= */
+
+/* 親コンテナの配置調整 */
+#detail-log-body > div > div {
+    flex-wrap: wrap !important;
+    align-items: flex-start !important; /* 複数行になった際、縦位置がズレるのを防ぐため上揃えに変更 */
+}
+
+/* 左側の要素（種目名） */
+#detail-log-body > div > div > span:first-child {
+    white-space: normal !important;
+    overflow: visible !important;
+    word-break: break-word !important;
+    text-align: left !important;
+}
+
+/* 右側の要素（重量と回数） */
+#detail-log-body > div > div > span:last-child {
+    white-space: normal !important;
+    overflow: visible !important;
+    word-break: break-word !important;
+    
+    /* 文字自体を右揃えにする */
+    text-align: right !important; 
+    
+    /* 改行（行落ち）が発生した場合、左側に余白を全振りして強制的に右端へ寄せる */
+    margin-left: auto !important; 
+}
