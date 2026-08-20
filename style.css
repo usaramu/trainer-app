@@ -2221,19 +2221,40 @@ input.lib-new-equip-input:focus {
     max-width: 100%;
     box-sizing: border-box;
 }
-
+/* =========================================================
+   スマホ：記録モーダルの日付入力を通常の入力欄と統一
+   ========================================================= */
 @media (max-width: 600px) {
-    #workout-log-modal input[type="date"],
-    #inbody-modal input[type="date"] {
-        font-size: 0.8rem;
-        padding: 8px 10px;
-        height: 38px;
-        line-height: 1.2;
+
+    #workout-log-modal #select-log-date,
+    #inbody-modal #inbody-date {
+        display: block;
+
+        /* 親要素から絶対にはみ出さない */
+        width: auto;
+        max-width: 100%;
+        min-width: 0;
+
+        /* padding・borderをwidthの内側に含める */
         box-sizing: border-box;
+
+        /* 通常の入力欄とサイズ感を合わせる */
+        height: 38px;
+        min-height: 38px;
+        padding: 8px 10px;
+
+        font-size: 0.8rem;
+        font-weight: 500;
+        line-height: 1.2;
+
+        /* Safariの自動拡大を抑える */
+        -webkit-text-size-adjust: 100%;
     }
 
-    #workout-log-modal input[type="date"]::-webkit-date-and-time-value,
-    #inbody-modal input[type="date"]::-webkit-date-and-time-value {
+    #workout-log-modal #select-log-date::-webkit-date-and-time-value,
+    #inbody-modal #inbody-date::-webkit-date-and-time-value {
+        min-height: 0;
+        padding: 0;
         text-align: left;
     }
 }
