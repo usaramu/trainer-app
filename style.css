@@ -2222,22 +2222,28 @@ input.lib-new-equip-input:focus {
     box-sizing: border-box;
 }
 /* =========================================================
-   スマホ：記録モーダルの日付欄
-   他の入力欄と同じ幅・高さにして、日付を中央配置
+   スマホ時の日付欄：枠を消去しはみ出しを隠蔽するスタイル
    ========================================================= */
 @media (max-width: 600px) {
     #workout-log-modal #select-log-date,
     #inbody-modal #inbody-date {
-        /* 幅を100%に固定し、はみ出し要因を強制リセット */
-        width: 100% !important;
-        max-width: 100% !important;
-        box-sizing: border-box !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
+        /* 枠と背景を完全に消去 */
+        border: none !important;
+        background: transparent !important;
+        box-shadow: none !important;
         
-        /* 念のためパディングの左右を少し減らして余裕を持たせる */
-        padding-left: 8px !important;
-        padding-right: 8px !important;
+        /* 左右の余白を削り、はみ出しを目立たなくする */
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        margin: 0 !important;
+        
+        /* タップ可能な要素であることを文字色で明示 */
+        color: var(--primary-color) !important;
+        font-weight: 900 !important;
+        font-size: 1rem !important; 
+        
+        /* 中央寄せにすることで、右側へのはみ出し感を緩和 */
+        text-align: center !important;
     }
 }
 
@@ -2373,4 +2379,29 @@ input.lib-new-equip-input:focus {
 #workout-log-modal .btn-add-set-row {
     min-height: 32px !important;
     margin-top: 2px !important;
+}
+
+/* =========================================================
+   詳細ログ（LOG）の文字省略を解除し改行させる
+   ========================================================= */
+
+/* タイトル部分の改行許可 */
+#detail-log-title {
+    white-space: normal !important;
+    overflow: visible !important;
+    word-break: break-word !important;
+}
+
+/* 種目リスト行の折り返し（改行）を許可 */
+#detail-log-body > div > div {
+    flex-wrap: wrap !important;
+}
+
+/* 種目名および記録内容の改行許可 */
+#detail-log-body > div > div > span {
+    white-space: normal !important;
+    overflow: visible !important;
+    word-break: break-word !important;
+    /* 改行された際に読みやすくするため左揃えを優先 */
+    text-align: left !important; 
 }
