@@ -2222,39 +2222,98 @@ input.lib-new-equip-input:focus {
     box-sizing: border-box;
 }
 /* =========================================================
-   スマホ：記録モーダルの日付入力を通常の入力欄と統一
+   スマホ：記録モーダルの日付欄
+   他の入力欄と同じ幅・高さにして、日付を中央配置
    ========================================================= */
 @media (max-width: 600px) {
-
     #workout-log-modal #select-log-date,
     #inbody-modal #inbody-date {
         display: block;
 
-        /* 親要素から絶対にはみ出さない */
-        width: auto;
+        /* メニュー選択などと同じ横幅 */
+        width: 100%;
         max-width: 100%;
         min-width: 0;
 
-        /* padding・borderをwidthの内側に含める */
+        /* 枠・paddingを含めて幅を計算 */
         box-sizing: border-box;
 
-        /* 通常の入力欄とサイズ感を合わせる */
-        height: 38px;
-        min-height: 38px;
-        padding: 8px 10px;
+        /* 他の入力欄と高さを統一 */
+        height: 44px;
+        min-height: 44px;
 
-        font-size: 0.8rem;
+        /* 左右の余白 */
+        padding: 0 14px;
+
+        /* 文字サイズ */
+        font-size: 0.85rem;
         font-weight: 500;
-        line-height: 1.2;
 
-        /* Safariの自動拡大を抑える */
+        /* 日付を中央に配置 */
+        text-align: center;
+
+        /* iPhoneの文字サイズ自動調整を防ぐ */
         -webkit-text-size-adjust: 100%;
     }
 
+    /* iPhone Safariの日付表示部分も中央配置 */
     #workout-log-modal #select-log-date::-webkit-date-and-time-value,
     #inbody-modal #inbody-date::-webkit-date-and-time-value {
-        min-height: 0;
-        padding: 0;
-        text-align: left;
+        text-align: center;
     }
+}
+
+/* =========================================================
+   記録モーダル：要素のコンパクト化
+   ========================================================= */
+
+/* 1. タイプとツールのチップを小さくコンパクトに */
+#workout-log-modal .variation-select-row,
+#workout-log-modal .equipment-select-row {
+    padding: 5px 8px !important;
+    margin-bottom: 6px !important;
+}
+
+#workout-log-modal .variation-chip-btn,
+#workout-log-modal .equipment-chip-btn {
+    min-height: 28px !important;
+    padding: 4px 10px !important;
+    font-size: 0.7rem !important;
+    border-radius: 8px !important;
+}
+
+/* 「タイプ:」「ツール:」のラベル文字サイズ調整 */
+#workout-log-modal .variation-select-row > span,
+#workout-log-modal .equipment-select-row > span {
+    font-size: 0.65rem !important;
+}
+
+/* 2. 重量と回数の入力欄を小さくコンパクトに */
+#workout-log-modal .set-input-row {
+    min-height: 36px !important;
+    padding: 2px 0 !important;
+}
+
+#workout-log-modal .set-field-group input.form-input {
+    width: 56px !important;
+    height: 34px !important;
+    font-size: 0.8rem !important;
+    border-radius: 8px !important;
+}
+
+#workout-log-modal .set-label {
+    font-size: 0.7rem !important;
+    min-width: 36px !important;
+}
+
+#workout-log-modal .set-unit {
+    font-size: 0.65rem !important;
+}
+
+/* P（パーシャル）ボタンのサイズ調整 */
+#workout-log-modal .btn-partial-toggle {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 0.65rem !important;
+    border-radius: 8px !important;
 }
