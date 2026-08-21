@@ -1,6 +1,7 @@
 let isEditingLogMode = false;
 const STORAGE_KEY = 'trainingRecords';
 const CURRENT_SCHEMA_VERSION = 'label-v5'; // スキーマバージョンを更新して自動同期
+const CODE_SNAPSHOT_KEY = 'workout_tracker_code_snapshot'; // ★ コード側デフォルトの前回スナップショット保存キー
 
 // ▼ 新しい表示フォーマット：種目/タイプ（マシン）
 function formatExerciseName(name, variation, equipment) {
@@ -30,7 +31,7 @@ const initialDefaultMenus = [
         { name: 'ローイング', detail: '15~20回 × 3セット', variation: 'シーテッド', equipment: 'アイソラテラル' },
         { name: 'チェストプレス', detail: '15~20回 × 3セット', variation: 'フラット', equipment: 'マシン' },
         { name: 'リアデルトイド', detail: '15~20回 × 3セット', variation: '手のひら内側', equipment: 'マシン' },
-        { name: 'クランチ', detail: '15~20回 × 3セット', variation: 'ノーマル', equipment: 'マシン' },
+        { name: 'クランチ', detail: '15~20回 × 3セット', variation: 'ノーマル', equipment: 'アブドミナル' },
         { name: 'バックエクステンション', detail: '15回 × 3セット', variation: 'ノーマル', equipment: 'マシン' },
       ]
     },
@@ -73,7 +74,7 @@ const initialDefaultMenus = [
         { name: 'ラットプルダウン', detail: '10回 × 3セット', variation: 'マググリップ', equipment: 'ケーブル' },
         { name: 'チェストプレス', detail: '10回 × 3セット', variation: 'フラット', equipment: 'マシン' },
         { name: 'サイドレイズ', detail: '15回 × 2〜3セット', variation: 'ノーマル', equipment: 'ダンベル' },
-        { name: 'クランチ', detail: '10回 × 3セット', variation: 'ノーマル', equipment: '自重' },
+        { name: 'クランチ', detail: '10回 × 3セット', variation: 'ノーマル', equipment: 'アブドミナル' },
         { name: 'トレッドミル', detail: '30分', variation: 'ノーマル', equipment: 'マシン' },
       ]
     }
@@ -158,7 +159,7 @@ const DEFAULT_EQUIPMENT_PATTERNS = {
   'アブダクション': ['マシン', 'バンド'],
   'ヒップスラスト': ['グルートドライブ', 'バーベル', 'スミス'],
   'グルートキックバック': ['ケーブル', 'マシン', 'バンド'],
-  'クラン': ['自重', 'マシン'],
+  'クランチ': ['自重', 'ロープ', 'アブドミナル'],
   'トーソローテーション': ['マシン'],
   'レッグレイズ': ['自重'],
   'プランク': ['自重'],
@@ -442,6 +443,199 @@ function init() {
   }
 }
 
+// ==========================================================
+// ★ コード側デフォルト自動反映の仕組み
+// ------------------------------------------------------------
+// initialDefaultMenus / DEFAULT_VARIATION_PATTERNS /
+// DEFAULT_EQUIPMENT_PATTERNS / INITIAL_EXERCISE_DETAILS /
+// buildDefaultExerciseLibrary() をコード側で書き換えるだけで、
+// 既存ユーザーの保存データにも変更が反映されるようにする。
+//
+// 仕組み：前回読み込み時点の「コード側デフォルト」をスナップショットとして
+// localStorageに保存しておき、今回のコード側デフォルトと比較。
+// - 前回スナップショットと今回のコードが同じ → ユーザーの保存値をそのまま使う
+// - 前回スナップショットと今回のコードが違う（＝コードを更新した）→
+//     ユーザーが自分で編集していなければ新しいコードの値に更新する
+//     ユーザーが独自に編集/追加していた分は保持する
+// ==========================================================
+
+function getCurrentCodeDefaults() {
+  return {
+    menus: JSON.parse(JSON.stringify(initialDefaultMenus)),
+    variations: JSON.parse(JSON.stringify(DEFAULT_VARIATION_PATTERNS)),
+    equipment: JSON.parse(JSON.stringify(DEFAULT_EQUIPMENT_PATTERNS)),
+    details: JSON.parse(JSON.stringify(INITIAL_EXERCISE_DETAILS)),
+    library: buildDefaultExerciseLibrary()
+  };
+}
+
+function deepEqual(a, b) {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
+function mergeUnique(baseArr, extraArr) {
+  const result = baseArr.slice();
+  (extraArr || []).forEach(v => {
+    if (!result.includes(v)) result.push(v);
+  });
+  return result;
+}
+
+// dict of arrays（種目リスト、タイプ、器具など）を同期する
+function syncArrayDict(prevDict, currDict, userDict) {
+  const prev = prevDict || {};
+  const curr = currDict || {};
+  const user = userDict ? JSON.parse(JSON.stringify(userDict)) : {};
+  const result = {};
+
+  Object.keys(curr).forEach(key => {
+    const currArr = curr[key];
+    const prevArr = prev[key];
+    if (!prevArr) {
+      // コード側で新規追加された（またはスナップショットがまだ無い）
+      result[key] = user[key] ? mergeUnique(currArr, user[key]) : currArr.slice();
+    } else {
+      const userArr = user[key] || prevArr.slice();
+      const removedByCode = prevArr.filter(v => !currArr.includes(v));
+      const addedByCode = currArr.filter(v => !prevArr.includes(v));
+      let merged = userArr.filter(v => !removedByCode.includes(v));
+      addedByCode.forEach(v => { if (!merged.includes(v)) merged.push(v); });
+      result[key] = merged;
+    }
+  });
+
+  // コード側から削除されたキーの扱い
+  Object.keys(prev).forEach(key => {
+    if (curr[key]) return;
+    if (user[key] && !deepEqual(user[key], prev[key])) {
+      // ユーザーが独自に編集済み → 残す
+      result[key] = user[key];
+    }
+    // 未編集ならコードの削除に合わせて削除
+  });
+
+  // コード側に存在しない、ユーザー独自のキー（自作の種目など）は保持
+  Object.keys(user).forEach(key => {
+    if (!curr[key] && !prev[key]) result[key] = user[key];
+  });
+
+  return result;
+}
+
+// dict of objects（種目の詳細説明など）を同期する
+function syncObjectDict(prevDict, currDict, userDict) {
+  const prev = prevDict || {};
+  const curr = currDict || {};
+  const user = userDict ? JSON.parse(JSON.stringify(userDict)) : {};
+  const result = {};
+
+  Object.keys(curr).forEach(key => {
+    if (!prev[key]) {
+      result[key] = user[key] ? user[key] : JSON.parse(JSON.stringify(curr[key]));
+    } else if (!user[key]) {
+      result[key] = JSON.parse(JSON.stringify(curr[key]));
+    } else if (deepEqual(user[key], prev[key])) {
+      result[key] = JSON.parse(JSON.stringify(curr[key])); // 未編集 → コードの新しい内容へ更新
+    } else {
+      result[key] = user[key]; // 編集済み → ユーザーの内容を優先
+    }
+  });
+
+  Object.keys(prev).forEach(key => {
+    if (curr[key]) return;
+    if (user[key] && !deepEqual(user[key], prev[key])) {
+      result[key] = user[key];
+    }
+  });
+
+  Object.keys(user).forEach(key => {
+    if (!curr[key] && !prev[key]) result[key] = user[key];
+  });
+
+  return result;
+}
+
+// メニュー内の種目リストを1件ずつ位置ベースで同期する
+// （名前や設定だけの変更でも確実に反映されるように、フィールド単位で比較する）
+function syncExerciseList(prevList, currList, userList) {
+  prevList = prevList || [];
+  currList = currList || [];
+  userList = userList || [];
+  const maxLen = Math.max(prevList.length, currList.length, userList.length);
+  const result = [];
+
+  for (let i = 0; i < maxLen; i++) {
+    const p = prevList[i];
+    const c = currList[i];
+    const u = userList[i];
+
+    if (c === undefined) {
+      // コード側でこの位置の種目が削除された
+      if (u !== undefined) {
+        if (p !== undefined && deepEqual(u, p)) {
+          // 未編集 → 削除に合わせて除外
+        } else {
+          result.push(u); // 編集済み／ユーザー独自 → 保持
+        }
+      }
+      continue;
+    }
+
+    if (u === undefined) {
+      result.push(JSON.parse(JSON.stringify(c)));
+    } else if (p !== undefined && deepEqual(u, p)) {
+      result.push(JSON.parse(JSON.stringify(c))); // 未編集 → 新しいコード内容へ更新
+    } else {
+      result.push(u); // 編集済み → ユーザーの内容を保持
+    }
+  }
+
+  return result;
+}
+
+// メニュー（上半身A等）を同期する
+function syncMenus(prevMenus, currMenus, userMenus) {
+  const prevMap = new Map((prevMenus || []).map(m => [m.id, m]));
+  const currMap = new Map((currMenus || []).map(m => [m.id, m]));
+  const userMap = new Map((userMenus || []).map(m => [m.id, m]));
+  const result = [];
+
+  currMenus.forEach(currMenu => {
+    const id = currMenu.id;
+    const prevMenu = prevMap.get(id);
+    const userMenu = userMap.get(id);
+    if (!prevMenu || !userMenu) {
+      // コード側で新規追加、またはユーザー側に無い → コードの内容を採用
+      result.push(JSON.parse(JSON.stringify(currMenu)));
+      return;
+    }
+
+    const title = deepEqual(userMenu.title, prevMenu.title) ? currMenu.title : userMenu.title;
+    const memo = deepEqual(userMenu.memo, prevMenu.memo) ? currMenu.memo : userMenu.memo;
+    const exercises = syncExerciseList(prevMenu.exercises, currMenu.exercises, userMenu.exercises);
+
+    result.push({ id, title, memo, exercises });
+  });
+
+  // コード側から削除されたメニュー／ユーザー独自メニューの扱い
+  const fields = m => ({ title: m.title, memo: m.memo, exercises: m.exercises });
+  (userMenus || []).forEach(userMenu => {
+    const id = userMenu.id;
+    if (currMap.has(id)) return; // 上のループで処理済み
+    const prevMenu = prevMap.get(id);
+    if (!prevMenu) {
+      // ユーザー独自に作成したメニュー → そのまま保持
+      result.push(userMenu);
+    } else if (!deepEqual(fields(userMenu), fields(prevMenu))) {
+      // コード側では削除されたが、ユーザーが編集していた → 保持
+      result.push(userMenu);
+    }
+    // 未編集のままコード側で削除された場合は削除する
+  });
+
+  return result;
+}
+
 function loadState() {
   const savedState = localStorage.getItem('workout_tracker_state');
   if (savedState) {
@@ -503,92 +697,43 @@ function loadState() {
     // ==========================================
 
     if (parsed.theme) state.theme = parsed.theme;
-    
-    // メニューの同期
-    if (parsed.menus) {
-      state.menus = parsed.menus;
-      const defaultMenuIds = ['A', 'B', 'C', 'D', 'E', 'F'];
-      defaultMenuIds.forEach(id => {
-        const defaultMenu = initialDefaultMenus.find(m => m.id === id);
-        const savedMenu = state.menus.find(m => m.id === id);
-        if (defaultMenu && savedMenu) {
-          savedMenu.title = defaultMenu.title;
-          savedMenu.memo = defaultMenu.memo;
-          savedMenu.exercises = JSON.parse(JSON.stringify(defaultMenu.exercises));
-        }
-      });
-    } else {
-      state.menus = JSON.parse(JSON.stringify(initialDefaultMenus));
-    }
+
+    // ★ 前回読み込み時のコード側デフォルトのスナップショットを取得
+    let prevDefaults = null;
+    try {
+      const rawSnapshot = localStorage.getItem(CODE_SNAPSHOT_KEY);
+      if (rawSnapshot) prevDefaults = JSON.parse(rawSnapshot);
+    } catch (e) { prevDefaults = null; }
+    const currDefaults = getCurrentCodeDefaults();
+
+    // メニューの同期（コード側の変更・追加・削除を反映しつつ、ユーザーの編集は保持）
+    state.menus = syncMenus(prevDefaults ? prevDefaults.menus : null, currDefaults.menus, parsed.menus);
 
     if (parsed.logs) state.logs = parsed.logs;
     state.inbodyLogs = parsed.inbodyLogs || [];
     state.exerciseLabels = ['胸', '背中', '脚', '肩', '腕', 'お尻', '腹筋', '全身', '有酸素運動', 'その他'];
-    
-    state.exerciseLibrary = buildDefaultExerciseLibrary();
-    if (parsed.exerciseLibrary) {
-      Object.keys(parsed.exerciseLibrary).forEach(label => {
-        if (!state.exerciseLibrary[label]) {
-          state.exerciseLibrary[label] = [];
-        }
-        parsed.exerciseLibrary[label].forEach(name => {
-          if (!state.exerciseLibrary[label].includes(name)) {
-            state.exerciseLibrary[label].push(name);
-          }
-        });
-      });
-    }
 
-    const mergedEquipment = JSON.parse(JSON.stringify(DEFAULT_EQUIPMENT_PATTERNS));
-    if (parsed.exerciseEquipment) {
-      Object.keys(parsed.exerciseEquipment).forEach(exName => {
-        if (mergedEquipment[exName]) {
-          const userEquips = parsed.exerciseEquipment[exName];
-          userEquips.forEach(eq => {
-            if (!mergedEquipment[exName].includes(eq)) {
-              mergedEquipment[exName].push(eq);
-            }
-          });
-        } else {
-          mergedEquipment[exName] = parsed.exerciseEquipment[exName];
-        }
-      });
-    }
-    state.exerciseEquipment = mergedEquipment;
+    // 種目リスト・タイプ・器具・詳細説明の同期
+    state.exerciseLibrary = syncArrayDict(prevDefaults ? prevDefaults.library : null, currDefaults.library, parsed.exerciseLibrary);
+    state.exerciseEquipment = syncArrayDict(prevDefaults ? prevDefaults.equipment : null, currDefaults.equipment, parsed.exerciseEquipment);
+    state.exerciseVariations = syncArrayDict(prevDefaults ? prevDefaults.variations : null, currDefaults.variations, parsed.exerciseVariations);
+    state.exerciseDetails = syncObjectDict(prevDefaults ? prevDefaults.details : null, currDefaults.details, parsed.exerciseDetails);
 
-    const mergedVariations = JSON.parse(JSON.stringify(DEFAULT_VARIATION_PATTERNS));
-    if (parsed.exerciseVariations) {
-      Object.keys(parsed.exerciseVariations).forEach(exName => {
-        if (mergedVariations[exName]) {
-          const userVars = parsed.exerciseVariations[exName];
-          userVars.forEach(v => {
-            if (!mergedVariations[exName].includes(v)) {
-              mergedVariations[exName].push(v);
-            }
-          });
-        } else {
-          mergedVariations[exName] = parsed.exerciseVariations[exName];
-        }
-      });
-    }
-    state.exerciseVariations = mergedVariations;
-
-    if (parsed.exerciseDetails) {
-      state.exerciseDetails = parsed.exerciseDetails;
-      Object.keys(INITIAL_EXERCISE_DETAILS).forEach(exName => {
-        if (!state.exerciseDetails[exName]) {
-          state.exerciseDetails[exName] = JSON.parse(JSON.stringify(INITIAL_EXERCISE_DETAILS[exName]));
-        }
-      });
-    } else {
-      state.exerciseDetails = JSON.parse(JSON.stringify(INITIAL_EXERCISE_DETAILS));
-    }
+    // 今回のコード側デフォルトをスナップショットとして保存（次回の比較用）
+    try {
+      localStorage.setItem(CODE_SNAPSHOT_KEY, JSON.stringify(currDefaults));
+    } catch (e) { /* 保存失敗は無視 */ }
 
   } else {
     state.exerciseLibrary = buildDefaultExerciseLibrary();
     state.exerciseEquipment = JSON.parse(JSON.stringify(DEFAULT_EQUIPMENT_PATTERNS));
     state.exerciseVariations = JSON.parse(JSON.stringify(DEFAULT_VARIATION_PATTERNS));
     state.exerciseDetails = JSON.parse(JSON.stringify(INITIAL_EXERCISE_DETAILS));
+
+    // 初回起動時もスナップショットを保存しておく
+    try {
+      localStorage.setItem(CODE_SNAPSHOT_KEY, JSON.stringify(getCurrentCodeDefaults()));
+    } catch (e) { /* 保存失敗は無視 */ }
   }
 }
 
@@ -640,12 +785,12 @@ function changeTheme(themeName) {
 function buildDefaultExerciseLibrary() {
   return {
     '胸': ['チェストプレス', 'チェストフライ', 'ディップス'],
-    '背中': ['ラットプルダウン', 'チンニング（懸垂）', 'ローイング', 'デッドリフト', 'バックエクステンション', 'リアデルトイド'],
+    '背中': ['ラットプルダウン', 'チンニング', 'ローイング', 'デッドリフト', 'バックエクステンション', 'リアデルトイド'],
     '脚': ['スクワット', 'レッグプレス', 'レッグエクステンション', 'レッグカール', 'グッドモーニング', 'アダクション'],
     '肩': ['ショルダープレス', 'サイドレイズ', 'フロントレイズ', 'フェイスプル'],
     '腕': ['アームカール', 'ケーブル・プレスダウン', 'トライセプス・エクステンション', 'キックバック', 'プッシュアップ'],
     'お尻': ['アブダクション', 'ヒップスラスト', 'グルートキックバック', 'ルーマニアンデッドリフト'],
-    '腹筋': ['クランチ（上体起こし）', 'トーソローテーション', 'レッグレイズ', 'プランク'],
+    '腹筋': ['クランチ', 'トーソローテーション', 'レッグレイズ', 'プランク'],
     '全身': ['クリーン/スナッチ', 'バーピー'],
     '有酸素運動': ['トレッドミル'],
     'その他': []
@@ -931,8 +1076,7 @@ function openDetailLogModal(logIndex) {
   } else {
     const menu = state.menus.find(m => m.id === log.menuId);
     const menuTitle = menu ? menu.title : '';
-    const freeBadge = log.recordType === 'free' ? ' <span style="font-size:0.75rem; font-weight:700; color:var(--lavender); background:var(--lavender-soft); padding:2px 8px; border-radius:8px; vertical-align:middle;">自由入力</span>' : '';
-    titleEl.innerHTML = `${menuTitle}${freeBadge}`;
+    titleEl.textContent = menuTitle;
   }
 
   let html = '';
@@ -1047,11 +1191,19 @@ function formatSingleLogObj(logObj, showEquipBadge = true) {
     }
   }
 
-  if (logObj.isCardio || logObj.minutes !== undefined || logObj.calories !== undefined) {
+  if (
+    logObj.isCardio ||
+    logObj.minutes !== undefined ||
+    logObj.calories !== undefined ||
+    logObj.incline !== undefined ||
+    logObj.speed !== undefined
+  ) {
     const parts = [];
-    if (logObj.minutes) parts.push(`${logObj.minutes}分`);
-    if (logObj.calories) parts.push(`(${logObj.calories}kcal)`);
-    return parts.join(' ') + equipBadge;
+    if (logObj.minutes !== undefined && logObj.minutes !== '') parts.push(`${logObj.minutes}分`);
+    if (logObj.incline !== undefined && logObj.incline !== '') parts.push(`傾斜${logObj.incline}%`);
+    if (logObj.speed !== undefined && logObj.speed !== '') parts.push(`速度${logObj.speed}km/h`);
+    if (logObj.calories !== undefined && logObj.calories !== '') parts.push(`${logObj.calories}kcal`);
+    return parts.join(' / ') + equipBadge;
   }
 
   if (logObj.setsArray && Array.isArray(logObj.setsArray) && logObj.setsArray.length > 0) {
@@ -1269,8 +1421,12 @@ function updateLastLogDisplay(blockEl) {
     
     if (isCardio) {
       const minInput = blockEl.querySelector('.extra-minutes');
+      const inclineInput = blockEl.querySelector('.extra-incline');
+      const speedInput = blockEl.querySelector('.extra-speed');
       const calInput = blockEl.querySelector('.extra-calories');
       if (minInput && lastObj.minutes !== undefined) minInput.value = lastObj.minutes;
+      if (inclineInput && lastObj.incline !== undefined) inclineInput.value = lastObj.incline;
+      if (speedInput && lastObj.speed !== undefined) speedInput.value = lastObj.speed;
       if (calInput && lastObj.calories !== undefined) calInput.value = lastObj.calories;
     } else {
       // 既存の入力欄を破棄し、前回の記録で再生成する
@@ -1370,9 +1526,6 @@ function openWorkoutLogModal(defaultMenuId, presetDateISO, isEdit = false) {
 
   const suggestedContainer = document.getElementById('suggested-fields-container');
   if (suggestedContainer) suggestedContainer.innerHTML = '';
-  
-  const extraContainer = document.getElementById('extra-exercise-container');
-  if (extraContainer) extraContainer.innerHTML = '';
 
   toggleRecordType();
 
@@ -1380,73 +1533,27 @@ function openWorkoutLogModal(defaultMenuId, presetDateISO, isEdit = false) {
   renderWorkoutLogInputs(activeMenuId);
 
   if (isEdit && existingLog && existingLog.exerciseLogs && existingLog.menuId !== 'OFF') {
-    const isFree = existingLog.recordType === 'free';    
     for (const [exName, logVal] of Object.entries(existingLog.exerciseLogs)) {
       const valArray = Array.isArray(logVal) ? logVal : [logVal];
-      
+
       valArray.forEach(item => {
         const itemIsCardio = item.isCardio === true || (item.weight === undefined && item.reps === undefined && item.minutes !== undefined);
 
-        if (!isFree) {
-          addSuggestedExerciseInput(exName, '', selectEl.value, itemIsCardio, item.equipment, item.variation);
-          const container = document.getElementById('suggested-fields-container');
-          const lastBlock = container ? container.lastElementChild : null;
-          if (lastBlock) {
-            if (itemIsCardio) {
-              const minInput = lastBlock.querySelector('.extra-minutes');
-              const calInput = lastBlock.querySelector('.extra-calories');
-              if (minInput) minInput.value = item.minutes !== undefined ? item.minutes : '';
-              if (calInput) calInput.value = item.calories !== undefined ? item.calories : '';
-            } else {
-              fillSetsContainerFromItem(lastBlock, item);
-            }
-          }
-        } else {
-          addExtraExerciseInput(item.equipment, item.variation);
-          const container = document.getElementById('extra-exercise-container');
-          const currentBlock = container ? container.lastElementChild : null;
-          
-          if (currentBlock) {
-            let foundLabel = item.label;
-            if (!foundLabel) {
-              for (const [lbl, names] of Object.entries(state.exerciseLibrary)) {
-                if (names.includes(exName)) {
-                  foundLabel = lbl;
-                  break;
-                }
-              }
-            }
-
-            if (foundLabel) {
-              const labelSelect = currentBlock.querySelector('.extra-label-select');
-              if (labelSelect) {
-                labelSelect.value = foundLabel;
-                renderExerciseChipsForBlock(currentBlock, item.equipment, item.variation);
-              }
-            }
-
-            const nameSelect = currentBlock.querySelector('.extra-name-select');
-            if (nameSelect) {
-              let hasOption = Array.from(nameSelect.options).some(opt => opt.value === exName);
-              if (!hasOption) {
-                const newOpt = document.createElement('option');
-                newOpt.value = exName;
-                newOpt.textContent = exName;
-                nameSelect.appendChild(newOpt);
-              }
-              nameSelect.value = exName;
-              renderVariationChips(currentBlock, exName, item.variation || '');
-              renderEquipmentChips(currentBlock, exName, item.equipment || '');
-            }
-
-            if (itemIsCardio) {
-              const minInput = currentBlock.querySelector('.extra-minutes');
-              const calInput = currentBlock.querySelector('.extra-calories');
-              if (minInput) minInput.value = item.minutes !== undefined ? item.minutes : '';
-              if (calInput) calInput.value = item.calories !== undefined ? item.calories : '';
-            } else {
-              fillSetsContainerFromItem(currentBlock, item);
-            }
+        addSuggestedExerciseInput(exName, '', selectEl.value, itemIsCardio, item.equipment, item.variation);
+        const container = document.getElementById('suggested-fields-container');
+        const lastBlock = container ? container.lastElementChild : null;
+        if (lastBlock) {
+          if (itemIsCardio) {
+            const minInput = lastBlock.querySelector('.extra-minutes');
+            const inclineInput = lastBlock.querySelector('.extra-incline');
+            const speedInput = lastBlock.querySelector('.extra-speed');
+            const calInput = lastBlock.querySelector('.extra-calories');
+            if (minInput) minInput.value = item.minutes !== undefined ? item.minutes : '';
+            if (inclineInput) inclineInput.value = item.incline !== undefined ? item.incline : '';
+            if (speedInput) speedInput.value = item.speed !== undefined ? item.speed : '';
+            if (calInput) calInput.value = item.calories !== undefined ? item.calories : '';
+          } else {
+            fillSetsContainerFromItem(lastBlock, item);
           }
         }
       });
@@ -1462,18 +1569,15 @@ function toggleRecordType() {
   const selectMenuLabel = document.getElementById('select-log-menu-label');
   const selectMenu = document.getElementById('select-log-menu');
   const logInputs = document.getElementById('workout-log-inputs');
-  const freeSection = document.getElementById('free-exercise-section');
 
   if (isOff) {
     if (selectMenuLabel) selectMenuLabel.style.display = 'none';
     if (selectMenu) selectMenu.style.display = 'none';
     if (logInputs) logInputs.style.display = 'none';
-    if (freeSection) freeSection.style.display = 'none';
   } else {
     if (selectMenuLabel) selectMenuLabel.style.display = 'block';
     if (selectMenu) selectMenu.style.display = 'block';
     if (logInputs) logInputs.style.display = 'block';
-    if (freeSection) freeSection.style.display = 'block';
 
     if (selectMenuLabel) selectMenuLabel.textContent = 'メニュー選択';
   }
@@ -1510,7 +1614,7 @@ function renderWorkoutLogInputs(menuId) {
 
   const summaryEl = document.createElement('summary');
   summaryEl.style.cssText = 'padding: 8px 12px; font-size: 0.8125rem; font-weight: 700; color: var(--primary-hover); cursor: pointer; user-select: none; display: flex; justify-content: space-between; align-items: center;';
-  summaryEl.innerHTML = `<span>💡 ${menu.title} の種目候補</span><span style="font-size: 0.75rem; color: var(--text-sub);">▾</span>`;
+  summaryEl.innerHTML = `<span>${menu.title} の種目候補</span><span style="font-size: 0.75rem; color: var(--text-sub);">▾</span>`;
   detailsEl.appendChild(summaryEl);
 
   const chipList = document.createElement('div');
@@ -1576,9 +1680,35 @@ function addSuggestedExerciseInput(exerciseName, detailStr = '', menuId = '', fo
         <input type="text" class="form-input extra-name-input" value="${exerciseName}" readonly style="font-weight:700; background-color:var(--primary-soft); color:var(--text-main); margin-bottom:0; flex: 1;">
         <button type="button" class="btn-remove-row" onclick="this.closest('.extra-log-block').remove()">&times;</button>
       </div>
-      <div class="direct-input-group" data-cardio="true">
-        <div class="direct-field"><label>時間 (分)</label><input type="number" class="extra-minutes" value="${lastObj.minutes !== undefined ? lastObj.minutes : 30}"></div>
-        <div class="direct-field"><label>カロリー(kcal)</label><input type="number" class="extra-calories" value="${lastObj.calories !== undefined ? lastObj.calories : ''}"></div>
+      <div class="direct-input-group cardio-input-group" data-cardio="true">
+        <div class="direct-field">
+          <label>時間</label>
+          <div class="direct-field-inputwrap">
+            <input type="number" class="form-input extra-minutes" inputmode="numeric" min="0" step="1" value="${lastObj.minutes !== undefined ? lastObj.minutes : 30}">
+            <span class="direct-field-unit">分</span>
+          </div>
+        </div>
+        <div class="direct-field">
+          <label>傾斜</label>
+          <div class="direct-field-inputwrap">
+            <input type="number" class="form-input extra-incline" inputmode="decimal" min="0" step="0.5" value="${lastObj.incline !== undefined ? lastObj.incline : ''}">
+            <span class="direct-field-unit">%</span>
+          </div>
+        </div>
+        <div class="direct-field">
+          <label>速度</label>
+          <div class="direct-field-inputwrap">
+            <input type="number" class="form-input extra-speed" inputmode="decimal" min="0" step="0.1" value="${lastObj.speed !== undefined ? lastObj.speed : ''}">
+            <span class="direct-field-unit">km/h</span>
+          </div>
+        </div>
+        <div class="direct-field">
+          <label>カロリー</label>
+          <div class="direct-field-inputwrap">
+            <input type="number" class="form-input extra-calories" inputmode="numeric" min="0" step="1" value="${lastObj.calories !== undefined ? lastObj.calories : ''}">
+            <span class="direct-field-unit">kcal</span>
+          </div>
+        </div>
       </div>
     `;
   } else {
@@ -1665,12 +1795,7 @@ function removeSetRow(btnEl) {
 }
 
 function addExtraExerciseInput(initEquip = '', initVar = '') {
-  const isFree = document.getElementById('record-type-free') ? document.getElementById('record-type-free').checked : false;
-  
-  let container = isFree ? document.getElementById('extra-exercise-container') : document.getElementById('suggested-fields-container');
-  if (!container) {
-    container = document.getElementById('extra-exercise-container') || document.getElementById('workout-log-inputs');
-  }
+  let container = document.getElementById('suggested-fields-container') || document.getElementById('workout-log-inputs');
 
   const block = document.createElement('div');
   block.className = 'extra-log-block';
@@ -1762,14 +1887,34 @@ function renderExerciseChipsForBlock(block, initEquip = '', initVar = '') {
 
   if (isCardio) {
     fieldsContainer.innerHTML = `
-      <div class="direct-input-group" data-cardio="true">
+      <div class="direct-input-group cardio-input-group" data-cardio="true">
         <div class="direct-field">
-          <label>時間 (分)</label>
-          <input type="number" class="extra-minutes" inputmode="numeric" placeholder="30">
+          <label>時間</label>
+          <div class="direct-field-inputwrap">
+            <input type="number" class="form-input extra-minutes" inputmode="numeric" min="0" step="1" placeholder="30">
+            <span class="direct-field-unit">分</span>
+          </div>
         </div>
         <div class="direct-field">
-          <label>消費カロリー (kcal)</label>
-          <input type="number" class="extra-calories" inputmode="numeric" placeholder="150">
+          <label>傾斜</label>
+          <div class="direct-field-inputwrap">
+            <input type="number" class="form-input extra-incline" inputmode="decimal" min="0" step="0.5" placeholder="5">
+            <span class="direct-field-unit">%</span>
+          </div>
+        </div>
+        <div class="direct-field">
+          <label>速度</label>
+          <div class="direct-field-inputwrap">
+            <input type="number" class="form-input extra-speed" inputmode="decimal" min="0" step="0.1" placeholder="4.5">
+            <span class="direct-field-unit">km/h</span>
+          </div>
+        </div>
+        <div class="direct-field">
+          <label>カロリー</label>
+          <div class="direct-field-inputwrap">
+            <input type="number" class="form-input extra-calories" inputmode="numeric" min="0" step="1" placeholder="150">
+            <span class="direct-field-unit">kcal</span>
+          </div>
         </div>
       </div>
     `;
@@ -1784,7 +1929,7 @@ function renderExerciseChipsForBlock(block, initEquip = '', initVar = '') {
   const names = state.exerciseLibrary[label] || [];
 
   if (names.length === 0) {
-    chipList.innerHTML = `<span class="exercise-chip-empty">まだ種目がありません（設定 📋 から追加できます）</span>`;
+    chipList.innerHTML = `<span class="exercise-chip-empty">まだ種目がありません（設定から追加できます）</span>`;
     return;
   }
 
@@ -1830,9 +1975,13 @@ function prefillLastLogValues(block, name) {
   if (!lastObj) return;
 
   const minInput = block.querySelector('.extra-minutes');
+  const inclineInput = block.querySelector('.extra-incline');
+  const speedInput = block.querySelector('.extra-speed');
   const calInput = block.querySelector('.extra-calories');
 
   if (minInput && lastObj.minutes !== undefined && lastObj.minutes !== null) minInput.value = lastObj.minutes;
+  if (inclineInput && lastObj.incline !== undefined && lastObj.incline !== null) inclineInput.value = lastObj.incline;
+  if (speedInput && lastObj.speed !== undefined && lastObj.speed !== null) speedInput.value = lastObj.speed;
   if (calInput && lastObj.calories !== undefined && lastObj.calories !== null) calInput.value = lastObj.calories;
 
   if (!minInput) fillSetsContainerFromItem(block, lastObj);
@@ -1891,11 +2040,15 @@ function submitWorkoutLog() {
 
     if (name) {
       if (minInput) {
-        const calories = block.querySelector('.extra-calories').value;
+        const incline = block.querySelector('.extra-incline');
+        const speed = block.querySelector('.extra-speed');
+        const calories = block.querySelector('.extra-calories');
         appendExerciseLog(name, {
           isCardio: true,
           minutes: minInput.value !== '' ? parseInt(minInput.value, 10) : 0,
-          calories: calories !== '' ? parseInt(calories, 10) : 0,
+          incline: incline && incline.value !== '' ? parseFloat(incline.value) : null,
+          speed: speed && speed.value !== '' ? parseFloat(speed.value) : null,
+          calories: calories.value !== '' ? parseInt(calories.value, 10) : 0,
           equipment: equipment,
           variation: variation
         });
@@ -1960,8 +2113,7 @@ function openDetailLogModal(logIndex) {
   } else {
     const menu = state.menus.find(m => m.id === log.menuId);
     const menuTitle = menu ? menu.title : '';
-    const freeBadge = log.recordType === 'free' ? ' <span style="font-size:0.75rem; font-weight:700; color:var(--lavender); background:var(--lavender-soft); padding:2px 8px; border-radius:8px; vertical-align:middle;">自由入力</span>' : '';
-    titleEl.innerHTML = `${menuTitle}${freeBadge}`;
+    titleEl.textContent = menuTitle;
   }
 
   let html = '';
@@ -3803,6 +3955,41 @@ function importPastLogs() {
   }
 }
 
+function exportTrainingLogs() {
+  if (!state.logs || state.logs.length === 0) {
+    alert("記録がまだありません。");
+    return;
+  }
+  const sortedLogs = [...state.logs].sort((a, b) => a.date.localeCompare(b.date));
+  const jsonStr = JSON.stringify(sortedLogs, null, 2);
+
+  const today = new Date();
+  const y = today.getFullYear();
+  const m = String(today.getMonth() + 1).padStart(2, '0');
+  const d = String(today.getDate()).padStart(2, '0');
+  const filename = `usatore_logs_${y}${m}${d}.json`;
+
+  const blob = new Blob([jsonStr], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function resyncCodeDefaults() {
+  if (!confirm("メニュー・種目・タイプ・器具の内容を、コード側の最新の内容に合わせ直します。\n（トレーニング記録・InBody記録は消えません）\n\nよろしいですか？")) {
+    return;
+  }
+  try {
+    localStorage.removeItem(CODE_SNAPSHOT_KEY);
+  } catch (e) { /* 無視 */ }
+  location.reload();
+}
+
 function moveBlock(btnEl, direction) {
   const block = btnEl.closest('.extra-log-block') || btnEl.closest('.exercise-row');
   if (!block) return;
@@ -4101,3 +4288,56 @@ function forceUpdateMenusAndLibrary() {
     location.reload(); // 画面を自動でリロード
   }
 }
+
+/* スマホChrome：キーボードで入力欄が隠れないようにする */
+(function setupMobileKeyboardScroll() {
+  const isMobile = () =>
+    window.matchMedia('(max-width: 768px)').matches ||
+    /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+  let scrollTimer = null;
+
+  function keepFocusedInputVisible(input) {
+    if (!isMobile() || !input || !input.matches(':focus')) return;
+
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(() => {
+      const rect = input.getBoundingClientRect();
+      const viewportHeight =
+        window.visualViewport ? window.visualViewport.height : window.innerHeight;
+
+      // キーボード上端より少し上に入力欄を置く
+      const safeBottom = viewportHeight - 24;
+
+      if (rect.bottom > safeBottom || rect.top < 60) {
+        input.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+          inline: 'nearest'
+        });
+      }
+    }, 120);
+  }
+
+  document.addEventListener('focusin', (e) => {
+    const input = e.target.closest('input, textarea, select');
+    if (!input) return;
+    keepFocusedInputVisible(input);
+  });
+
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', () => {
+      const input = document.activeElement;
+      if (input && input.matches('input, textarea, select')) {
+        keepFocusedInputVisible(input);
+      }
+    });
+
+    window.visualViewport.addEventListener('scroll', () => {
+      const input = document.activeElement;
+      if (input && input.matches('input, textarea, select')) {
+        keepFocusedInputVisible(input);
+      }
+    });
+  }
+})();

@@ -8,7 +8,7 @@
     <!-- ▼ まる文字フォント（Zen Maru Gothic） -->
     <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;600;700;900&display=swap" rel="stylesheet">
     <!-- バージョン更新: v=20260820_01 -->
-    <link rel="stylesheet" href="style.css?v=20260820_21">
+    <link rel="stylesheet" href="style.css?v=20260821_09">
 </head>
 <body>
 
@@ -228,16 +228,6 @@
 
                 <div id="workout-log-inputs">
                     <!-- 基本メニューの数値入力欄 -->
-                </div>
-
-                <div class="extra-exercise-section" id="free-exercise-section">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <label class="form-label" id="extra-exercise-label" style="margin-bottom: 0;">実施した種目</label>
-                        <button type="button" class="btn-add-extra" style="width: auto; padding: 6px 12px; font-size: 0.8125rem;" onclick="addExtraExerciseInput()">+ 種目を追加</button>
-                    </div>
-                    <div id="extra-exercise-container">
-                        <!-- カード追加用エリア -->
-                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -524,9 +514,11 @@
         <button type="button" class="btn-footer-tool" id="btn-open-exercise-library" onclick="openExerciseLibraryModal()">📋</button>
         <button type="button" class="btn-footer-tool" onclick="openThemeSettingsModal()">🎨</button>
         <button type="button" class="btn-footer-tool" onclick="importPastLogs()">📥</button>
+        <button type="button" class="btn-footer-tool" onclick="exportTrainingLogs()">📤</button>
+        <button type="button" class="btn-footer-tool" onclick="resyncCodeDefaults()">🔄</button>
     </div>
 
 
-    <script src="script.js?v=20260820_21"></script>
+    <script src="script.js?v=20260821_09"></script>
 </body>
 </html>

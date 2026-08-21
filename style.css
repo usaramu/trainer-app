@@ -1581,19 +1581,74 @@ input.lib-new-equip-input:focus {
     gap: 8px;
     flex-wrap: wrap;
 }
+
+.cardio-input-group {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.cardio-input-group .direct-field {
+    min-width: 0;
+    padding: 4px 7px;
+}
+
+.cardio-input-group .direct-field-inputwrap {
+    flex-shrink: 0;
+}
+
+.cardio-input-group .direct-field-inputwrap input.form-input {
+    width: 42px !important;
+    height: 26px !important;
+    padding: 0 !important;
+    text-align: center !important;
+    margin-bottom: 0 !important;
+    background-color: var(--card-bg) !important;
+    font-size: 14px !important;
+}
 .direct-field {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
     flex: 1;
-    min-width: 90px;
+    min-width: 0;
+    background: var(--primary-soft);
+    border: 1.5px solid var(--border-color);
+    border-radius: 10px;
+    padding: 3px 8px;
 }
 .direct-field label,
 .extra-label-select-label {
     display: block;
-    color: var(--text-sub);
-    font-size: 0.68rem;
+    color: var(--primary-hover);
+    font-size: 0.7rem;
     font-weight: 800;
-    margin-bottom: 4px;
+    margin-bottom: 0;
+    white-space: nowrap;
+}
+.direct-field-inputwrap {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+.direct-field-inputwrap input.form-input {
+    width: 42px !important;
+    height: 28px !important;
+    padding: 0 !important;
+    text-align: center !important;
+    margin-bottom: 0 !important;
+    background-color: var(--card-bg) !important;
+}
+.direct-field-unit {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--text-sub);
+    white-space: nowrap;
 }
 .extra-minutes,
+.extra-incline,
+.extra-speed,
 .extra-calories {
     width: 100%;
 }
@@ -2221,31 +2276,6 @@ input.lib-new-equip-input:focus {
     max-width: 100%;
     box-sizing: border-box;
 }
-/* =========================================================
-   スマホ時の日付欄：枠を消去しはみ出しを隠蔽するスタイル
-   ========================================================= */
-@media (max-width: 600px) {
-    #workout-log-modal #select-log-date,
-    #inbody-modal #inbody-date {
-        /* 枠と背景を完全に消去 */
-        border: none !important;
-        background: transparent !important;
-        box-shadow: none !important;
-        
-        /* 左右の余白を削り、はみ出しを目立たなくする */
-        padding-left: 0 !important;
-        padding-right: 0 !important;
-        margin: 0 !important;
-        
-        /* タップ可能な要素であることを文字色で明示 */
-        color: var(--primary-color) !important;
-        font-weight: 900 !important;
-        font-size: 1rem !important; 
-        
-        /* 中央寄せにすることで、右側へのはみ出し感を緩和 */
-        text-align: center !important;
-    }
-}
 
 /* =========================================================
    記録モーダル：要素のコンパクト化
@@ -2506,4 +2536,90 @@ body.modal-open {
     word-break: break-all;
 }
 
+/* 有酸素入力欄：通常幅は4列、スマホでは2×2にして横はみ出しを防止 */
+.direct-input-group {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 4px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
 
+.direct-field {
+    min-width: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 3px 5px !important;
+    gap: 3px !important;
+    border-radius: 8px !important;
+}
+
+.direct-field label {
+    font-size: 0.65rem !important;
+}
+
+.direct-field-inputwrap {
+    min-width: 0 !important;
+    gap: 2px !important;
+}
+
+.direct-field-inputwrap input.form-input {
+    width: 42px !important;
+    max-width: 100% !important;
+    height: 26px !important;
+    padding: 0 !important;
+    font-size: 14px !important;
+    box-sizing: border-box !important;
+}
+
+.direct-field-unit {
+    font-size: 0.65rem !important;
+    white-space: nowrap !important;
+}
+
+@media (max-width: 600px) {
+    .direct-input-group {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 4px !important;
+    }
+
+    .direct-field {
+        padding: 4px 6px !important;
+    }
+
+    .direct-field-inputwrap input.form-input {
+        width: 48px !important;
+        max-width: 48px !important;
+    }
+}
+
+@media (max-width: 360px) {
+    .direct-field {
+        padding: 3px 4px !important;
+    }
+
+    .direct-field-inputwrap input.form-input {
+        width: 42px !important;
+        max-width: 42px !important;
+    }
+}
+
+
+/* スマホChromeでソフトキーボード表示時もモーダル内をスクロール可能にする */
+@media (max-width: 768px) {
+    .modal-content,
+    .modal-body,
+    .workout-log-modal-content {
+        max-height: 90dvh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+    }
+
+    input,
+    textarea,
+    select {
+        scroll-margin-top: 72px;
+        scroll-margin-bottom: 120px;
+    }
+}
