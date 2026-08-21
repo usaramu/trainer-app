@@ -963,6 +963,9 @@ function renderHistoryLogs() {
         titleText = menu ? menu.title : log.menuId;
       }
 
+      // 半角・全角の括弧（）とその中身をここで確実に削除する
+      titleText = titleText.replace(/[（\(][^（）\(\)]*[）\)]/g, '').trim();
+
       let exHTML = '';
       if (log.menuId === 'OFF') {
         exHTML = '<div class="history-ex-empty">☕ やすみもだいじ</div>';
@@ -993,10 +996,15 @@ function renderHistoryLogs() {
 
       const dayHeader = document.createElement('div');
       dayHeader.className = 'date-accordion-header';
+      dayHeader.style.cssText = "display: flex; justify-content: space-between; align-items: center; padding: 10px 4px;";
       dayHeader.innerHTML = `
-        <span class="inbody-list-date">${formattedDate}</span>
-        <span class="date-accordion-preview">${titleText}</span>
-        <span class="arrow-icon">▾</span>
+        <div style="display: flex; align-items: center; width: 100%; gap: 12px;">
+          <span class="inbody-list-date">${formattedDate}</span>
+          <span class="date-accordion-preview" style="flex: 1; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+            ${titleText}
+          </span>
+          <span class="arrow-icon" style="color: var(--text-sub); font-size: 0.6rem;">▾</span>
+        </div>
       `;
 
       const dayBody = document.createElement('div');
@@ -3250,7 +3258,7 @@ function renderInbodyTab() {
     drawInbodyChart(state.inbodyMetric || 'weight');
   }
 
-  // --- 履歴リスト ---
+  // --- 履歴リスト（HISTORY風のフラットな行デザイン） ---
   listContainer.innerHTML = '';
   const listSorted = [...sorted].reverse();
 
@@ -3294,7 +3302,7 @@ function renderInbodyTab() {
       }).join('');
 
       segTableHTML = `
-        <div class="ib-seg-container">
+        <div class="ib-seg-container" style="margin-top: 8px;">
           <div class="ib-seg-header">
             <span class="ib-seg-cell label">部位</span>
             <span class="ib-seg-cell val muscle">筋肉量(%)</span>
@@ -3306,19 +3314,26 @@ function renderInbodyTab() {
     }
 
     const item = document.createElement('div');
-    item.className = 'date-accordion-item ib-history-card';
+    // HISTORYと同じ「history-date-item」クラスを適用してスタイルを統一
+    item.className = 'date-accordion-item history-date-item';
 
     const header = document.createElement('div');
-    header.className = 'date-accordion-header ib-history-card-top';
+    header.className = 'date-accordion-header';
+    header.style.cssText = "display: flex; justify-content: space-between; align-items: center; padding: 10px 4px;";
     header.innerHTML = `
-      <span class="ib-history-date">${formattedDate}</span>
-      <span class="ib-history-weight">${log.weight !== null && log.weight !== undefined ? `${log.weight}kg` : '-'}<span class="arrow-icon" style="margin-left:8px;">▾</span></span>
+      <div style="display: flex; align-items: center; width: 100%; gap: 12px;">
+        <span class="inbody-list-date">${formattedDate}</span>
+        <span class="date-accordion-preview" style="flex: 1; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+          ${log.weight !== null && log.weight !== undefined ? `${log.weight}kg` : '-'}
+        </span>
+        <span class="arrow-icon" style="color: var(--text-sub); font-size: 0.6rem;">▾</span>
+      </div>
     `;
 
     const body = document.createElement('div');
     body.className = 'date-accordion-body';
     body.innerHTML = `
-      <div class="ib-history-chips">
+      <div class="ib-history-chips" style="padding-top: 8px;">
         ${chips.map(c => `<span class="inbody-metric-chip">${c}</span>`).join('') || '<span class="ib-history-empty-chip">詳細データなし</span>'}
       </div>
       ${segTableHTML}
@@ -3339,7 +3354,7 @@ function renderInbodyTab() {
         item.classList.remove('active');
       } else {
         item.classList.add('active');
-        body.style.maxHeight = body.scrollHeight + 40 + 'px';
+        body.style.maxHeight = (body.scrollHeight + 50) + 'px';
       }
     };
 
@@ -3430,7 +3445,7 @@ function drawInbodyChart(metric) {
 
   const dpr = window.devicePixelRatio || 1;
   const cssWidth = canvas.parentElement.clientWidth - 28;
-  const cssHeight = 200;
+  const cssHeight = 160; // グラフの高さを少しコンパクトに
   canvas.width = cssWidth * dpr;
   canvas.height = cssHeight * dpr;
   canvas.style.height = cssHeight + 'px';
@@ -3466,10 +3481,10 @@ function drawInbodyChart(metric) {
     maxVal = minVal + step * gridCount;
   }
 
-  const leftPad = 40; 
-  const rightPad = 20; 
-  const topPad = 14;
-  const bottomPad = 26;
+  const leftPad = 36; 
+  const rightPad = 16; 
+  const topPad = 10;
+  const bottomPad = 22;
   const plotW = cssWidth - leftPad - rightPad;
   const plotH = cssHeight - topPad - bottomPad;
 
@@ -3481,9 +3496,10 @@ function drawInbodyChart(metric) {
   const borderColor = rootStyle.getPropertyValue('--border-color').trim() || '#E8EEF3';
   const textMain = rootStyle.getPropertyValue('--text-main').trim() || '#3E4852';
 
+  // グリッド線（薄く上品に）
   ctx.strokeStyle = borderColor;
   ctx.fillStyle = textSub;
-  ctx.font = '10px sans-serif';
+  ctx.font = '9px sans-serif';
   ctx.textAlign = 'right';
   ctx.textBaseline = 'middle';
 
@@ -3493,13 +3509,14 @@ function drawInbodyChart(metric) {
     ctx.beginPath();
     ctx.moveTo(leftPad, y);
     ctx.lineTo(cssWidth - rightPad, y);
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 0.8;
     ctx.stroke();
     
     let labelText = v.toFixed(step < 1 ? 1 : 0);
-    ctx.fillText(labelText, leftPad - 6, y);
+    ctx.fillText(labelText, leftPad - 5, y);
   }
 
+  // 折れ線グラフ（少し細くしてスタイリッシュに）
   ctx.beginPath();
   sorted.forEach((log, i) => {
     const x = xForIndex(i);
@@ -3508,24 +3525,26 @@ function drawInbodyChart(metric) {
     else ctx.lineTo(x, y);
   });
   ctx.strokeStyle = meta.color;
-  ctx.lineWidth = 2.5;
+  ctx.lineWidth = 2;
   ctx.lineJoin = 'round';
   ctx.stroke();
 
+  // データ点のドット
   sorted.forEach((log, i) => {
     const x = xForIndex(i);
     const y = yForValue(getMetricValue(log, metric));
     ctx.beginPath();
-    ctx.arc(x, y, 3.5, 0, Math.PI * 2);
+    ctx.arc(x, y, 3, 0, Math.PI * 2);
     ctx.fillStyle = '#ffffff';
     ctx.fill();
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 1.5;
     ctx.strokeStyle = meta.color;
     ctx.stroke();
   });
 
-  ctx.fillStyle = textMain;
-  ctx.font = '10px sans-serif';
+  // X軸（日付）ラベル
+  ctx.fillStyle = textSub;
+  ctx.font = '9px sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
   const maxLabels = 5;
@@ -3764,155 +3783,6 @@ function submitInbodyImport() {
   alert(`${importedCount}件をインポートしました。${skippedCount > 0 ? `(${skippedCount}件はスキップ)` : ''}`);
 }
 
-function renderHistoryLogs() {
-  const container = document.getElementById('history-log-container');
-  if (!container) return;
-
-  container.innerHTML = '';
-
-  if (!state.logs || state.logs.length === 0) {
-    container.innerHTML = '<p style="color:var(--text-sub); text-align:center; padding:24px; font-size:0.8125rem;">まだ記録がありません。</p>';
-    return;
-  }
-
-  const sortedLogs = [...state.logs].sort((a, b) => a.date.localeCompare(b.date));
-
-  const groupedByMonth = {};
-  sortedLogs.forEach(log => {
-    const [y, m] = log.date.split('-');
-    const monthKey = `${y}年 ${parseInt(m, 10)}月`;
-    if (!groupedByMonth[monthKey]) {
-      groupedByMonth[monthKey] = [];
-    }
-    groupedByMonth[monthKey].push(log);
-  });
-
-  const monthKeys = Object.keys(groupedByMonth);
-  const latestMonthKey = monthKeys[monthKeys.length - 1];
-
-  monthKeys.forEach(monthKey => {
-    const monthLogs = groupedByMonth[monthKey];
-
-    const groupEl = document.createElement('div');
-    groupEl.className = 'history-month-group';
-
-    const summaryEl = document.createElement('div');
-    summaryEl.className = 'history-month-summary';
-    const countExOff = monthLogs.filter(l => l.menuId !== 'OFF').length;
-    summaryEl.innerHTML = `<span>📅 ${monthKey} (${countExOff}回)</span><span class="arrow-icon">▾</span>`;
-
-    const bodyEl = document.createElement('div');
-    bodyEl.className = 'history-month-body';
-
-    monthLogs.forEach(log => {
-      const [y, m, d] = log.date.split('-');
-      const dateObj = new Date(parseInt(y, 10), parseInt(m, 10) - 1, parseInt(d, 10));
-      const dayOfWeek = ['日', '月', '火', '水', '木', '金', '土'][dateObj.getDay()];
-      const formattedDate = `${y}/${parseInt(m, 10)}/${parseInt(d, 10)} (${dayOfWeek})`;
-
-      let titleText = '';
-      if (log.menuId === 'OFF') {
-        titleText = 'OFF';
-      } else if (log.menuId === 'ALL') {
-        titleText = '全身の日';
-      } else {
-        const menu = state.menus.find(m => m.id === log.menuId);
-        titleText = menu ? menu.title : log.menuId;
-      }
-
-      let exHTML = '';
-      if (log.menuId === 'OFF') {
-        exHTML = '<div class="history-ex-empty">☕ やすみもだいじ</div>';
-      } else if (log.exerciseLogs && Object.keys(log.exerciseLogs).length > 0) {
-        exHTML = '<div class="history-ex-list">';
-        for (const [exName, logVal] of Object.entries(log.exerciseLogs)) {
-          const cleanName = exName.replace('【追加】', '');
-          const valArray = Array.isArray(logVal) ? logVal : [logVal];
-
-          valArray.forEach(item => {
-            const formatted = formatSingleLogObj(item);
-            exHTML += `
-              <div class="history-ex-item">
-                <span class="history-ex-name">• ${cleanName}</span>
-                <span class="history-ex-val">${formatted}</span>
-              </div>
-            `;
-          });
-        }
-        exHTML += '</div>';
-      } else {
-        exHTML = '<div class="history-ex-empty">詳細ログはありません</div>';
-      }
-
-      const dayItem = document.createElement('div');
-      dayItem.className = 'date-accordion-item history-date-item';
-
-      const dayHeader = document.createElement('div');
-      dayHeader.className = 'date-accordion-header';
-      dayHeader.innerHTML = `
-        <span class="inbody-list-date">${formattedDate}</span>
-        <span class="date-accordion-preview">${titleText}</span>
-        <span class="arrow-icon">▾</span>
-      `;
-
-      const dayBody = document.createElement('div');
-      dayBody.className = 'date-accordion-body';
-      dayBody.innerHTML = exHTML;
-
-      dayHeader.onclick = () => {
-        const isActive = dayItem.classList.contains('active');
-        if (isActive) {
-          dayBody.style.maxHeight = '0px';
-          dayItem.classList.remove('active');
-        } else {
-          dayItem.classList.add('active');
-          dayBody.style.maxHeight = (dayBody.scrollHeight + 100) + 'px';
-          
-          setTimeout(() => {
-            if (dayItem.classList.contains('active')) {
-              dayBody.style.maxHeight = 'none';
-            }
-          }, 350);
-
-          setTimeout(() => {
-            dayItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-          }, 100);
-        }
-        
-        if (groupEl.classList.contains('active')) {
-          bodyEl.style.maxHeight = 'none';
-        }
-      };
-
-      dayItem.appendChild(dayHeader);
-      dayItem.appendChild(dayBody);
-      bodyEl.appendChild(dayItem);
-    });
-
-    groupEl.appendChild(summaryEl);
-    groupEl.appendChild(bodyEl);
-
-    summaryEl.onclick = () => {
-      const isActive = groupEl.classList.contains('active');
-      if (isActive) {
-        bodyEl.style.maxHeight = '0px';
-        groupEl.classList.remove('active');
-      } else {
-        groupEl.classList.add('active');
-        bodyEl.style.maxHeight = 'none';
-      }
-    };
-
-    container.appendChild(groupEl);
-
-    if (monthKey === latestMonthKey) {
-      setTimeout(() => {
-        groupEl.classList.add('active');
-        bodyEl.style.maxHeight = 'none';
-      }, 50);
-    }
-  });
-}
 
 function openCategoryWorkout(category) {
   let targetMenuId = 'A';
@@ -4289,6 +4159,98 @@ function forceUpdateMenusAndLibrary() {
   }
 }
 
+
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, ch => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[ch]));
+}
+
+
+/* ==========================================================
+   デフォルトメニュー確認
+   initialDefaultMenus の内容をスマホでも確認できるようにする
+   ========================================================== */
+function openDefaultMenusViewer() {
+  let modal = document.getElementById('default-menus-viewer-modal');
+
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'default-menus-viewer-modal';
+    modal.className = 'modal-overlay';
+    modal.innerHTML = `
+      <div class="default-menus-viewer">
+        <div class="default-menus-viewer-header">
+          <div>
+            <div class="default-menus-viewer-title">デフォルトメニュー</div>
+
+          </div>
+          <button type="button" class="default-menus-viewer-close"
+                  onclick="closeDefaultMenusViewer()">×</button>
+        </div>
+        <div id="default-menus-viewer-body" class="default-menus-viewer-body"></div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeDefaultMenusViewer();
+    });
+  }
+
+  const body = modal.querySelector('#default-menus-viewer-body');
+
+  body.innerHTML = initialDefaultMenus.map((menu, index) => {
+    const exercises = Array.isArray(menu.exercises) ? menu.exercises : [];
+
+    return `
+      <section class="default-menu-card">
+        <div class="default-menu-card-head">
+          <span class="default-menu-id">${escapeHtml(menu.id ?? String(index + 1))}</span>
+          <h3>${escapeHtml(menu.title || 'メニュー')}</h3>
+        </div>
+        ${menu.memo ? `<p class="default-menu-memo">${escapeHtml(menu.memo)}</p>` : ''}
+        <div class="default-menu-exercises">
+          ${exercises.map((ex, i) => {
+            const name = typeof ex === 'string' ? ex : (ex.name || '種目');
+            const equipment = typeof ex === 'object' ? (ex.equipment || '') : '';
+            const variation = typeof ex === 'object' ? (ex.variation || '') : '';
+            const detail = typeof ex === 'object'
+              ? [
+                  ex.sets ? `${ex.sets}セット` : '',
+                  ex.reps ? `${ex.reps}回` : '',
+                  ex.weight ? `${ex.weight}` : ''
+                ].filter(Boolean).join(' × ')
+              : '';
+
+            return `
+              <div class="default-exercise-row">
+                <span class="default-exercise-num">${i + 1}</span>
+                <div class="default-exercise-main">
+                  <div class="default-exercise-name">${escapeHtml(name)}</div>
+                  ${equipment || variation || detail ? `
+                    <div class="default-exercise-meta">
+                      ${[equipment, variation, detail].filter(Boolean).map(escapeHtml).join(' / ')}
+                    </div>` : ''}
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </section>
+    `;
+  }).join('');
+
+  modal.classList.add('active');
+  document.body.classList.add('modal-open');
+}
+
+function closeDefaultMenusViewer() {
+  const modal = document.getElementById('default-menus-viewer-modal');
+  if (modal) modal.classList.remove('active');
+  document.body.classList.remove('modal-open');
+}
+
 /* スマホChrome：キーボードで入力欄が隠れないようにする */
 (function setupMobileKeyboardScroll() {
   const isMobile = () =>
@@ -4341,3 +4303,22 @@ function forceUpdateMenusAndLibrary() {
     });
   }
 })();
+
+
+
+
+
+/* フッター「その他」モーダル */
+function openFooterDataModal() {
+  const modal = document.getElementById('footer-data-modal');
+  if (!modal) return;
+  modal.classList.add('active');
+  document.body.classList.add('modal-open');
+}
+
+function closeFooterDataModal() {
+  const modal = document.getElementById('footer-data-modal');
+  if (!modal) return;
+  modal.classList.remove('active');
+  document.body.classList.remove('modal-open');
+}

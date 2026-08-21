@@ -8,7 +8,7 @@
     <!-- ▼ まる文字フォント（Zen Maru Gothic） -->
     <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;600;700;900&display=swap" rel="stylesheet">
     <!-- バージョン更新: v=20260820_01 -->
-    <link rel="stylesheet" href="style.css?v=20260821_09">
+    <link rel="stylesheet" href="style.css?v=20260821_18">
 </head>
 <body>
 
@@ -509,16 +509,27 @@
         </div>
     </div>
 
-        <div class="footer-tools" style="display: flex; gap: 10px; justify-content: center; margin-top: 32px; margin-bottom: 24px;">
-         
-        <button type="button" class="btn-footer-tool" id="btn-open-exercise-library" onclick="openExerciseLibraryModal()">📋</button>
-        <button type="button" class="btn-footer-tool" onclick="openThemeSettingsModal()">🎨</button>
-        <button type="button" class="btn-footer-tool" onclick="importPastLogs()">📥</button>
-        <button type="button" class="btn-footer-tool" onclick="exportTrainingLogs()">📤</button>
-        <button type="button" class="btn-footer-tool" onclick="resyncCodeDefaults()">🔄</button>
+        <div class="footer-tools">
+            <button type="button" class="btn-footer-tool footer-emoji-btn" onclick="openExerciseLibraryModal()" aria-label="種目・器具一覧" title="種目・器具一覧">📋</button>
+            <button type="button" class="btn-footer-tool footer-emoji-btn" onclick="openDefaultMenusViewer()" aria-label="デフォルトメニュー" title="デフォルトメニュー">🏋️‍♀️</button>
+            <button type="button" class="btn-footer-tool footer-emoji-btn" onclick="openThemeSettingsModal()" aria-label="カラーテーマ" title="カラーテーマ">🎨</button>
+            <button type="button" class="btn-footer-tool footer-emoji-btn" onclick="openFooterDataModal()" aria-label="その他" title="その他">🛠️</button>
+        </div>
+
+    <script src="script.js?v=20260821_18"></script>
+
+    <div id="footer-data-modal" class="modal-overlay" onclick="if(event.target===this) closeFooterDataModal()">
+        <div class="footer-data-modal-content">
+            <div class="footer-data-modal-header">
+                <button type="button" class="footer-data-modal-close" onclick="closeFooterDataModal()">×</button>
+            </div>
+            <div class="footer-data-modal-actions">
+                <button type="button" class="footer-data-modal-action" title="📥" onclick="importPastLogs(); closeFooterDataModal();">データインポート</button>
+                <button type="button" class="footer-data-modal-action" title="📤" onclick="exportTrainingLogs(); closeFooterDataModal();">データエクスポート</button>
+                <button type="button" class="footer-data-modal-action" title="🔄" onclick="resyncCodeDefaults(); closeFooterDataModal();">最新の状態に更新</button>
+            </div>
+        </div>
     </div>
 
-
-    <script src="script.js?v=20260821_09"></script>
 </body>
 </html>

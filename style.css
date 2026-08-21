@@ -847,13 +847,6 @@ h1 {
     cursor: pointer;
 }
 
-.date-accordion-preview {
-    flex: 1;
-    text-align: right;
-    font-size: 0.78rem;
-    font-weight: 900;
-    color: var(--primary-color);
-}
 
 .date-accordion-header .arrow-icon {
     color: var(--text-sub);
@@ -1379,8 +1372,11 @@ h1 {
 
 .footer-tools {
     display: flex;
-    gap: 10px;
     justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 32px;
+    margin-bottom: 24px;
 }
 
 .btn-footer-tool {
@@ -1698,11 +1694,7 @@ input.lib-new-equip-input:focus {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
 }
-.history-date-item {
-    background: var(--card-bg);
-    border: 1.5px solid var(--border-color);
-    border-radius: 14px;
-}
+
 
 /* --- TODAY'S LOG --- */
 .today-summary-date {
@@ -2105,11 +2097,6 @@ input.lib-new-equip-input:focus {
 
 /* HISTORY：月ごとのアコーディオン */
 .history-month-summary {
-    font-weight: 600 !important;
-}
-
-/* HISTORY：日付アコーディオン */
-.date-accordion-preview {
     font-weight: 600 !important;
 }
 
@@ -2622,4 +2609,581 @@ body.modal-open {
         scroll-margin-top: 72px;
         scroll-margin-bottom: 120px;
     }
+}
+
+
+/* デフォルトメニュー確認モーダル */
+.default-menus-viewer {
+    width: min(720px, calc(100% - 24px));
+    max-height: 88dvh;
+    background: var(--card-bg);
+    border: 1.5px solid var(--border-color);
+    border-radius: 18px;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.default-menus-viewer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px 14px;
+    border-bottom: 1.5px solid var(--border-color);
+    background: var(--card-bg);
+}
+
+.default-menus-viewer-title {
+    font-size: 0.95rem;
+    font-weight: 900;
+    color: var(--text-main);
+}
+
+.default-menus-viewer-subtitle {
+    margin-top: 2px;
+    font-size: 0.65rem;
+    color: var(--text-sub);
+}
+
+.default-menus-viewer-close {
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 50%;
+    background: var(--bg-color);
+    color: var(--text-sub);
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.default-menus-viewer-body {
+    max-height: calc(88dvh - 65px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 10px;
+}
+
+.default-menu-card {
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 14px;
+    background: var(--bg-color);
+}
+
+.default-menu-card:last-child {
+    margin-bottom: 0;
+}
+
+.default-menu-card-head {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.default-menu-id {
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 24px;
+    border-radius: 7px;
+    background: var(--primary-soft);
+    color: var(--primary-color);
+    font-size: 0.72rem;
+    font-weight: 900;
+}
+
+.default-menu-card h3 {
+    margin: 0;
+    font-size: 0.82rem;
+    font-weight: 900;
+    color: var(--text-main);
+}
+
+.default-menu-memo {
+    margin: 7px 0;
+    font-size: 0.7rem;
+    line-height: 1.5;
+    color: var(--text-sub);
+}
+
+.default-exercise-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    padding: 7px 0;
+    border-top: 1px solid var(--border-color);
+}
+
+.default-exercise-num {
+    min-width: 18px;
+    color: var(--text-sub);
+    font-size: 0.68rem;
+    text-align: center;
+}
+
+.default-exercise-name {
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+.default-exercise-meta {
+    margin-top: 2px;
+    font-size: 0.64rem;
+    line-height: 1.4;
+    color: var(--text-sub);
+}
+
+@media (max-width: 600px) {
+    .default-menus-viewer {
+        width: calc(100% - 16px);
+        max-height: 92dvh;
+        border-radius: 16px;
+    }
+
+    .default-menus-viewer-body {
+        max-height: calc(92dvh - 65px);
+        padding: 8px;
+    }
+
+    .default-menu-card {
+        padding: 9px;
+        margin-bottom: 8px;
+    }
+
+    .default-menu-card h3 {
+        font-size: 0.78rem;
+    }
+}
+
+
+/* 設定画面：デフォルトメニュー確認ボタン */
+.settings-default-menu-button {
+    display: block;
+    width: 100%;
+    min-height: 40px;
+    margin-top: 10px;
+    padding: 8px 12px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--primary-soft);
+    color: var(--primary-color);
+    font-size: 0.78rem;
+    font-weight: 800;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+.settings-default-menu-button:active {
+    transform: scale(0.99);
+}
+
+@media (max-width: 600px) {
+    .settings-default-menu-button {
+        min-height: 42px;
+        font-size: 0.78rem;
+    }
+}
+
+
+/* フッター：デフォルトメニュー確認 */
+.btn-default-menu-viewer {
+    width: auto !important;
+    min-width: 56px;
+    padding: 0 9px !important;
+    font-size: 0.68rem !important;
+    font-weight: 800 !important;
+    white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+    .btn-default-menu-viewer {
+        min-width: 52px;
+        padding: 0 7px !important;
+        font-size: 0.62rem !important;
+    }
+}
+
+/* フッター整理：データ・更新を1つのボタンに集約 */
+.footer-data-menu {
+    display: none;
+    width: 100%;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 2px;
+}
+
+.footer-data-menu.is-open {
+    display: flex;
+}
+
+.footer-data-action {
+    width: auto !important;
+    min-width: 0 !important;
+    padding: 0 10px !important;
+    font-size: 0.68rem !important;
+    white-space: nowrap;
+}
+
+.btn-footer-data-menu {
+    width: auto !important;
+    min-width: 56px;
+    padding: 0 10px !important;
+    font-size: 0.68rem !important;
+    font-weight: 800 !important;
+    white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+    .footer-data-menu {
+        gap: 5px;
+    }
+
+    .footer-data-action {
+        padding: 0 8px !important;
+        font-size: 0.62rem !important;
+    }
+
+    .btn-footer-data-menu {
+        min-width: 52px;
+        padding: 0 8px !important;
+        font-size: 0.62rem !important;
+    }
+}
+
+
+/* 「その他」：JSON・更新をモーダルで表示 */
+.footer-data-menu {
+    display: none !important;
+}
+
+.footer-data-modal-content {
+    width: min(360px, calc(100% - 32px));
+    background: var(--card-bg);
+    border: 1.5px solid var(--border-color);
+    border-radius: 18px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.footer-data-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 13px 14px;
+    border-bottom: 1.5px solid var(--border-color);
+}
+
+.footer-data-modal-title {
+    font-size: 0.9rem;
+    font-weight: 900;
+    color: var(--text-main);
+}
+
+.footer-data-modal-close {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 1.5px solid var(--border-color);
+    border-radius: 50%;
+    background: var(--bg-color);
+    color: var(--text-sub);
+    font-size: 20px;
+    line-height: 1;
+}
+
+/* フッターボタンをより小さく統一 */
+.footer-emoji-btn,
+.footer-emoji-action {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    max-width: 34px !important;
+    flex: 0 0 34px !important;
+    font-size: 16px !important; /* アイコンの大きさを調整 */
+    border-radius: 10px !important;
+    background-color: var(--card-bg) !important;
+    border: 1.5px solid var(--border-color) !important;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* モーダル内のボタン配置を改善 */
+.footer-data-modal-actions {
+    display: flex;
+    flex-direction: column; /* 縦並びに変更 */
+    gap: 8px;
+    padding: 10px 16px 20px;
+}
+
+.footer-data-modal-action {
+    width: 100% !important;
+    height: 48px !important; /* 少し高さを出して押しやすく */
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0 16px !important;
+    border: 1.5px solid var(--border-color) !important;
+    border-radius: 14px !important;
+    background: var(--bg-color) !important;
+    color: var(--text-main) !important;
+    font-size: 0.8rem !important;
+    font-weight: 700 !important;
+    text-align: left;
+}
+
+/* モーダル内のアイコンを左側に配置 */
+.footer-data-modal-action::before {
+    content: attr(title); /* title属性をラベルとして活用 */
+    margin-right: 12px;
+    font-size: 18px;
+}
+
+
+.footer-data-modal-action:active {
+    transform: scale(0.99);
+}
+
+@media (max-width: 480px) {
+    .footer-data-modal-content {
+        width: calc(100% - 24px);
+    }
+}
+
+/* フッターの絵文字ボタンを完全に同一サイズへ */
+.footer-tools { width:100%; box-sizing:border-box; }
+.footer-emoji-btn {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    max-width: 40px !important;
+    flex: 0 0 40px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 18px !important;
+    line-height: 1 !important;
+    border-radius: 14px !important; /* サイト全体の角丸デザインに合わせる */
+    background-color: var(--card-bg) !important;
+    border: 1.5px solid var(--border-color) !important;
+    box-shadow: 0 2px 6px rgba(62, 72, 82, 0.03);
+    cursor: pointer;
+    transition: transform 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.footer-emoji-btn:hover {
+    transform: translateY(-2px);
+    background-color: var(--primary-soft) !important;
+    border-color: var(--primary-color) !important;
+}
+
+.footer-emoji-action {
+    width:44px !important; height:44px !important; min-width:44px !important; max-width:44px !important;
+    padding:0 !important; margin:0 !important; flex:0 0 44px !important;
+    display:inline-flex !important; align-items:center !important; justify-content:center !important;
+    font-size:20px !important; line-height:1 !important; text-align:center !important; box-sizing:border-box !important;
+}
+@media (max-width:480px) {
+    .footer-tools { gap:8px !important; }
+    .footer-emoji-btn, .footer-emoji-action {
+        width:42px !important; height:42px !important; min-width:42px !important; max-width:42px !important;
+        flex-basis:42px !important; font-size:19px !important;
+    }
+    .footer-data-modal-actions { gap:8px; }
+}
+
+/* フッター絵文字ボタン：コンパクトサイズ */
+.footer-emoji-btn {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    max-width: 34px !important;
+    flex: 0 0 34px !important;
+    font-size: 16px !important;
+    border-radius: 8px !important;
+}
+
+
+.footer-emoji-action {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    max-width: 34px !important;
+    flex: 0 0 34px !important;
+    font-size: 16px !important;
+    border-radius: 8px !important;
+}
+
+@media (max-width: 480px) {
+    .footer-tools {
+        gap: 10px !important;
+        margin-top: 28px;
+        margin-bottom: 20px;
+    }
+    
+    .footer-emoji-btn {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        max-width: 38px !important;
+        flex-basis: 38px !important;
+        font-size: 17px !important;
+    }
+}
+
+    .footer-emoji-btn,
+    .footer-emoji-action {
+        width: 32px !important;
+        height: 32px !important;
+        min-width: 32px !important;
+        max-width: 32px !important;
+        flex-basis: 32px !important;
+        font-size: 15px !important;
+    }
+
+
+
+.footer-emoji-btn:hover,
+.footer-emoji-action:hover {
+    transform: translateY(-2px);
+    background-color: var(--primary-soft) !important;
+    border-color: var(--primary-color) !important;
+}
+
+/* 「その他」モーダルのタイトルの文字を完全に消す場合 */
+.footer-data-modal-title {
+    display: none !important;
+}
+
+.footer-data-modal-content {
+    width: auto !important;
+    max-width: 280px;
+    border-radius: 20px !important;
+}
+
+/* リスト行のデザイン：枠をなくし、下線のみ */
+.history-date-item {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    margin-bottom: 0 !important;
+    box-shadow: none !important;
+}
+
+/* ヘッダー（行）の高さと余白を詰める */
+.history-date-item .date-accordion-header {
+    padding: 10px 4px !important;
+    min-height: 40px;
+}
+
+/* 展開される詳細部分の背景と内側の余白 */
+.history-date-item .date-accordion-body {
+    background: var(--primary-soft); /* 展開時だけ薄い背景色で区分け */
+    padding: 0 10px !important;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* 日付とメニュー名の配置をさらに詰める */
+.inbody-list-date {
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+    color: var(--text-sub) !important;
+    min-width: 90px;
+}
+
+
+/* --- フッターボタンのサイズ調整（小さくすっきり） --- */
+.footer-tools {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 32px;
+    margin-bottom: 24px;
+}
+
+.footer-emoji-btn,
+.footer-emoji-action {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    max-width: 34px !important;
+    flex: 0 0 34px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 16px !important;
+    line-height: 1 !important;
+    border-radius: 8px !important;
+    background-color: var(--card-bg) !important;
+    border: 1.5px solid var(--border-color) !important;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.footer-emoji-btn:hover,
+.footer-emoji-action:hover {
+    transform: translateY(-2px);
+    background-color: var(--primary-soft) !important;
+    border-color: var(--primary-color) !important;
+}
+
+/* 「その他」モーダルのタイトル非表示 */
+.footer-data-modal-title {
+    display: none !important;
+}
+
+.footer-data-modal-content {
+    width: auto !important;
+    max-width: 280px;
+    border-radius: 20px !important;
+}
+
+/* --- History：テーブル風のフラットな行デザイン --- */
+.history-date-item {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    margin-bottom: 0 !important;
+    box-shadow: none !important;
+}
+
+.history-date-item .date-accordion-header {
+    padding: 10px 4px !important;
+    min-height: 40px;
+}
+
+.history-date-item .date-accordion-body {
+    background: var(--primary-soft);
+    padding: 0 10px !important;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.inbody-list-date {
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+    color: var(--text-sub) !important;
+    min-width: 90px;
+}
+
+.date-accordion-preview {
+    font-size: 0.78rem !important;
+    font-weight: 700 !important;
+    color: var(--primary-color) !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    display: block !important;
 }
