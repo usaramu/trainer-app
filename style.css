@@ -982,6 +982,7 @@ h1 {
     padding: 14px 16px;
     overflow-y: auto !important;
     flex-grow: 1;
+    min-height: 0;
     -webkit-overflow-scrolling: touch;
 }
 
@@ -2255,6 +2256,7 @@ input.lib-new-equip-input:focus {
 .modal-body {
     overflow-x: hidden;
     overflow-y: auto;
+    min-height: 0;
 }
 
 #workout-log-modal input[type="date"],
@@ -2262,6 +2264,9 @@ input.lib-new-equip-input:focus {
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
+    -webkit-appearance: none;
+    appearance: none;
+    min-height: 44px;
 }
 
 /* =========================================================
@@ -3186,4 +3191,35 @@ body.modal-open {
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     display: block !important;
+}
+
+/* デフォルトメニュー確認モーダル */
+.default-menus-viewer {
+    width: min(720px, calc(100% - 24px));
+    max-height: 85vh; /* 88dvhから少し安全なサイズに変更 */
+    background: var(--card-bg);
+    border: 1.5px solid var(--border-color);
+    border-radius: 18px;
+    display: flex; /* フレックスボックスにして高さを制御 */
+    flex-direction: column;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.default-menus-viewer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px 14px;
+    border-bottom: 1.5px solid var(--border-color);
+    background: var(--card-bg);
+    flex-shrink: 0; /* ヘッダーが潰れないようにする */
+}
+
+.default-menus-viewer-body {
+    flex-grow: 1;
+    overflow-y: auto !important; /* スクロールを確実に有効化 */
+    -webkit-overflow-scrolling: touch; /* スマホでの慣性スクロールを有効化 */
+    padding: 10px;
 }
