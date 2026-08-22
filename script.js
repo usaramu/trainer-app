@@ -4133,7 +4133,7 @@ document.addEventListener('touchmove', (e) => {
   const activeModal = document.querySelector('.modal-overlay.active');
   if (activeModal) {
     // スクロールしている場所が「モーダルの中身」以外なら、スワイプを無効化する
-    if (!e.target.closest('.modal-body')) {
+    if (!e.target.closest('.modal-body') && !e.target.closest('.default-menus-viewer-body')) {
       e.preventDefault();
     }
   }
